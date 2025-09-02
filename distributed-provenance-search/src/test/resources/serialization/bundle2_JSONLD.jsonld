@@ -1,0 +1,41 @@
+{
+  "@context" : [ {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+    "ex" : "www.example.com/",
+    "dct" : "http://purl.org/dc/terms/",
+    "prov" : "http://www.w3.org/ns/prov#"
+  }, "https://openprovenance.org/prov-jsonld/context.jsonld" ],
+  "@graph" : [ {
+    "@type" : "Bundle",
+    "@context" : [ { }, "https://openprovenance.org/prov-jsonld/context.jsonld" ],
+    "@id" : "ex:bundle2",
+    "@graph" : [ {
+      "@type" : "Activity",
+      "@id" : "ex:activity1",
+      "startTime" : "2011-11-16T16:05:00",
+      "endTime" : "2011-11-16T18:05:00",
+      "type" : [ "cpm:mainActivity" ]
+    }, {
+      "@type" : "Usage",
+      "activity" : "ex:activity1",
+      "entity" : "ex:backConnector1"
+    }, {
+      "@type" : "Generation",
+      "entity" : "ex:forwardConnector1",
+      "activity" : "ex:activity1"
+    }, {
+      "@type" : "Entity",
+      "@id" : "ex:backConnector1",
+      "type" : [ "cpm:backwardConnector" ]
+    }, {
+      "@type" : "Entity",
+      "@id" : "ex:forwardConnector1",
+      "type" : [ "cpm:forwardConnector" ]
+    }, {
+      "@type" : "Derivation",
+      "generatedEntity" : "ex:forwardConnector1",
+      "usedEntity" : "ex:backConnector1"
+    } ]
+  } ]
+}

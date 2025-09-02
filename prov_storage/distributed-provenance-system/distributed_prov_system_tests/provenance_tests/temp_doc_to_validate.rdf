@@ -1,0 +1,17 @@
+@prefix ex: <http://example.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+ex:a1 a prov:Activity ;
+    prov:qualifiedEnd ex:end1 ;
+    prov:qualifiedStart ex:start1 ;
+    prov:qualifiedUsage ex:use1 .
+
+ex:e1 a prov:Entity .
+
+ex:end1 a prov:End .
+
+ex:start1 a prov:Start .
+
+ex:use1 a prov:Usage ;
+    prov:entity ex:e1 .
+

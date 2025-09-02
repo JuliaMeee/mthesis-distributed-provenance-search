@@ -1,0 +1,44 @@
+document
+  prefix ns_RDC <http://munich-prov-storage-provider.de:8000/api/v1/organizations/CVUT/documents/>
+
+  bundle ns_RDC:04_preprocessing
+    prefix ns_RDC <http://munich-prov-storage-provider.de:8000/api/v1/organizations/CVUT/documents/>
+    prefix ns_pathology <http://provenance-storage-provider.com:8000/api/v1/organizations/UniParis/>
+    prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
+    prefix dct <http://purl.org/dc/terms/>
+    prefix meta <http://munich-prov-storage-provider.de:8000/api/v1/documents/meta/>
+    prefix self_connector <http://munich-prov-storage-provider.de:8000/api/v1/connectors/>
+    prefix connector <http://provenance-storage-provider.com:8000/api/v1/connectors/>
+
+    entity(connector:WSIDataConnector2, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_pathology:02_scanning', cpm:senderServiceUri="#URI#"])
+    entity(self_connector:trainDatasetConnector, [prov:type='cpm:forwardConnector', cpm:receiverServiceUri="#URI#"])
+    entity(self_connector:testDatasetConnector, [prov:type='cpm:forwardConnector', cpm:receiverServiceUri="#URI#"])
+    agent(ns_RDC:pathologyDepartment, [prov:type='cpm:senderAgent', cpm:contactIdPid=""])
+    agent(ns_RDC:researchDataCenter, [prov:type='cpm:receiverAgent', cpm:contactIdPid=""])
+    activity(ns_RDC:preprocessing, -, -, [cpm:metabundle='meta:meta2', prov:type='cpm:mainActivity', prov:type='cpm:dataHandling', dct:hasPart='ns_RDC:tilesGeneration', dct:hasPart='ns_RDC:datasetSplit'])
+    entity(ns_pathology:WSIDataConnector2-b, [cpm:externalId="wsi-id-1"])
+    entity(ns_RDC:tilesBatch1, [cpm:externalId="batch-id-1"])
+    entity(ns_RDC:trainDataset, [cpm:externalId="datasetId1"])
+    entity(ns_RDC:testDataset, [cpm:externalId="datasetId2"])
+    activity(ns_RDC:tilesGeneration, -, -)
+    activity(ns_RDC:datasetSplit, -, -)
+    wasGeneratedBy(ns_RDC:tilesBatch1, ns_RDC:tilesGeneration, -)
+    used(ns_RDC:tilesGeneration, ns_pathology:WSIDataConnector2-b, -)
+    wasDerivedFrom(ns_RDC:testDataset, ns_RDC:tilesBatch1, -, -, -)
+    wasDerivedFrom(ns_RDC:trainDataset, ns_RDC:tilesBatch1, -, -, -)
+    used(ns_RDC:datasetSplit, ns_RDC:tilesBatch1, -)
+    wasGeneratedBy(ns_RDC:trainDataset, ns_RDC:datasetSplit, -)
+    wasGeneratedBy(ns_RDC:testDataset, ns_RDC:datasetSplit, -)
+    wasAttributedTo(connector:WSIDataConnector2, ns_RDC:pathologyDepartment)
+    wasAttributedTo(self_connector:testDatasetConnector, ns_RDC:researchDataCenter)
+    wasAttributedTo(self_connector:trainDatasetConnector, ns_RDC:researchDataCenter)
+    used(ns_RDC:preprocessing, connector:WSIDataConnector2, -)
+    wasDerivedFrom(self_connector:testDatasetConnector, connector:WSIDataConnector2, -, -, -)
+    wasGeneratedBy(self_connector:testDatasetConnector, ns_RDC:preprocessing, -)
+    wasDerivedFrom(self_connector:trainDatasetConnector, connector:WSIDataConnector2, -, -, -)
+    wasGeneratedBy(self_connector:trainDatasetConnector, ns_RDC:preprocessing, -)
+    specializationOf(ns_RDC:testDataset, self_connector:testDatasetConnector)
+    specializationOf(ns_RDC:trainDataset, self_connector:trainDatasetConnector)
+    specializationOf(ns_pathology:WSIDataConnector2-b, connector:WSIDataConnector2)
+  endBundle
+endDocument

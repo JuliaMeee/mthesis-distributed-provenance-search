@@ -1,0 +1,35 @@
+document
+  prefix ns_RDC <http://munich-prov-storage-provider.de:8000/api/v1/organizations/UniMunchen/documents/>
+
+  bundle ns_RDC:06_evaluation
+    prefix ns_RDC2 <http://warsaw-prov-storage.pl:8000/api/v1/organizations/UniMunchen/documents/>
+    prefix ns_RDC3 <http://munich-prov-storage-provider.de:8000/api/v1/organizations/UniMunchen/documents/>
+    prefix ns_RDC <http://munich-prov-storage-provider.de:8000/api/v1/organizations/UniMunchen/documents/>
+    prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
+    prefix dct <http://purl.org/dc/terms/>
+    prefix meta <http://munich-prov-storage-provider.de:8000/api/v1/documents/meta/>
+    prefix remote_connector <http://warsaw-prov-storage.pl:8000/api/v1/connectors/>
+    prefix remote_connector2 <http://munich-prov-storage-provider.de:8000/api/v1/connectors/>
+
+    entity(remote_connector:trainedModelConnector, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_RDC2:05_training', cpm:senderServiceUri="#URI#"])
+    entity(remote_connector2:testDatasetConnector, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_RDC3:04_preprocessing', cpm:senderServiceUri="#URI#"])
+    activity(ns_RDC:testingMain, -, -, [cpm:metabundle='meta:meta1', prov:type='cpm:mainActivity', prov:type='cpm:dataHandling', dct:hasPart='ns_RDC:testRun', dct:hasPart='ns_RDC:resultsCompare'])
+    agent(ns_RDC:researchDataCenter, [prov:type='cpm:senderAgent', cpm:contactIdPid=""])
+    agent(ns_RDC:researchDataCenter, [prov:type='cpm:senderAgent', cpm:contactIdPid=""])
+    used(ns_RDC:testingMain, remote_connector2:testDatasetConnector, -)
+    used(ns_RDC:testingMain, remote_connector:trainedModelConnector, -)
+    wasAttributedTo(remote_connector:trainedModelConnector, ns_RDC:researchDataCenter)
+    wasAttributedTo(remote_connector2:testDatasetConnector, ns_RDC:researchDataCenter)
+    entity(ns_RDC:testRunResults)
+    entity(ns_RDC:trainedModel-b, [cpm:externalId="modelId1"])
+    entity(ns_RDC:testDataset-b, [cpm:externalId="datasetId2"])
+    activity(ns_RDC:testRun, -, -)
+    specializationOf(ns_RDC:trainedModel-b, remote_connector:trainedModelConnector)
+    specializationOf(ns_RDC:testDataset-b, remote_connector2:testDatasetConnector)
+    used(ns_RDC:testRun, ns_RDC:testDataset-b, -)
+    wasGeneratedBy(ns_RDC:testRunResults, ns_RDC:testRun, -)
+    wasDerivedFrom(ns_RDC:testRunResults, ns_RDC:trainedModel-b, -, -, -)
+    wasDerivedFrom(ns_RDC:testRunResults, ns_RDC:testDataset-b, -, -, -)
+    used(ns_RDC:testRun, ns_RDC:trainedModel-b, -)
+  endBundle
+endDocument

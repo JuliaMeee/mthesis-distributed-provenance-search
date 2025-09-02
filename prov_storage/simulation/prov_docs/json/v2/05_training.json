@@ -1,0 +1,162 @@
+{
+  "prefix" : {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "ns_RDC" : "http://warsaw-prov-storage.pl:8000/api/v1/organizations/UniWarsaw/documents",
+    "prov" : "http://www.w3.org/ns/prov#"
+  },
+  "bundle" : {
+    "ns_RDC:05_training_v2" : {
+      "prefix" : {
+        "ns_RDC2" : "http://munich-prov-storage-provider.de:8000/api/v1/organizations/CVUT/documents/",
+        "ns_RDC" : "http://warsaw-prov-storage.pl:8000/api/v1/organizations/UniWarsaw/documents",
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "dct" : "http://purl.org/dc/terms/",
+        "self_connector" : "http://warsaw-prov-storage.pl:8000/api/v1/connectors/",
+        "meta" : "http://warsaw-prov-storage.pl:8000/api/v1/documents/meta/",
+        "xsd" : "http://www.w3.org/2001/XMLSchema#",
+        "remote_connector" : "http://munich-prov-storage-provider.de:8000/api/v1/connectors/",
+        "prov" : "http://www.w3.org/ns/prov#"
+      },
+      "entity" : {
+        "ns_RDC:untrainedModel" : { },
+        "ns_RDC:trainedModel" : { },
+        "ns_RDC:trainDataset-b" : { },
+        "remote_connector:trainDatasetConnector" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC2:04_preprocessing"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        },
+        "ns_RDC:validationDataset-b" : { },
+        "self_connector:trainedModelConnector" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "ns_RDC:summaries" : { }
+      },
+      "activity" : {
+        "ns_RDC:validation" : { },
+        "ns_RDC:training" : { },
+        "ns_RDC:trainingMain" : {
+          "cpm:metabundle" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "meta:meta1"
+          } ],
+          "dct:hasPart" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC:training"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC:validation"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:mainActivity"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:dataHandling"
+          } ]
+        }
+      },
+      "agent" : {
+        "ns_RDC:researchDataCenter" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:receiverAgent"
+          } ]
+        }
+      },
+      "used" : {
+        "_:n2" : {
+          "prov:activity" : "ns_RDC:trainingMain",
+          "prov:entity" : "self_connector:trainDatasetConnector"
+        },
+        "_:n13" : {
+          "prov:activity" : "ns_RDC:validation",
+          "prov:entity" : "ns_RDC:validationDataset-b"
+        },
+        "_:n14" : {
+          "prov:activity" : "ns_RDC:validation",
+          "prov:entity" : "ns_RDC:trainedModel"
+        },
+        "_:n11" : {
+          "prov:activity" : "ns_RDC:training",
+          "prov:entity" : "ns_RDC:untrainedModel"
+        },
+        "_:n10" : {
+          "prov:activity" : "ns_RDC:training",
+          "prov:entity" : "ns_RDC:trainDataset-b"
+        }
+      },
+      "wasAttributedTo" : {
+        "_:n0" : {
+          "prov:entity" : "self_connector:trainDatasetConnector",
+          "prov:agent" : "ns_RDC:researchDataCenter"
+        },
+        "_:n1" : {
+          "prov:entity" : "self_connector:trainedModelConnector",
+          "prov:agent" : "ns_RDC:researchDataCenter"
+        }
+      },
+      "specializationOf" : {
+        "_:n5" : {
+          "prov:specificEntity" : "ns_RDC:trainDataset-b",
+          "prov:generalEntity" : "self_connector:trainDatasetConnector"
+        },
+        "_:n6" : {
+          "prov:specificEntity" : "ns_RDC:validationDataset-b",
+          "prov:generalEntity" : "self_connector:trainDatasetConnector"
+        },
+        "_:n7" : {
+          "prov:specificEntity" : "ns_RDC:trainedModel",
+          "prov:generalEntity" : "self_connector:trainedModelConnector"
+        }
+      },
+      "wasDerivedFrom" : {
+        "_:n8" : {
+          "prov:generatedEntity" : "ns_RDC:trainedModel",
+          "prov:usedEntity" : "ns_RDC:untrainedModel"
+        },
+        "_:n16" : {
+          "prov:generatedEntity" : "ns_RDC:summaries",
+          "prov:usedEntity" : "ns_RDC:trainedModel"
+        },
+        "_:n9" : {
+          "prov:generatedEntity" : "ns_RDC:trainedModel",
+          "prov:usedEntity" : "ns_RDC:trainDataset-b"
+        },
+        "_:n4" : {
+          "prov:generatedEntity" : "self_connector:trainedModelConnector",
+          "prov:usedEntity" : "self_connector:trainDatasetConnector"
+        },
+        "_:n17" : {
+          "prov:generatedEntity" : "ns_RDC:summaries",
+          "prov:usedEntity" : "ns_RDC:validationDataset-b"
+        }
+      },
+      "wasGeneratedBy" : {
+        "_:n15" : {
+          "prov:entity" : "ns_RDC:summaries",
+          "prov:activity" : "ns_RDC:validation"
+        },
+        "_:n12" : {
+          "prov:entity" : "ns_RDC:trainedModel",
+          "prov:activity" : "ns_RDC:training"
+        },
+        "_:n3" : {
+          "prov:entity" : "self_connector:trainedModelConnector",
+          "prov:activity" : "ns_RDC:trainingMain"
+        }
+      }
+    }
+  }
+}

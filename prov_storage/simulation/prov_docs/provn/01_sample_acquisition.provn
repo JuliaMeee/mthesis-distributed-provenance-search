@@ -1,0 +1,38 @@
+document
+  prefix ns_surgery <http://provenance-storage-provider.com:8000/api/v1/organizations/UniGraz/documents/>
+
+  bundle ns_surgery:01_sample_acquisition
+    prefix ns_surgery <http://provenance-storage-provider.com:8000/api/v1/organizations/UniGraz/documents/>
+    prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
+    prefix dct <http://purl.org/dc/terms/>
+    prefix meta <http://provenance-storage-provider.com:8000/api/v1/documents/meta/>
+    prefix self_connector <http://provenance-storage-provider.com:8000/api/v1/connectors/>
+
+    entity(self_connector:sampleConnector, [prov:type='cpm:forwardConnector', cpm:receiverServiceUri="#URI#"])
+    agent(ns_surgery:pathologyDepartment, [prov:type='cpm:receiverAgent', cpm:contactIdPid=""])
+    activity(ns_surgery:sampleAcquisition, -, -, [cpm:metabundle='meta:meta1', prov:type='cpm:mainActivity', prov:type='cpm:sampleAcquisition', prov:type='cpm:sampleHandling', dct:hasPart='ns_surgery:biomaterialCollection', dct:hasPart='ns_surgery:samplePreparation', dct:hasPart='ns_surgery:sampleTransport'])
+    wasGeneratedBy(self_connector:sampleConnector, ns_surgery:sampleAcquisition, -)
+    wasAttributedTo(self_connector:sampleConnector, ns_surgery:pathologyDepartment)
+    entity(ns_surgery:patient, [cpm:externalId="patient-id-0", ns_surgery:bioptic-app-id="app-id-0"])
+    entity(ns_surgery:tissueSample, [cpm:externalId="sample-id-0"])
+    entity(ns_surgery:preparedSample, [cpm:externalId="sample-id-0"])
+    entity(ns_surgery:Sample, [cpm:externalId="tissue-id-0"])
+    agent(ns_surgery:surgicalDepartment)
+    activity(ns_surgery:biomaterialCollection, -, -)
+    activity(ns_surgery:samplePreparation, -, -)
+    activity(ns_surgery:sampleTransport, -, -)
+    wasAssociatedWith(ns_surgery:biomaterialCollection, ns_surgery:surgicalDepartment, -)
+    wasAssociatedWith(ns_surgery:samplePreparation, ns_surgery:surgicalDepartment, -)
+    wasAssociatedWith(ns_surgery:sampleTransport, ns_surgery:surgicalDepartment, -)
+    used(ns_surgery:biomaterialCollection, ns_surgery:patient, -)
+    wasGeneratedBy(ns_surgery:tissueSample, ns_surgery:biomaterialCollection, -)
+    wasDerivedFrom(ns_surgery:tissueSample, ns_surgery:patient, -, -, -)
+    used(ns_surgery:samplePreparation, ns_surgery:tissueSample, -)
+    wasGeneratedBy(ns_surgery:preparedSample, ns_surgery:samplePreparation, -)
+    wasDerivedFrom(ns_surgery:preparedSample, ns_surgery:tissueSample, -, -, -)
+    specializationOf(ns_surgery:Sample, self_connector:sampleConnector)
+    used(ns_surgery:sampleTransport, ns_surgery:preparedSample, -)
+    wasGeneratedBy(ns_surgery:Sample, ns_surgery:sampleTransport, -)
+    wasDerivedFrom(ns_surgery:Sample, ns_surgery:preparedSample, -, -, -)
+  endBundle
+endDocument

@@ -1,0 +1,166 @@
+# from Matej Gallos simmulation of the provenance application https://gitlab.ics.muni.cz/422328/dbprov/
+# deleted not needed services
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dbprov
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      timeout: 5s
+      retries: 10
+    ports:
+      - 5432:5432
+
+  neo4j-storage-1:
+    container_name: neo4j-storage-1
+    image: neo4j:bullseye
+    environment:
+      NEO4J_dbms_usage__report_enabled: false
+      NEO4J_AUTH: neo4j/password
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider 0.0.0.0:7474 || exit 1" ]
+      timeout: 5s
+      retries: 10
+    ports:
+      - 7474:7474
+      - 7687:7687
+
+  neo4j-storage-2:
+    container_name: neo4j-storage-2
+    image: neo4j:bullseye
+    environment:
+      NEO4J_dbms_usage__report_enabled: false
+      NEO4J_AUTH: neo4j/password
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1" ]
+      timeout: 5s
+      retries: 10
+
+  neo4j-storage-3:
+    container_name: neo4j-storage-3
+    image: neo4j:bullseye
+    environment:
+      NEO4J_dbms_usage__report_enabled: false
+      NEO4J_AUTH: neo4j/password
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1" ]
+      timeout: 5s
+      retries: 10
+
+  trusted-party:
+    container_name: trusted-party
+    # build:
+    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.TrustedParty
+    image: trusted_party
+    ports:
+      - 8020:8020
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8020/health/ || exit 1" ]
+
+  prov-storage-1:
+    container_name: prov-storage-1
+    # build:
+    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
+    image: distributed_prov_system
+    environment:
+      NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-1:7687
+    configs:
+      - source: storage-1-ps-config
+        target: /dbprov/config/config.json
+        mode: 0600
+    ports:
+      - 8001:8000
+    depends_on:
+      trusted-party:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+
+  prov-storage-2:
+    container_name: prov-storage-2
+    # build:
+    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
+    image: distributed_prov_system
+    environment:
+      NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-2:7687
+    configs:
+      - source: storage-2-ps-config
+        target: /dbprov/config/config.json
+        mode: 0600
+    ports:
+      - 8002:8000
+    depends_on:
+      trusted-party:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+
+  prov-storage-3:
+    container_name: prov-storage-3
+    # build:
+    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
+    image: distributed_prov_system
+    environment:
+      NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-3:7687
+    configs:
+      - source: storage-3-ps-config
+        target: /dbprov/config/config.json
+        mode: 0600
+    ports:
+      - 8003:8000
+    depends_on:
+      trusted-party:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+  
+  # prov-traverser-1:
+  #   container_name: prov-traverser-1
+  #   image: traverser_image
+  #   environment:
+  #     - SERVER_PORT=8000
+  #   ports:
+  #     - 8004:8000
+  #   depends_on:
+  #     prov-storage-1:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     timeout: 5s
+  #     retries: 10
+  #     test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+  # debug-shell:
+  #   image: ubuntu:22.04
+  #   container_name: debug-shell
+  #   command: ["sleep", "infinity"]
+  #   tty: true
+  #   stdin_open: true
+  #   networks:
+  #     - default
+  #   # Install curl and iputils-ping on startup
+  #   entrypoint: ["/bin/bash", "-c", "apt-get update && apt-get install -y curl iputils-ping && bash"]
+
+
+configs:
+  storage-1-ps-config:
+    file: ./setup/configs/config-storage-1.json
+  storage-2-ps-config:
+    file: ./setup/configs/config-storage-2.json
+  storage-3-ps-config:
+    file: ./setup/configs/config-storage-3.json
+

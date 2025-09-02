@@ -1,0 +1,8 @@
+{
+  "id": "ExampleTrustedParty",
+  "fqdn": "http://example-trusted-party.com",
+  "trustedCertsDirPath": "/opt/config/certificates/trusted_certs",
+  "publicCertPath": "/opt/config/certificates/tp.pem",
+  "privateKeyPath": "/opt/config/certificates/tp.key"
+}
+

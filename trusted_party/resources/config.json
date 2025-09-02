@@ -1,0 +1,7 @@
+{
+  "id": "TrustedParty",
+  "fqdn": "http://127.0.0.1:8020",
+  "trustedCertsDirPath": "/path/to/trusted/certs",
+  "publicCertPath": "/path/to/TP/public/certificate",
+  "privateKeyPath": "/path/to/TP/private/key"
+}

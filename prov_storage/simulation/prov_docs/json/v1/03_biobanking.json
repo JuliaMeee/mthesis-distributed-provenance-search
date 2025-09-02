@@ -1,0 +1,212 @@
+{
+  "prefix" : {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "ns_biobabank" : "http://provenance-storage-provider.com:8000/api/v1/organizations/MUNI/documents/",
+    "prov" : "http://www.w3.org/ns/prov#"
+  },
+  "bundle" : {
+    "ns_biobabank:03_biobanking" : {
+      "prefix" : {
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "dct" : "http://purl.org/dc/terms/",
+        "connector" : "http://provenance-storage-provider.com:8000/api/v1/connectors/",
+        "meta" : "http://provenance-storage-provider.com:8000/api/v1/documents/meta/",
+        "xsd" : "http://www.w3.org/2001/XMLSchema#",
+        "ns_biobabank" : "http://provenance-storage-provider.com:8000/api/v1/organizations/MUNI/documents/",
+        "ns_pathology" : "http://provenance-storage-provider.com:8000/api/v1/organizations/UniParis/",
+        "prov" : "http://www.w3.org/ns/prov#"
+      },
+      "entity" : {
+        "ns_biobabank:registeredSlide" : {
+          "cpm:externalId" : [ "slide-id-0.1" ]
+        },
+        "ns_biobabank:storedSlide" : {
+          "cpm:externalId" : [ "slide-id-1" ]
+        },
+        "connector:WSIDataConnector1" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:02_scanning"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        },
+        "ns_biobabank:diagnoses_and_WSI_data-b" : { },
+        "ns_biobabank:slide" : {
+          "cpm:externalId" : [ "slide-id-0.1" ]
+        },
+        "connector:pathologicalDiagnosisConnector" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:02_scanning"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        },
+        "ns_biobabank:labelledSlide" : {
+          "cpm:externalId" : [ "slide-id-1" ]
+        },
+        "connector:slidesCollectionConnector" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:02_scanning"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        }
+      },
+      "activity" : {
+        "ns_biobabank:storage-b" : { },
+        "ns_biobabank:storage" : {
+          "cpm:metabundle" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "meta:meta1"
+          } ],
+          "dct:hasPart" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_biobabank:storage-b"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_biobabank:registration"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_biobabank:labelling"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:sampleStorage"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:mainActivity"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:sampleHandling"
+          } ]
+        },
+        "ns_biobabank:registration" : { },
+        "ns_biobabank:labelling" : { }
+      },
+      "agent" : {
+        "ns_biobabank:pathologyDepartment" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:senderAgent"
+          } ]
+        },
+        "ns_biobabank:biobank_department" : { }
+      },
+      "used" : {
+        "_:n5" : {
+          "prov:activity" : "ns_biobabank:storage",
+          "prov:entity" : "connector:WSIDataConnector1"
+        },
+        "_:n13" : {
+          "prov:activity" : "ns_biobabank:registration",
+          "prov:entity" : "ns_biobabank:slide"
+        },
+        "_:n20" : {
+          "prov:activity" : "ns_biobabank:storage-b",
+          "prov:entity" : "ns_biobabank:labelledSlide"
+        },
+        "_:n14" : {
+          "prov:activity" : "ns_biobabank:registration",
+          "prov:entity" : "ns_biobabank:diagnoses_and_WSI_data-b"
+        },
+        "_:n3" : {
+          "prov:activity" : "ns_biobabank:storage",
+          "prov:entity" : "connector:slidesCollectionConnector"
+        },
+        "_:n4" : {
+          "prov:activity" : "ns_biobabank:storage",
+          "prov:entity" : "connector:pathologicalDiagnosisConnector"
+        },
+        "_:n17" : {
+          "prov:activity" : "ns_biobabank:labelling",
+          "prov:entity" : "ns_biobabank:registeredSlide"
+        }
+      },
+      "wasAttributedTo" : {
+        "_:n19" : {
+          "prov:entity" : "ns_biobabank:storage-b",
+          "prov:agent" : "ns_biobabank:biobank_department"
+        },
+        "_:n2" : {
+          "prov:entity" : "connector:WSIDataConnector1",
+          "prov:agent" : "ns_biobabank:pathologyDepartment"
+        },
+        "_:n16" : {
+          "prov:entity" : "ns_biobabank:labelling",
+          "prov:agent" : "ns_biobabank:biobank_department"
+        },
+        "_:n12" : {
+          "prov:entity" : "ns_biobabank:registration",
+          "prov:agent" : "ns_biobabank:biobank_department"
+        },
+        "_:n0" : {
+          "prov:entity" : "connector:slidesCollectionConnector",
+          "prov:agent" : "ns_biobabank:pathologyDepartment"
+        },
+        "_:n1" : {
+          "prov:entity" : "connector:pathologicalDiagnosisConnector",
+          "prov:agent" : "ns_biobabank:pathologyDepartment"
+        }
+      },
+      "specializationOf" : {
+        "_:n6" : {
+          "prov:specificEntity" : "ns_biobabank:diagnoses_and_WSI_data-b",
+          "prov:generalEntity" : "connector:WSIDataConnector1"
+        },
+        "_:n22" : {
+          "prov:specificEntity" : "ns_biobabank:slide",
+          "prov:generalEntity" : "connector:slidesCollectionConnector"
+        },
+        "_:n7" : {
+          "prov:specificEntity" : "ns_biobabank:diagnoses_and_WSI_data-b",
+          "prov:generalEntity" : "connector:pathologicalDiagnosisConnector"
+        }
+      },
+      "wasDerivedFrom" : {
+        "_:n8" : {
+          "prov:generatedEntity" : "ns_biobabank:registeredSlide",
+          "prov:usedEntity" : "ns_biobabank:slide"
+        },
+        "_:n9" : {
+          "prov:generatedEntity" : "ns_biobabank:registeredSlide",
+          "prov:usedEntity" : "ns_biobabank:diagnoses_and_WSI_data-b"
+        },
+        "_:n11" : {
+          "prov:generatedEntity" : "ns_biobabank:storedSlide",
+          "prov:usedEntity" : "ns_biobabank:labelledSlide"
+        },
+        "_:n10" : {
+          "prov:generatedEntity" : "ns_biobabank:labelledSlide",
+          "prov:usedEntity" : "ns_biobabank:registeredSlide"
+        }
+      },
+      "wasGeneratedBy" : {
+        "_:n18" : {
+          "prov:entity" : "ns_biobabank:labelledSlide",
+          "prov:activity" : "ns_biobabank:labelling"
+        },
+        "_:n15" : {
+          "prov:entity" : "ns_biobabank:registeredSlide",
+          "prov:activity" : "ns_biobabank:registration"
+        },
+        "_:n21" : {
+          "prov:entity" : "ns_biobabank:storedSlide",
+          "prov:activity" : "ns_biobabank:storage-b"
+        }
+      }
+    }
+  }
+}

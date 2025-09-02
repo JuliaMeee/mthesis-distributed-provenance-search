@@ -1,0 +1,50 @@
+document
+  prefix ns_biobabank <http://provenance-storage-provider.com:8000/api/v1/organizations/MUNI/documents/>
+
+  bundle ns_biobabank:03_biobanking
+    prefix ns_biobabank <http://provenance-storage-provider.com:8000/api/v1/organizations/MUNI/documents/>
+    prefix ns_pathology <http://provenance-storage-provider.com:8000/api/v1/organizations/UniParis/>
+    prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
+    prefix dct <http://purl.org/dc/terms/>
+    prefix meta <http://provenance-storage-provider.com:8000/api/v1/documents/meta/>
+    prefix connector <http://provenance-storage-provider.com:8000/api/v1/connectors/>
+
+    entity(connector:pathologicalDiagnosisConnector, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_pathology:02_scanning', cpm:senderServiceUri="#URI#"])
+    entity(connector:slidesCollectionConnector, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_pathology:02_scanning', cpm:senderServiceUri="#URI#"])
+    entity(connector:WSIDataConnector1, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_pathology:02_scanning', cpm:senderServiceUri="#URI#"])
+    agent(ns_biobabank:pathologyDepartment, [prov:type='cpm:senderAgent', cpm:contactIdPid=""])
+    activity(ns_biobabank:storage, -, -, [cpm:metabundle='meta:meta1', prov:type='cpm:mainActivity', prov:type='cpm:sampleHandling', prov:type='cpm:sampleStorage', dct:hasPart='ns_biobabank:registration', dct:hasPart='ns_biobabank:labelling', dct:hasPart='ns_biobabank:storage-b'])
+    wasAttributedTo(connector:slidesCollectionConnector, ns_biobabank:pathologyDepartment)
+    wasAttributedTo(connector:pathologicalDiagnosisConnector, ns_biobabank:pathologyDepartment)
+    wasAttributedTo(connector:WSIDataConnector1, ns_biobabank:pathologyDepartment)
+    used(ns_biobabank:storage, connector:slidesCollectionConnector, -)
+    used(ns_biobabank:storage, connector:pathologicalDiagnosisConnector, -)
+    used(ns_biobabank:storage, connector:WSIDataConnector1, -)
+    specializationOf(ns_biobabank:diagnoses_and_WSI_data-b, connector:WSIDataConnector1)
+    specializationOf(ns_biobabank:diagnoses_and_WSI_data-b, connector:pathologicalDiagnosisConnector)
+    agent(ns_biobabank:biobank_department)
+    entity(ns_biobabank:slide, [cpm:externalId="slide-id-0.1"])
+    entity(ns_biobabank:diagnoses_and_WSI_data-b)
+    entity(ns_biobabank:registeredSlide, [cpm:externalId="slide-id-0.1"])
+    entity(ns_biobabank:labelledSlide, [cpm:externalId="slide-id-1"])
+    entity(ns_biobabank:storedSlide, [cpm:externalId="slide-id-1"])
+    activity(ns_biobabank:registration, -, -)
+    activity(ns_biobabank:labelling, -, -)
+    activity(ns_biobabank:storage-b, -, -)
+    wasDerivedFrom(ns_biobabank:registeredSlide, ns_biobabank:slide, -, -, -)
+    wasDerivedFrom(ns_biobabank:registeredSlide, ns_biobabank:diagnoses_and_WSI_data-b, -, -, -)
+    wasDerivedFrom(ns_biobabank:labelledSlide, ns_biobabank:registeredSlide, -, -, -)
+    wasDerivedFrom(ns_biobabank:storedSlide, ns_biobabank:labelledSlide, -, -, -)
+    wasAttributedTo(ns_biobabank:registration, ns_biobabank:biobank_department)
+    used(ns_biobabank:registration, ns_biobabank:slide, -)
+    used(ns_biobabank:registration, ns_biobabank:diagnoses_and_WSI_data-b, -)
+    wasGeneratedBy(ns_biobabank:registeredSlide, ns_biobabank:registration, -)
+    wasAttributedTo(ns_biobabank:labelling, ns_biobabank:biobank_department)
+    used(ns_biobabank:labelling, ns_biobabank:registeredSlide, -)
+    wasGeneratedBy(ns_biobabank:labelledSlide, ns_biobabank:labelling, -)
+    wasAttributedTo(ns_biobabank:storage-b, ns_biobabank:biobank_department)
+    used(ns_biobabank:storage-b, ns_biobabank:labelledSlide, -)
+    wasGeneratedBy(ns_biobabank:storedSlide, ns_biobabank:storage-b, -)
+    specializationOf(ns_biobabank:slide, connector:slidesCollectionConnector)
+  endBundle
+endDocument
