@@ -4,9 +4,9 @@ STORAGE_CONTAINER_NAME=$1
 ORG_NAME=$2
 ORG_KEY_PATH=$3
 FILE_PATH=$4
+BUNDLE_NAME=$5
 
 FILE_NAME_WITH_EXT=$(basename "$FILE_PATH")
-FILE_NAME="${FILE_NAME_WITH_EXT%.*}"
 
 read STORAGE_INNER_IP STORAGE_INNER_PORT STORAGE_HOST_PORT < <(./get_container_network_info.sh $STORAGE_CONTAINER_NAME)
 
@@ -31,6 +31,6 @@ cat <<EOF > "$PAYLOAD_TEMP_FILE"
 }
 EOF
 
-curl --location "http://localhost:${STORAGE_HOST_PORT}/api/v1/organizations/${ORG_NAME}/documents/${FILE_NAME}" \
+curl --location --request PUT "http://localhost:${STORAGE_HOST_PORT}/api/v1/organizations/${ORG_NAME}/documents/${BUNDLE_NAME}" \
      --header 'Content-Type: application/json' \
      --data "@${PAYLOAD_TEMP_FILE}"

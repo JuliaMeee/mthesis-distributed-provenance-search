@@ -6,9 +6,7 @@ import cz.muni.fi.cpm.template.mapper.ITemplateProvMapper;
 import cz.muni.fi.cpm.template.mapper.TemplateProvMapper;
 import cz.muni.fi.cpm.template.schema.*;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.*;
 import org.openprovenance.prov.model.interop.Formats;
@@ -243,6 +241,5 @@ public class SerializationRoundTripTest {
         }
 
         assert (allTestsPassed);
-
     }
 }

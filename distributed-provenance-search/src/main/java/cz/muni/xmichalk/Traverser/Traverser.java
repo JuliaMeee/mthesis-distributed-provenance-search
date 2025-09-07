@@ -1,9 +1,12 @@
 package cz.muni.xmichalk.Traverser;
 
 import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.fi.cpm.model.ICpmFactory;
+import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.BundleSearcher.BreadthFirstBundleSearcher;
 import cz.muni.xmichalk.BundleSearcher.IBundleSearcher;
+import cz.muni.xmichalk.DocumentLoader.DocumentWithIntegrity;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.Traverser.Models.*;
 import org.openprovenance.prov.model.*;
@@ -15,12 +18,18 @@ import java.util.function.Predicate;
 public class Traverser {
     private final IDocumentLoader documentLoader;
     private final String cpmNamespace = "https://www.commonprovenancemodel.org/";
+    private final ProvFactory provFactory;
+    private final ICpmFactory cpmFactory;
+    private final ICpmProvFactory cpmProvFactory;
 
     private static final Comparator<ToSearchEntry> toSearchPriorityComparator =
             Comparator.comparing(e -> e.pathCredibility);
 
-    public Traverser(IDocumentLoader documentLoader) {
+    public Traverser(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory) {
         this.documentLoader = documentLoader;
+        this.provFactory = provFactory;
+        this.cpmFactory = cpmFactory;
+        this.cpmProvFactory = cpmProvFactory;
     }
 
 
@@ -64,14 +73,17 @@ public class Traverser {
     }
 
     public ProcessBundleResult ProcessBundleBackward(QualifiedName bundleId, QualifiedName forwardConnectorId, Predicate<INode> predicate) throws IOException {
-        CpmDocument cpmDocument = documentLoader.load(bundleId.getUri());
+        DocumentWithIntegrity documentWithIntegrity = documentLoader.loadDocument(bundleId.getUri());
+        var document = documentWithIntegrity.document;
+        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
+        var integrity = documentWithIntegrity.integrityCheckPassed ? ECredibility.VALID : ECredibility.LOW;
 
         IBundleSearcher bundleSearcher = new BreadthFirstBundleSearcher();
 
         List<INode> results = bundleSearcher.search(cpmDocument, forwardConnectorId, predicate);
         List<INode> connectors = cpmDocument.getBackwardConnectors();
 
-        return new ProcessBundleResult(results, connectors, ECredibility.VALID);
+        return new ProcessBundleResult(results, connectors, integrity);
     }
 
     private QualifiedName GetReferencedBundleId(INode connectorNode) {
@@ -94,5 +106,12 @@ public class Traverser {
         if (bundleCredibility == ECredibility.INVALID) return ECredibility.INVALID;
         if (bundleCredibility == ECredibility.VALID && pathCredibility == ECredibility.VALID) return ECredibility.VALID;
         return ECredibility.LOW;
+    }
+
+    public void loadMetaBundle(String uri) {
+        var loadedMeta = documentLoader.loadMetaDocument(uri);
+        var document = loadedMeta.document;
+        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
+        var integrity = loadedMeta.integrityCheckPassed ? ECredibility.VALID : ECredibility.INVALID;
     }
 }
