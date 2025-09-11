@@ -12,6 +12,7 @@ import org.openprovenance.prov.vanilla.ProvFactory;
 import cz.muni.fi.cpm.model.INode;
 
 import java.util.List;
+import java.util.Objects;
 
 public class BundleSearcherTest {
     ProvFactory pF = new ProvFactory();
@@ -20,48 +21,75 @@ public class BundleSearcherTest {
     ProvUtilities u = new ProvUtilities();
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
 
-    private CpmDocument getSimpleDocument() {
-        QualifiedName entityId = cPF.newCpmQualifiedName("entity1");
-        Entity entity = cPF.getProvFactory().newEntity(entityId);
-
-        QualifiedName agentId = cPF.newCpmQualifiedName("agent1");
-        Agent agent = cPF.getProvFactory().newAgent(agentId);
-
-        QualifiedName activityId = cPF.newCpmQualifiedName("activity1");
-        Activity activity = cPF.getProvFactory().newActivity(activityId);
-        activity.setStartTime(pF.newISOTime("2025-08-16T10:00:00Z"));
-        activity.setEndTime(pF.newISOTime("2025-08-16T11:00:00Z"));
-
-        Relation relation = cPF.getProvFactory().newWasAttributedTo(cPF.newCpmQualifiedName("attr"), entityId, agentId);
-        Relation relation2 = cPF.getProvFactory().newWasAssociatedWith(cPF.newCpmQualifiedName("assoc"), activityId, agentId);
-        Relation relation3 = cPF.getProvFactory().newWasGeneratedBy(cPF.newCpmQualifiedName("gen"), entityId, activityId);
-
-        QualifiedName bundleId = pF.newQualifiedName("uri", "bundle", "ex");
-
-        return new CpmDocument(List.of(entity, agent, activity, relation, relation2, relation3), bundleId, pF, cPF, cF);
-    }
-
     @Test
     public void testInvalidStartNodeId() {
-        var doc = getSimpleDocument();
+        var doc = TestDocument.getTestDocument1(pF, cPF, cF);
+        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
         QualifiedName invalidStartNodeId = cPF.newCpmQualifiedName("invalidId");
 
         var searcher = new BreadthFirstBundleSearcher();
-        List<INode> results = searcher.search(doc, invalidStartNodeId, node -> true);
+        List<INode> results = searcher.search(cpmDoc, invalidStartNodeId, node -> true);
 
         assert results.isEmpty();
     }
 
     @Test
     public void testSearchById() {
-        var doc = getSimpleDocument();
+        var doc = TestDocument.getTestDocument1(pF, cPF, cF);
+        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
         QualifiedName startNodeId = cPF.newCpmQualifiedName("activity1");
         QualifiedName targetNodeId = cPF.newCpmQualifiedName("entity1");
-        INode targetNode = doc.getNode(targetNodeId);
+        INode targetNode = cpmDoc.getNode(targetNodeId);
 
         var searcher = new BreadthFirstBundleSearcher();
-        List<INode> results = searcher.search(doc, startNodeId, node -> node.getId().equals(targetNodeId));
+        List<INode> results = searcher.search(cpmDoc, startNodeId, node -> node.getId().equals(targetNodeId));
 
         assert results.size() == 1 && results.contains(targetNode);
     }
+
+    private Object FindValue(INode node, QualifiedName attributeName) {
+        for (Element element : node.getElements()) {
+            for (Other other : element.getOther()) {
+                var otherName = other.getElementName();
+                if (attributeName.getLocalPart() == otherName.getLocalPart()
+                        && attributeName.getNamespaceURI() == otherName.getNamespaceURI()) {
+                    return other.getValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    private Object FindNodeByAttribute(INode node, QualifiedName targetAttribute, Object targetValue) {
+        for (Element element : node.getElements()) {
+            if (element.getId().equals(targetAttribute)) {
+                var found = true;
+            }
+            for (Other other : element.getOther()) {
+                QualifiedName name = other.getElementName();
+                if (name.equals(targetAttribute) && Objects.equals(other.getValue(), targetValue)) {
+                    return other.getValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /*@Test
+    public void FindInBundle() throws IOException {
+        var file = dataFolder + "dataset1/SamplingBundle_V1.json";
+        var doc = new SerializationRoundTripTest().deserialize(file, Formats.ProvFormat.JSON);
+        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        var attributeName = new org.openprovenance.prov.vanilla.QualifiedName("http://www.w3.org/ns/prov#", "location", "prov");
+
+        cpmDoc.getNodes().forEach(node -> {
+            Object value = new NodeSearcher().tryGetValue(node, attributeName);
+            if (value != null) {
+                System.out.println("Found attribute in node " + node.getId() + ": " + value);
+            }
+        });
+    }*/
 }
