@@ -1,67 +1,58 @@
 package cz.muni.xmichalk.DocumentLoader;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import cz.muni.xmichalk.DocumentLoader.StorageDTO.Token;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.erdtman.jcs.JsonCanonicalizer;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+
 import java.security.MessageDigest;
 
 public class StorageDocumentIntegrityVerifier {
+    public static boolean verifyIntegrity(String document, Token token) {
+        return verifySignature(token) && verifyHash(document, token.data.additionalData.hashFunction, token.data.documentDigest);
+    }
 
-    public boolean verifySignature(String encodedDocument, Token token) {
+    public static boolean verifySignature(Token token) {
         try {
-            String payload = getVerifySignaturePayload(encodedDocument, token);
+            PublicKey publicKey = loadPublicKeyFromCertificate(token.data.additionalData.trustedPartyCertificate);
 
-            String url = getVerifySignatureUrl(token);
+            ObjectMapper mapper = new ObjectMapper();
+            String tokenDataJsonString = mapper.writeValueAsString(token.data);
+            byte[] canonized = new JsonCanonicalizer(tokenDataJsonString).getEncodedUTF8();
 
-            try (CloseableHttpClient client = HttpClients.createDefault()) {
-                HttpPost post = new HttpPost(url);
-                post.setHeader("Content-Type", "application/json");
-                post.setEntity(new StringEntity(payload, StandardCharsets.UTF_8));
+            byte[] signatureBytes = Base64.getDecoder().decode(token.signature);
 
-                try (CloseableHttpResponse response = client.execute(post)) {
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    return statusCode == 200;
-                }
-            }
+            Signature verifier = Signature.getInstance("SHA256withECDSA");
+            verifier.initVerify(publicKey);
+            verifier.update(canonized);
+            return verifier.verify(signatureBytes);
+
         } catch (Exception e) {
-            throw new RuntimeException("Integrity check failed", e);
+            throw new RuntimeException(e);
         }
-
     }
 
-    private static String getVerifySignatureUrl(Token token) {
-        /*return storageResponse.token.data.additionalData.trustedPartyUri + "/api/v1/verifySignature";*/
-        return "http://localhost:8020/api/v1/verifySignature"; // TODO change to docker service url
+    public static PublicKey loadPublicKeyFromCertificate(String pemCert) throws Exception {
+        ByteArrayInputStream certStream = new ByteArrayInputStream(pemCert.getBytes(StandardCharsets.UTF_8));
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) cf.generateCertificate(certStream);
+        return cert.getPublicKey();
     }
 
-    private static String getVerifySignaturePayload(String document, Token token) throws JsonProcessingException {
-        String organizationId = token.data.originatorId;
-        String signature = token.signature;
-
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode jsonNode = mapper.createObjectNode();
-        jsonNode.put("organizationId", organizationId);
-        jsonNode.put("document", document);
-        jsonNode.put("signature", signature);
-        return mapper.writeValueAsString(jsonNode);
-    }
-
-    public boolean verifyHash(String serializedDocument, String hashFunctionName, String expectedHash) {
+    public static boolean verifyHash(String data, String hashFunctionName, String expectedHexHash) {
         MessageDigest hashFunction = getHashFunction(hashFunctionName);
-        byte[] hash = hashString(serializedDocument, hashFunction);
+        byte[] hash = hashString(data, hashFunction);
         String hashHex = bytesToHex(hash);
-        return hashHex.equals(expectedHash);
+        return hashHex.equals(expectedHexHash);
     }
 
-    public MessageDigest getHashFunction(String hashFunction) {
+    public static MessageDigest getHashFunction(String hashFunction) {
         try {
             return MessageDigest.getInstance(hashFunction);
         } catch (Exception e) {

@@ -16,7 +16,6 @@
   },
   "bundle": {
     "storage:DnaSequencingBundle_V0": {
-      "@id": "storage:DnaSequencingBundle_V0",
       "entity": {
         "blank:SiU_BP_0001_b": {
           "schema:name": ["SiU_BP_0001_b"],
@@ -162,7 +161,7 @@
             }
           ],
           "cpm:referencedBundleHashValue": [
-            "98449e50d70fe385e2bc2391b5ee169218a6b33252894ec620b3d1faecde1690"
+            "252be860992eef5a1b9292027762bb155b7943e48014f986cec00115a209a553"
           ],
           "cpm:referencedBundleId": [
             { "type": "prov:QUALIFIED_NAME", "$": "storage:SamplingBundle_V0" }

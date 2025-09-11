@@ -21,11 +21,12 @@ public class Main {
         Traverser traverser = new Traverser(documentLoader, pf, cf, cpf);
         try {
 
-            traverser.loadMetaBundle("http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta");
+            traverser.loadMetaBundle("http://prov-storage-3:8000/api/v1/documents/meta/SpeciesIdentificationBundle_V0_meta");
 
-            traverser.searchBackward(
-                            new QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "DnaSequencingBundle_V0", "storage2"),
-                            new QualifiedName("https://openprovenance.org/blank/", "FilteredSequencesCon", "blank"),
+
+            traverser.searchPredecessors(
+                            new QualifiedName("http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/", "SpeciesIdentificationBundle_V0", null),
+                            new QualifiedName("https://openprovenance.org/blank/", "IdentifiedSpeciesCon", null),
                             node -> node.getId().getLocalPart().equals("ABSPermit_ircc2345678"))
                     .forEach(result -> System.out.println(result.bundleId.getLocalPart() + " : " + result.node.getId().getLocalPart()));
         } catch (Exception e) {

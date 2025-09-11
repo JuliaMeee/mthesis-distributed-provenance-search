@@ -39,7 +39,7 @@ public class Traverser {
      * @param forwardConnectorId - identifier of the forward connector in the bundle
      * @return - list of predecessors (jsons)
      */
-    public List<SearchResultEntry> searchBackward(QualifiedName startBundleId, QualifiedName forwardConnectorId, Predicate<INode> predicate) throws Exception {
+    public List<SearchResultEntry> searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, Predicate<INode> predicate) throws IOException {
         Set<VisitedEntry> visitedBundles = new HashSet<>();
         Queue<ToSearchEntry> bundlesToSearch = new PriorityQueue<>(toSearchPriorityComparator);
         Set<SearchResultEntry> results = new HashSet<>();
@@ -76,7 +76,7 @@ public class Traverser {
         DocumentWithIntegrity documentWithIntegrity = documentLoader.loadDocument(bundleId.getUri());
         var document = documentWithIntegrity.document;
         var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
-        var integrity = documentWithIntegrity.integrityCheckPassed ? ECredibility.VALID : ECredibility.LOW;
+        var integrity = documentWithIntegrity.integrityCheckPassed ? ECredibility.VALID : ECredibility.INVALID;
 
         IBundleSearcher bundleSearcher = new BreadthFirstBundleSearcher();
 
