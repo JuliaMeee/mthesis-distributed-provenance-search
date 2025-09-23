@@ -6,6 +6,9 @@ Build the docker images from working directory `/prov_storage/distributed-proven
 `docker build -f Dockerfile.TrustedParty -t trusted_party .`
 `docker build -f Dockerfile.ProvStorage -t distributed_prov_system .`
 
+Build the docker image for traverser service from working directory `/distributed-provenance-search/` with
+`docker build -f Dockerfile -t traverser_image .`
+
 Start docker and run `docker-compose up -d`.
 
 From `/setup` run:

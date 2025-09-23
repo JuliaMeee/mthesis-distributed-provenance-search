@@ -1,8 +1,8 @@
 plugins {
     id("java")
     id("maven-publish")
-    id("org.springframework.boot") version "3.2.5"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") version "3.4.+"
+    id("io.spring.dependency-management") version "1.1.6"
 }
 
 group = "cz.muni.xmichalk"
@@ -40,18 +40,18 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
-
     implementation("org.openprovenance.prov:prov-model:2.2.1")
     implementation("org.openprovenance.prov:prov-json:1.0.0")
     implementation("org.openprovenance.prov:prov-interop:2.2.1")
     implementation("org.openprovenance.prov:prov-nf:2.2.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    // implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.1")
 
-    implementation("cz.muni.fi.cpm:cpm-core:1.0.0")
-    implementation("cz.muni.fi.cpm:cpm-template:1.0.0")
+    // implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
+    // implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
+    implementation(files("src/main/resources/cpm-core-1.0.0.jar"))
+    implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
+
 
     implementation("org.springframework.boot:spring-boot-starter-web")
 

@@ -130,31 +130,52 @@ services:
       retries: 10
       test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
   
-  # prov-traverser-1:
-  #   container_name: prov-traverser-1
-  #   image: traverser_image
-  #   environment:
-  #     - SERVER_PORT=8000
-  #   ports:
-  #     - 8004:8000
-  #   depends_on:
-  #     prov-storage-1:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     timeout: 5s
-  #     retries: 10
-  #     test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
-  # debug-shell:
-  #   image: ubuntu:22.04
-  #   container_name: debug-shell
-  #   command: ["sleep", "infinity"]
-  #   tty: true
-  #   stdin_open: true
-  #   networks:
-  #     - default
-  #   # Install curl and iputils-ping on startup
-  #   entrypoint: ["/bin/bash", "-c", "apt-get update && apt-get install -y curl iputils-ping && bash"]
+  prov-traverser-1:
+    container_name: prov-traverser-1
+    image: traverser_image
+    ports:
+      - 8081:8000
+    depends_on:
+      prov-storage-1:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+  
+  prov-traverser-2:
+    container_name: prov-traverser-2
+    image: traverser_image
+    ports:
+      - 8082:8000
+    depends_on:
+      prov-storage-2:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
 
+  prov-traverser-3:
+    container_name: prov-traverser-3
+    image: traverser_image
+    ports:
+      - 8083:8000
+    depends_on:
+      prov-storage-3:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+
+  debug-shell:
+    image: ubuntu:22.04
+    container_name: debug-shell
+    command: ["sleep", "infinity"]
+    tty: true
+    stdin_open: true
+    entrypoint: ["/bin/bash", "-c", "apt-get update && apt-get install -y curl iputils-ping && bash"]
 
 configs:
   storage-1-ps-config:

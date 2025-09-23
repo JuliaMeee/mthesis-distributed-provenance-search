@@ -1,0 +1,5 @@
+{
+  "http://prov-storage-1:8000": "http://prov-traverser-1:8000",
+  "http://prov-storage-2:8000": "http://prov-traverser-2:8000",
+  "http://prov-storage-3:8000": "http://prov-traverser-3:8000"
+}

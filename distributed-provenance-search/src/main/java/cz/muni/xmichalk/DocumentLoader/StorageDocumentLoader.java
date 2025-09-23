@@ -28,7 +28,7 @@ public class StorageDocumentLoader implements IDocumentLoader {
     public DocumentWithIntegrity loadDocument(String uri) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
-            String responseBody = getRequest(getLocalhostUri(uri));
+            String responseBody = getRequest(uri);
             ObjectMapper mapper = new ObjectMapper();
             GetDocumentResponse storageResponse = mapper.readValue(responseBody, GetDocumentResponse.class);
             String decodedDocument = decodeData(storageResponse.document);
@@ -44,7 +44,7 @@ public class StorageDocumentLoader implements IDocumentLoader {
     public DocumentWithIntegrity loadMetaDocument(String uri) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
-            String responseBody = getRequest(getLocalhostUri(uri));
+            String responseBody = getRequest(uri);
             ObjectMapper mapper = new ObjectMapper();
             GetMetaResponse storageResponse = mapper.readValue(responseBody, GetMetaResponse.class);
             String decodedDocument = decodeData(storageResponse.graph);
@@ -89,13 +89,5 @@ public class StorageDocumentLoader implements IDocumentLoader {
         }
 
         return serializedDocument;
-    }
-
-    public static String getBundleMetaUri(String bundleUri) {
-        return bundleUri.replace("organizations/ORG1/documents/", "/documents/meta/") + "_meta";
-    }
-
-    private static String getLocalhostUri(String uri) {
-        return uri.replaceFirst("prov-storage-(\\d):8000", "localhost:800$1");
     }
 }

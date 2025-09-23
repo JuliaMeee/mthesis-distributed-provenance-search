@@ -1,14 +1,17 @@
 package cz.muni.xmichalk.Traverser.Models;
 
-import cz.muni.fi.cpm.model.INode;
 import org.openprovenance.prov.model.QualifiedName;
 
 public class SearchResultEntry {
-    public QualifiedName bundleId;
-    public INode node;
+    public QualifiedNameDTO bundleId;
+    public QualifiedNameDTO nodeId;
 
-    public SearchResultEntry(QualifiedName bundleId, INode node) {
-        this.bundleId = bundleId;
-        this.node = node;
+    public SearchResultEntry() {
+
+    }
+
+    public SearchResultEntry(QualifiedName bundleId, QualifiedName nodeId) {
+        this.bundleId = new QualifiedNameDTO(bundleId);
+        this.nodeId = new QualifiedNameDTO(nodeId);
     }
 }
