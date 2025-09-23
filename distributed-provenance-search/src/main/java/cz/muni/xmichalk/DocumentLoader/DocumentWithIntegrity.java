@@ -1,6 +1,5 @@
 package cz.muni.xmichalk.DocumentLoader;
 
-import cz.muni.fi.cpm.model.CpmDocument;
 import org.openprovenance.prov.model.Document;
 
 public class DocumentWithIntegrity {
