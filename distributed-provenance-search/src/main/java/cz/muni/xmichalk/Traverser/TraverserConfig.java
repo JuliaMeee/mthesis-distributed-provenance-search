@@ -19,7 +19,6 @@ import java.io.IOException;
 @Configuration
 public class TraverserConfig {
 
-    // In a @Configuration class
     @Bean
     public ProvFactory provFactory() {
         return new ProvFactory();
