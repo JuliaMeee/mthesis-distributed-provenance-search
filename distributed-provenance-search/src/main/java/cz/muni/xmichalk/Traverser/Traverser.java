@@ -23,7 +23,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -36,7 +35,7 @@ public class Traverser {
     private final ITraverserTable traverserTable;
     private final int concurrencyDegree = 10;
 
-    private static final Comparator<ToSearchEntry> toSearchPriorityComparator =
+    private static final Comparator<ItemToSearch> toSearchPriorityComparator =
             Comparator.comparing(e -> e.pathCredibility);
 
     public Traverser(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory, ITraverserTable traverserTable) {
@@ -56,36 +55,38 @@ public class Traverser {
      * @return - list of predecessors (jsons)
      */
     public SearchResults searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, TargetSpecification targetSpecification) {
-        ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles = new ConcurrentHashMap<>();
-        ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch = new ConcurrentHashMap<>();
-        Set<FoundResult> results = ConcurrentHashMap.newKeySet();
+        SearchState searchState = new SearchState(
+                new ConcurrentHashMap<>(),
+                new ConcurrentHashMap<>(),
+                new PriorityBlockingQueue<>(10, toSearchPriorityComparator),
+                ConcurrentHashMap.newKeySet()
+        );
 
-        bundlesToSearch.put(startBundleId,
-                new ToSearchEntry(startBundleId, forwardConnectorId, ECredibility.VALID));
+        searchState.toSearch.add(new ItemToSearch(startBundleId, forwardConnectorId, ECredibility.VALID));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
 
-        AtomicInteger runningTasks = new AtomicInteger(0); // track running tasks count
+        AtomicInteger runningTasks = new AtomicInteger(0);
 
         for (int i = 0; i < concurrencyDegree; i++) {
-            ToSearchEntry entry = pollNextToSearch(bundlesToSearch, visitedBundles);
-            if (entry != null) {
-                submitSearchTask(entry, bundlesToSearch, visitedBundles, results,
-                        targetSpecification, completionService, runningTasks);
+            ItemToSearch itemToSearch = pollNextToSearch(searchState);
+            if (itemToSearch != null) {
+                submitSearchTask(itemToSearch, searchState, targetSpecification,
+                        completionService, runningTasks);
             }
         }
 
         try {
             while (runningTasks.get() > 0) {
-                // wait until one task finishes
-                completionService.take();
+                completionService.take(); // wait for a task to finish
+                runningTasks.decrementAndGet();
 
-                ToSearchEntry next;
+                ItemToSearch next;
                 while (runningTasks.get() < concurrencyDegree
-                        && (next = pollNextToSearch(bundlesToSearch, visitedBundles)) != null) {
-                    submitSearchTask(next, bundlesToSearch, visitedBundles, results,
-                            targetSpecification, completionService, runningTasks);
+                        && (next = pollNextToSearch(searchState)) != null) {
+                    submitSearchTask(next, searchState, targetSpecification,
+                            completionService, runningTasks);
                 }
             }
         } catch (InterruptedException e) {
@@ -94,78 +95,66 @@ public class Traverser {
             executor.shutdown();
         }
 
-        return new SearchResults(List.copyOf(results));
+        return new SearchResults(List.copyOf(searchState.results));
     }
 
-    private ToSearchEntry pollNextToSearch(
-            ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch,
-            ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles
-    ) {
-        for (QualifiedName bundleId : bundlesToSearch.keySet()) {
-            ToSearchEntry entry = bundlesToSearch.get(bundleId);
-            if (entry == null) continue;
-
-            VisitedEntry newVisited = new VisitedEntry(entry.bundleId, entry.pathCredibility, ECredibility.UNKNOWN);
-            if (visitedBundles.putIfAbsent(bundleId, newVisited) == null) {
-                bundlesToSearch.remove(bundleId, entry);
-                return entry;
-            } else {
-                bundlesToSearch.remove(bundleId, entry);
+    private ItemToSearch pollNextToSearch(SearchState searchState) {
+        ItemToSearch itemToSearch;
+        while ((itemToSearch = searchState.toSearch.poll()) != null) {
+            if (itemToSearch.pathCredibility != ECredibility.VALID && searchState.processing.values().stream()
+                    .anyMatch(item -> item.pathCredibility == ECredibility.VALID)) {
+                return null; // wait untill all valid bundles are processed before continuing with lower credibility ones
+            }
+            if (searchState.processing.putIfAbsent(itemToSearch.bundleId, itemToSearch) == null) {
+                if (!searchState.visited.containsKey(itemToSearch.bundleId)) {
+                    return itemToSearch;
+                } else {
+                    searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
+                }
             }
         }
         return null;
     }
 
-    private void submitSearchTask(
-            ToSearchEntry entry,
-            ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch,
-            ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles,
-            Set<FoundResult> results,
-            TargetSpecification targetSpecification,
-            CompletionService<Void> completionService,
-            AtomicInteger runningTasks
-    ) {
-        var tasksCount = runningTasks.incrementAndGet();
+    private void submitSearchTask(ItemToSearch itemToSearch,
+                                  SearchState searchState,
+                                  TargetSpecification targetSpecification,
+                                  CompletionService<Void> completionService,
+                                  AtomicInteger runningTasks) {
+        runningTasks.incrementAndGet();
         completionService.submit(() -> {
-
+            System.out.println("Processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId + " (running tasks: " + itemToSearch + ")");
+            SearchBundleResult searchBundleResult = new SearchBundleResult(List.of(), List.of(), ECredibility.INVALID); // default value
             try {
-                System.out.println("Processing bundle: " + entry.bundleId + " via connector: " + entry.connectorId + " (running tasks: " + tasksCount + ")");
-
-                SearchBundleResult searchBundleResult;
-                try {
-                    searchBundleResult = fetchSearchBundleResult(entry.bundleId, entry.connectorId, targetSpecification);
-                    visitedBundles.get(entry.bundleId).bundleCredibility = searchBundleResult.credibility;
-                } catch (Exception e) {
-                    System.err.println("Error during search bundle " + entry.bundleId.getLocalPart()
-                            + " call: " + e.getMessage());
-                    searchBundleResult = new SearchBundleResult(List.of(), List.of(), ECredibility.INVALID);
-                }
-
-                ECredibility mergedCredibility = mergeCredibility(searchBundleResult.credibility, entry.pathCredibility);
-
-                results.addAll(
-                        searchBundleResult.results.stream()
-                                .map(nodeId -> new FoundResult(entry.bundleId, nodeId, mergedCredibility))
-                                .toList()
-                );
-
-                for (ConnectorNode connector : searchBundleResult.connectors) {
-                    if (connector.referencedBundleId != null) {
-                        bundlesToSearch.putIfAbsent(
-                                connector.referencedBundleId,
-                                new ToSearchEntry(
-                                        connector.referencedBundleId,
-                                        connector.id,
-                                        mergedCredibility
-                                )
-                        );
-                    }
-                }
-
-                System.out.println("Finished processing bundle: " + entry.bundleId + " via connector: " + entry.connectorId);
+                searchBundleResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetSpecification);
+            } catch (Exception e) {
+                System.err.println("Error during search bundle " + itemToSearch.bundleId.getLocalPart() + ": " + e.getMessage());
             } finally {
-                runningTasks.decrementAndGet();
+                searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId, itemToSearch.pathCredibility, searchBundleResult.credibility));
+                searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
+
             }
+
+            ECredibility mergedCredibility = mergeCredibility(searchBundleResult.credibility, itemToSearch.pathCredibility);
+
+            searchState.results.addAll(searchBundleResult.results.stream()
+                    .map(nodeId -> new FoundResult(itemToSearch.bundleId, nodeId, mergedCredibility))
+                    .toList());
+
+            for (ConnectorNode connector : searchBundleResult.connectors) {
+                if (connector.referencedBundleId != null) {
+                    searchState.toSearch.add(
+                            new ItemToSearch(
+                                    connector.referencedBundleId,
+                                    connector.id,
+                                    mergedCredibility
+                            )
+                    );
+                }
+            }
+
+            System.out.println("Finished processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId);
+
             return null;
         });
     }
