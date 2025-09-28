@@ -21,7 +21,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 public class Traverser {
@@ -30,6 +34,7 @@ public class Traverser {
     private final ICpmFactory cpmFactory;
     private final ICpmProvFactory cpmProvFactory;
     private final ITraverserTable traverserTable;
+    private final int concurrencyDegree = 10;
 
     private static final Comparator<ToSearchEntry> toSearchPriorityComparator =
             Comparator.comparing(e -> e.pathCredibility);
@@ -51,46 +56,116 @@ public class Traverser {
      * @return - list of predecessors (jsons)
      */
     public SearchResults searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, TargetSpecification targetSpecification) {
-        Set<VisitedEntry> visitedBundles = new HashSet<>();
-        Set<ToSearchEntry> currentlyProcessedBundles = new HashSet<>();
-        Queue<ToSearchEntry> bundlesToSearch = new PriorityQueue<>(toSearchPriorityComparator);
-        Set<InnerNode> results = new HashSet<>();
+        ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles = new ConcurrentHashMap<>();
+        ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch = new ConcurrentHashMap<>();
+        Set<InnerNode> results = ConcurrentHashMap.newKeySet();
 
-        bundlesToSearch.add(new ToSearchEntry(startBundleId, forwardConnectorId, ECredibility.VALID));
+        bundlesToSearch.put(startBundleId,
+                new ToSearchEntry(startBundleId, forwardConnectorId, ECredibility.VALID));
 
-        while (!bundlesToSearch.isEmpty()) {
-            var itemToSearch = bundlesToSearch.poll();
-            if (visitedBundles.stream().anyMatch(e -> e.bundleId.equals(itemToSearch.bundleId))
-                    || currentlyProcessedBundles.stream().anyMatch(e -> e.bundleId.equals(itemToSearch.bundleId))) {
-                continue; // Skip already visited bundles
+        ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
+        CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
+
+        AtomicInteger runningTasks = new AtomicInteger(0); // track running tasks count
+
+        for (int i = 0; i < concurrencyDegree; i++) {
+            ToSearchEntry entry = pollNextToSearch(bundlesToSearch, visitedBundles);
+            if (entry != null) {
+                submitSearchTask(entry, bundlesToSearch, visitedBundles, results,
+                        targetSpecification, completionService, runningTasks);
             }
-            currentlyProcessedBundles.add(itemToSearch);
-
-            SearchBundleResult searchBundleResult;
-
-            System.out.println("Processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId);
-
-            try {
-                searchBundleResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetSpecification);
-            } catch (Exception e) {
-                System.err.println("Error during search bundle " + itemToSearch.bundleId.getLocalPart() + " call: " + e.getMessage());
-                searchBundleResult = new SearchBundleResult(new ArrayList<>(), new ArrayList<>(), ECredibility.INVALID);
-            }
-
-            results.addAll(searchBundleResult.results.stream().map(nodeId -> new InnerNode(itemToSearch.bundleId, nodeId)).toList());
-
-            for (ConnectorNode connector : searchBundleResult.connectors) {
-                if (connector.referencedBundleId != null) {
-                    bundlesToSearch.add(new ToSearchEntry(connector.referencedBundleId, connector.id, mergeCredibility(searchBundleResult.credibility, itemToSearch.pathCredibility)));
-                }
-            }
-
-            visitedBundles.add(new VisitedEntry(itemToSearch.bundleId, ECredibility.VALID));
-            currentlyProcessedBundles.remove(itemToSearch);
         }
 
-        return new SearchResults(results.stream().toList());
+        try {
+            while (runningTasks.get() > 0) {
+                // wait until one task finishes
+                completionService.take();
 
+                ToSearchEntry next;
+                while (runningTasks.get() < concurrencyDegree
+                        && (next = pollNextToSearch(bundlesToSearch, visitedBundles)) != null) {
+                    submitSearchTask(next, bundlesToSearch, visitedBundles, results,
+                            targetSpecification, completionService, runningTasks);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            executor.shutdown();
+        }
+
+        return new SearchResults(List.copyOf(results));
+    }
+
+    private ToSearchEntry pollNextToSearch(
+            ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch,
+            ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles
+    ) {
+        for (QualifiedName bundleId : bundlesToSearch.keySet()) {
+            ToSearchEntry entry = bundlesToSearch.get(bundleId);
+            if (entry == null) continue;
+
+            VisitedEntry newVisited = new VisitedEntry(entry.bundleId, entry.pathCredibility, ECredibility.UNKNOWN);
+            if (visitedBundles.putIfAbsent(bundleId, newVisited) == null) {
+                bundlesToSearch.remove(bundleId, entry);
+                return entry;
+            } else {
+                bundlesToSearch.remove(bundleId, entry);
+            }
+        }
+        return null;
+    }
+
+    private void submitSearchTask(
+            ToSearchEntry entry,
+            ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch,
+            ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles,
+            Set<InnerNode> results,
+            TargetSpecification targetSpecification,
+            CompletionService<Void> completionService,
+            AtomicInteger runningTasks
+    ) {
+        var tasksCount = runningTasks.incrementAndGet();
+        completionService.submit(() -> {
+
+            try {
+                System.out.println("Processing bundle: " + entry.bundleId + " via connector: " + entry.connectorId + " (running tasks: " + tasksCount + ")");
+
+                SearchBundleResult searchBundleResult;
+                try {
+                    searchBundleResult = fetchSearchBundleResult(entry.bundleId, entry.connectorId, targetSpecification);
+                    visitedBundles.get(entry.bundleId).bundleCredibility = searchBundleResult.credibility;
+                } catch (Exception e) {
+                    System.err.println("Error during search bundle " + entry.bundleId.getLocalPart()
+                            + " call: " + e.getMessage());
+                    searchBundleResult = new SearchBundleResult(List.of(), List.of(), ECredibility.INVALID);
+                }
+
+                results.addAll(
+                        searchBundleResult.results.stream()
+                                .map(nodeId -> new InnerNode(entry.bundleId, nodeId))
+                                .toList()
+                );
+
+                for (ConnectorNode connector : searchBundleResult.connectors) {
+                    if (connector.referencedBundleId != null) {
+                        bundlesToSearch.putIfAbsent(
+                                connector.referencedBundleId,
+                                new ToSearchEntry(
+                                        connector.referencedBundleId,
+                                        connector.id,
+                                        mergeCredibility(searchBundleResult.credibility, entry.pathCredibility)
+                                )
+                        );
+                    }
+                }
+
+                System.out.println("Finished processing bundle: " + entry.bundleId + " via connector: " + entry.connectorId);
+            } finally {
+                runningTasks.decrementAndGet();
+            }
+            return null;
+        });
     }
 
     public SearchBundleResult fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, TargetSpecification targetSpecification) throws IOException {
