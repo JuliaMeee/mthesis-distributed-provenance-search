@@ -3,9 +3,9 @@ package cz.muni.xmichalk.Traverser.Models;
 import java.util.List;
 
 public class SearchResults {
-    public List<InnerNode> results;
+    public List<FoundResult> results;
 
-    public SearchResults(List<InnerNode> results) {
+    public SearchResults(List<FoundResult> results) {
         this.results = results;
     }
 }

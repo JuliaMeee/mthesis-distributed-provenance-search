@@ -58,7 +58,7 @@ public class Traverser {
     public SearchResults searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, TargetSpecification targetSpecification) {
         ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles = new ConcurrentHashMap<>();
         ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch = new ConcurrentHashMap<>();
-        Set<InnerNode> results = ConcurrentHashMap.newKeySet();
+        Set<FoundResult> results = ConcurrentHashMap.newKeySet();
 
         bundlesToSearch.put(startBundleId,
                 new ToSearchEntry(startBundleId, forwardConnectorId, ECredibility.VALID));
@@ -120,7 +120,7 @@ public class Traverser {
             ToSearchEntry entry,
             ConcurrentMap<QualifiedName, ToSearchEntry> bundlesToSearch,
             ConcurrentMap<QualifiedName, VisitedEntry> visitedBundles,
-            Set<InnerNode> results,
+            Set<FoundResult> results,
             TargetSpecification targetSpecification,
             CompletionService<Void> completionService,
             AtomicInteger runningTasks
@@ -141,9 +141,11 @@ public class Traverser {
                     searchBundleResult = new SearchBundleResult(List.of(), List.of(), ECredibility.INVALID);
                 }
 
+                ECredibility mergedCredibility = mergeCredibility(searchBundleResult.credibility, entry.pathCredibility);
+
                 results.addAll(
                         searchBundleResult.results.stream()
-                                .map(nodeId -> new InnerNode(entry.bundleId, nodeId))
+                                .map(nodeId -> new FoundResult(entry.bundleId, nodeId, mergedCredibility))
                                 .toList()
                 );
 
@@ -154,7 +156,7 @@ public class Traverser {
                                 new ToSearchEntry(
                                         connector.referencedBundleId,
                                         connector.id,
-                                        mergeCredibility(searchBundleResult.credibility, entry.pathCredibility)
+                                        mergedCredibility
                                 )
                         );
                     }
