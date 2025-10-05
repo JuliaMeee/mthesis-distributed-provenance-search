@@ -17,4 +17,3 @@ to register organizations and upload provenance files.
 If you get `curl: (52) Empty reply from server`, try again after waiting for a few seconds.
 
 To clean everything up (stop and remove all containers) run `docker-compose down -v`
-

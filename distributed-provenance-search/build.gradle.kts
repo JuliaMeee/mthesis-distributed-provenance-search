@@ -44,11 +44,7 @@ dependencies {
     implementation("org.openprovenance.prov:prov-json:1.0.0")
     implementation("org.openprovenance.prov:prov-interop:2.2.1")
     implementation("org.openprovenance.prov:prov-nf:2.2.1")
-    // implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
 
-
-    // implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
-    // implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
     implementation(files("src/main/resources/cpm-core-1.0.0.jar"))
     implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
 

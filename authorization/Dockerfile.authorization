@@ -1,0 +1,16 @@
+# Use Eclipse Temurin JDK for building
+FROM eclipse-temurin:23-jdk AS builder
+WORKDIR /app
+
+COPY . .
+RUN chmod +x ./gradlew
+RUN ./gradlew clean build
+
+# Use Eclipse Temurin JDK for running
+FROM eclipse-temurin:23-jdk
+WORKDIR /app
+
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+EXPOSE 9000 5005
+CMD ["java", "-jar", "app.jar"]
