@@ -4,16 +4,14 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.BundleSearcher.BreadthFirstBundleSearcher;
-import cz.muni.xmichalk.BundleSearcher.IBundleSearcher;
-import cz.muni.xmichalk.DocumentLoader.DocumentWithIntegrity;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
-import cz.muni.xmichalk.Traverser.DTO.SearchBundleResultDTO;
+import cz.muni.xmichalk.Traverser.DTO.BundleSearchResponseDTO;
 import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
 import cz.muni.xmichalk.Traverser.Models.*;
 import cz.muni.xmichalk.Traverser.TraverserTable.ITraverserTable;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.interop.Formats;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,11 +19,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
+
+import static cz.muni.xmichalk.Traverser.TraverserUtils.getReferencedBundleId;
+import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserialize;
+import static cz.muni.xmichalk.Util.ProvDocumentUtils.prepareForDeserialization;
 
 public class Traverser {
     private final IDocumentLoader documentLoader;
@@ -54,7 +56,7 @@ public class Traverser {
      * @param targetSpecification - characterization of the nodes we are searching for
      * @return - list of predecessors (jsons)
      */
-    public SearchResults searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, TargetSpecification targetSpecification) {
+    public List<FoundResult> searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, String targetType, String targetSpecification) {
         SearchState searchState = new SearchState(
                 new ConcurrentHashMap<>(),
                 new ConcurrentHashMap<>(),
@@ -72,7 +74,7 @@ public class Traverser {
         for (int i = 0; i < concurrencyDegree; i++) {
             ItemToSearch itemToSearch = pollNextToSearch(searchState);
             if (itemToSearch != null) {
-                submitSearchTask(itemToSearch, searchState, targetSpecification,
+                submitSearchTask(itemToSearch, searchState, targetType, targetSpecification,
                         completionService, runningTasks);
             }
         }
@@ -85,7 +87,7 @@ public class Traverser {
                 ItemToSearch next;
                 while (runningTasks.get() < concurrencyDegree
                         && (next = pollNextToSearch(searchState)) != null) {
-                    submitSearchTask(next, searchState, targetSpecification,
+                    submitSearchTask(next, searchState, targetType, targetSpecification,
                             completionService, runningTasks);
                 }
             }
@@ -95,7 +97,7 @@ public class Traverser {
             executor.shutdown();
         }
 
-        return new SearchResults(List.copyOf(searchState.results));
+        return List.copyOf(searchState.results);
     }
 
     private ItemToSearch pollNextToSearch(SearchState searchState) {
@@ -118,35 +120,39 @@ public class Traverser {
 
     private void submitSearchTask(ItemToSearch itemToSearch,
                                   SearchState searchState,
-                                  TargetSpecification targetSpecification,
+                                  String targetType,
+                                  String targetSpecification,
                                   CompletionService<Void> completionService,
                                   AtomicInteger runningTasks) {
         runningTasks.incrementAndGet();
         completionService.submit(() -> {
             System.out.println("Processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId + " (running tasks: " + itemToSearch + ")");
-            SearchBundleResult searchBundleResult = new SearchBundleResult(List.of(), List.of(), ECredibility.INVALID); // default value
+            BundleSearchResponseDTO searchBundleResult = new BundleSearchResponseDTO(null, null); // default value
             try {
-                searchBundleResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetSpecification);
+                searchBundleResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetType, targetSpecification);
             } catch (Exception e) {
                 System.err.println("Error during search bundle " + itemToSearch.bundleId.getLocalPart() + ": " + e.getMessage());
             } finally {
-                searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId, itemToSearch.pathCredibility, searchBundleResult.credibility));
+                searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId, itemToSearch.pathCredibility, ECredibility.VALID)); // TODO validity
                 searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
 
             }
 
-            ECredibility mergedCredibility = mergeCredibility(searchBundleResult.credibility, itemToSearch.pathCredibility);
+            ECredibility mergedCredibility = ECredibility.VALID; // TODO mergeCredibility(searchBundleResult.credibility, itemToSearch.pathCredibility);
 
-            searchState.results.addAll(searchBundleResult.results.stream()
-                    .map(nodeId -> new FoundResult(itemToSearch.bundleId, nodeId, mergedCredibility))
-                    .toList());
+            if (searchBundleResult.found != null) {
+                searchState.results.add(new FoundResult(itemToSearch.bundleId, searchBundleResult.found, true, true, true, true)); // TODO validity and integrity
+            }
 
-            for (ConnectorNode connector : searchBundleResult.connectors) {
-                if (connector.referencedBundleId != null) {
+            List<INode> connectors = ParseConnectors(searchBundleResult.connectors);
+
+            for (INode connector : connectors) {
+                var referencedBundleId = getReferencedBundleId(connector);
+                if (referencedBundleId != null) {
                     searchState.toSearch.add(
                             new ItemToSearch(
-                                    connector.referencedBundleId,
-                                    connector.id,
+                                    referencedBundleId,
+                                    connector.getId(),
                                     mergedCredibility
                             )
                     );
@@ -159,8 +165,22 @@ public class Traverser {
         });
     }
 
-    public SearchBundleResult fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, TargetSpecification targetSpecification) throws IOException {
-        SearchParamsDTO searchParams = new SearchParamsDTO(bundleId, connectorId, targetSpecification);
+    private List<INode> ParseConnectors(String connectorsJson) throws IOException {
+        if (connectorsJson != null) {
+            try {
+                var connectorsDocument = deserialize(prepareForDeserialization(connectorsJson, Formats.ProvFormat.JSON), Formats.ProvFormat.JSON);
+                var connectorsCpmDocument = new CpmDocument(connectorsDocument, provFactory, cpmProvFactory, cpmFactory);
+                return connectorsCpmDocument.getBackwardConnectors();
+            } catch (Exception e) {
+                return new ArrayList<>();
+            }
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public BundleSearchResponseDTO fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, String targetType, String targetSpecification) throws IOException {
+        SearchParamsDTO searchParams = new SearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
         String traverserAddress = traverserTable.getTraverserUrl(bundleId.getUri());
         if (traverserAddress == null) {
             throw new IOException("No traverser found for bundle: " + bundleId.getUri());
@@ -176,42 +196,21 @@ public class Traverser {
 
         HttpEntity<SearchParamsDTO> request = new HttpEntity<>(searchParams, headers);
 
-        ResponseEntity<SearchBundleResultDTO> response = restTemplate.postForEntity(
-                url, request, SearchBundleResultDTO.class);
+        ResponseEntity<BundleSearchResponseDTO> response = restTemplate.postForEntity(
+                url, request, BundleSearchResponseDTO.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new IOException("API call failed with status: " + response.getStatusCode());
         }
 
-        SearchBundleResultDTO searchBundleResultDTO = response.getBody();
+        BundleSearchResponseDTO searchBundleResultDTO = response.getBody();
 
-        return searchBundleResultDTO.toDomainModel();
-    }
-
-    public SearchBundleResult searchBundleBackward(QualifiedName bundleId, QualifiedName forwardConnectorId, Predicate<INode> predicate) {
-        DocumentWithIntegrity documentWithIntegrity = documentLoader.loadDocument(bundleId.getUri());
-        var document = documentWithIntegrity.document;
-        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
-        var integrity = documentWithIntegrity.integrityCheckPassed ? ECredibility.VALID : ECredibility.INVALID;
-
-        IBundleSearcher bundleSearcher = new BreadthFirstBundleSearcher();
-
-        List<INode> results = bundleSearcher.search(cpmDocument, forwardConnectorId, predicate);
-        List<INode> connectors = cpmDocument.getBackwardConnectors();
-
-        return new SearchBundleResult(results, connectors, integrity);
+        return searchBundleResultDTO;
     }
 
     private ECredibility mergeCredibility(ECredibility bundleCredibility, ECredibility pathCredibility) {
         if (bundleCredibility == ECredibility.INVALID) return ECredibility.INVALID;
         if (bundleCredibility == ECredibility.VALID && pathCredibility == ECredibility.VALID) return ECredibility.VALID;
         return ECredibility.LOW;
-    }
-
-    public void loadMetaBundle(String uri) {
-        var loadedMeta = documentLoader.loadMetaDocument(uri);
-        var document = loadedMeta.document;
-        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
-        var integrity = loadedMeta.integrityCheckPassed ? ECredibility.VALID : ECredibility.INVALID;
     }
 }

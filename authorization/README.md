@@ -36,6 +36,8 @@ curl --request POST \
   ```
 4. The curl returns a response containing an access_token.
 
+<i>Note: the same user can login as a member of a different organization every time, but the token will contain only one organization that was used at this login.</i>
+
 Current organizations:
 - org1
 - org2

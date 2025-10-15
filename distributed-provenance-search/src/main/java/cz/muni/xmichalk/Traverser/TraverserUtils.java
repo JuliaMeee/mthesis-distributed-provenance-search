@@ -1,26 +1,14 @@
 package cz.muni.xmichalk.Traverser;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
-import cz.muni.xmichalk.Traverser.Models.TargetSpecification;
 import org.openprovenance.prov.model.Element;
 import org.openprovenance.prov.model.Other;
 import org.openprovenance.prov.model.QualifiedName;
 
-import java.util.Objects;
-import java.util.function.Predicate;
-
 public class TraverserUtils {
     private static final String cpmNamespace = "https://www.commonprovenancemodel.org/";
 
-    public static boolean isMissingRequiredParams(SearchParamsDTO params) {
-        return params.bundleId == null || params.connectorId == null || params.targetSpecification == null;
-    }
-
-    public static Predicate<INode> translateToPredicate(TargetSpecification targetSpecification) {
-        return node -> Objects.equals(node.getId().getLocalPart(), targetSpecification.localName);
-    }
-
+    
     private static boolean isReferencedBundleIdAttribute(QualifiedName attrName) {
         return (attrName.getUri().startsWith(cpmNamespace) && attrName.getLocalPart().equals("referencedBundleId"));
     }

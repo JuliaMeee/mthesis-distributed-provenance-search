@@ -9,6 +9,9 @@ Build the docker images from working directory `/prov_storage/distributed-proven
 Build the docker image for traverser service from working directory `/distributed-provenance-search/` with
 `docker build -f Dockerfile -t traverser_image .`
 
+Build the docker image for bundle-search service from working directory `/bundle-search/` with
+`docker build -f .\Dockerfile -t bundle_search_image . `
+
 Start docker and run `docker-compose up -d`.
 
 From `/setup` run:
@@ -17,3 +20,4 @@ to register organizations and upload provenance files.
 If you get `curl: (52) Empty reply from server`, try again after waiting for a few seconds.
 
 To clean everything up (stop and remove all containers) run `docker-compose down -v`
+

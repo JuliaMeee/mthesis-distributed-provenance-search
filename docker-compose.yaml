@@ -132,7 +132,7 @@ services:
   
   prov-traverser-1:
     container_name: prov-traverser-1
-    image: traverser_image
+    image: bundle_search_image
     ports:
       - 8081:8000
     depends_on:
@@ -145,7 +145,7 @@ services:
   
   prov-traverser-2:
     container_name: prov-traverser-2
-    image: traverser_image
+    image: bundle_search_image
     ports:
       - 8082:8000
     depends_on:
@@ -158,12 +158,29 @@ services:
 
   prov-traverser-3:
     container_name: prov-traverser-3
-    image: traverser_image
+    image: bundle_search_image
     ports:
       - 8083:8000
     depends_on:
       prov-storage-3:
         condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+
+  prov-traverser:
+    container_name: prov-traverser
+    image: traverser_image
+    ports:
+      - 8090:8000
+    depends_on:
+      prov-traverser-1:
+        condition: service_started
+      prov-traverser-2:
+        condition: service_started
+      prov-traverser-3:
+        condition: service_started
     healthcheck:
       timeout: 5s
       retries: 10
@@ -177,34 +194,6 @@ services:
     stdin_open: true
     entrypoint: ["/bin/bash", "-c", "apt-get update && apt-get install -y curl iputils-ping && bash"]
 
-  authorization-db:
-    image: postgres
-    container_name: authorization-db
-    restart: always
-    environment:
-      POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: auth_pass
-      POSTGRES_DB: auth_service
-    ports:
-      - "6543:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-  
-  authorization-service:
-    image: authorization_image
-    container_name: authorization-service
-    depends_on:
-      - authorization-db
-    ports:
-      - "9000:9000"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://authorization-db:5432/auth_service
-      SPRING_DATASOURCE_USERNAME: auth_user
-      SPRING_DATASOURCE_PASSWORD: auth_pass
-    restart: always
-
-volumes:
-  db_data:
 
 configs:
   storage-1-ps-config:

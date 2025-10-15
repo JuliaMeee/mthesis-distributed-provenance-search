@@ -2,17 +2,23 @@ import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
+import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleSearcher.BreadthFirstBundleSearcher;
+import cz.muni.xmichalk.BundleSearcher.BFSBundleNodeSearcher;
 import org.junit.jupiter.api.Test;
-import org.openprovenance.prov.model.*;
+import org.openprovenance.prov.model.Element;
+import org.openprovenance.prov.model.Other;
+import org.openprovenance.prov.model.ProvUtilities;
+import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
-
-import cz.muni.fi.cpm.model.INode;
-
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+
+import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
 
 public class BundleSearcherTest {
     ProvFactory pF = new ProvFactory();
@@ -27,8 +33,8 @@ public class BundleSearcherTest {
         var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
         QualifiedName invalidStartNodeId = cPF.newCpmQualifiedName("invalidId");
 
-        var searcher = new BreadthFirstBundleSearcher();
-        List<INode> results = searcher.search(cpmDoc, invalidStartNodeId, node -> true);
+        var searcher = new BFSBundleNodeSearcher(node -> true);
+        List<INode> results = searcher.search(cpmDoc, invalidStartNodeId);
 
         assert results.isEmpty();
     }
@@ -41,8 +47,8 @@ public class BundleSearcherTest {
         QualifiedName targetNodeId = cPF.newCpmQualifiedName("entity1");
         INode targetNode = cpmDoc.getNode(targetNodeId);
 
-        var searcher = new BreadthFirstBundleSearcher();
-        List<INode> results = searcher.search(cpmDoc, startNodeId, node -> node.getId().equals(targetNodeId));
+        var searcher = new BFSBundleNodeSearcher(node -> node.getId().equals(targetNodeId));
+        List<INode> results = searcher.search(cpmDoc, startNodeId);
 
         assert results.size() == 1 && results.contains(targetNode);
     }

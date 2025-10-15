@@ -8,10 +8,16 @@ import org.openprovenance.prov.model.QualifiedName;
 import java.util.*;
 import java.util.function.Predicate;
 
-public final class BreadthFirstBundleSearcher implements IBundleSearcher {
+public final class BFSBundleNodeSearcher implements IBundleSearcher<List<INode>, List<String>> {
+
+    private final Predicate<INode> filter;
+
+    public BFSBundleNodeSearcher(Predicate<INode> filter) {
+        this.filter = filter;
+    }
 
     @Override
-    public List<INode> search(CpmDocument doc, QualifiedName startNodeId, Predicate<INode> predicate) {
+    public List<INode> search(CpmDocument doc, QualifiedName startNodeId) {
         Set<INode> visited = new HashSet<>();
         Queue<INode> queue = new ArrayDeque<>();
         List<INode> results = new ArrayList<>();
@@ -31,7 +37,7 @@ public final class BreadthFirstBundleSearcher implements IBundleSearcher {
 
             visited.add(current);
 
-            if (predicate.test(current)) {
+            if (filter.test(current)) {
                 results.add(current);
             }
 
@@ -44,5 +50,14 @@ public final class BreadthFirstBundleSearcher implements IBundleSearcher {
         }
 
         return results;
+    }
+    
+    @Override
+    public List<String> serializeResult(List<INode> result) {
+        List<String> serialized = new ArrayList<>();
+        for (INode node : result) {
+            serialized.add(node.getId().getUri());
+        }
+        return serialized;
     }
 }

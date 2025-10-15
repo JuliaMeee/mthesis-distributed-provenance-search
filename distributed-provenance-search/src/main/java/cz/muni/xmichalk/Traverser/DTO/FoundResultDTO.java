@@ -1,12 +1,15 @@
 package cz.muni.xmichalk.Traverser.DTO;
 
-import cz.muni.xmichalk.Traverser.Models.ECredibility;
 import cz.muni.xmichalk.Traverser.Models.FoundResult;
 
 public class FoundResultDTO implements IDTO<FoundResult> {
     public QualifiedNameDTO bundleId;
-    public QualifiedNameDTO nodeId;
-    public ECredibility credibility;
+    public boolean pathIntegrity;
+    public boolean integrity;
+    public boolean pathValidity;
+    public boolean validity;
+    public Object result;
+
 
     public FoundResultDTO() {
 
@@ -16,16 +19,22 @@ public class FoundResultDTO implements IDTO<FoundResult> {
     public FoundResult toDomainModel() {
         return new FoundResult(
                 this.bundleId.toDomainModel(),
-                this.nodeId.toDomainModel(),
-                this.credibility
+                this.result,
+                this.pathIntegrity,
+                this.integrity,
+                this.pathValidity,
+                this.validity
         );
     }
 
     @Override
     public FoundResultDTO from(final FoundResult domainModel) {
         this.bundleId = new QualifiedNameDTO().from(domainModel.bundleId);
-        this.nodeId = new QualifiedNameDTO().from(domainModel.nodeId);
-        this.credibility = domainModel.credibility;
+        this.result = domainModel.result;
+        this.pathIntegrity = domainModel.pathIntegrity;
+        this.integrity = domainModel.integrity;
+        this.pathValidity = domainModel.pathValidity;
+        this.validity = domainModel.validity;
         return this;
     }
 }
