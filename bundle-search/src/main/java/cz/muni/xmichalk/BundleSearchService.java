@@ -3,15 +3,15 @@ package cz.muni.xmichalk;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
-import cz.muni.xmichalk.BundleSearcher.BundleSearcherRegistry;
-import cz.muni.xmichalk.BundleSearcher.IBundleSearcher;
+import cz.muni.xmichalk.BundleSearch.BundleSearcherRegistry;
+import cz.muni.xmichalk.BundleSearch.ETargetType;
+import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.DTO.ResponseDTO;
 import cz.muni.xmichalk.DocumentLoader.DocumentWithIntegrity;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
-import org.springframework.jmx.support.ConnectorServerFactoryBean;
 
 import java.io.IOException;
 
@@ -28,30 +28,28 @@ public class BundleSearchService {
         this.cpmProvFactory = cpmProvFactory;
     }
 
-    public ResponseDTO searchBundleBackward(QualifiedName bundleId, QualifiedName forwardConnectorId, String targetType, String targetSpecification) throws IOException {
+    public ResponseDTO searchBundleBackward(QualifiedName bundleId, QualifiedName forwardConnectorId, ETargetType targetType, String targetSpecification) throws IOException {
         DocumentWithIntegrity documentWithIntegrity = documentLoader.loadDocument(bundleId.getUri());
         var document = documentWithIntegrity.document;
-        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
-        
-        var searcherConstructor = BundleSearcherRegistry.getSearcherConstructor(targetType);
-        IBundleSearcher searcher = searcherConstructor.apply(targetSpecification);
-
-        Object result = searcher.search(cpmDocument, forwardConnectorId);
-        var connectors = cpmDocument.getBackwardConnectors();
-        
-        return new ResponseDTO(connectors, searcher.serializeResult(result), document);
+        return searchBundleBackward(document, forwardConnectorId, targetType, targetSpecification);
     }
 
-    public ResponseDTO searchBundleBackward(Document document, QualifiedName forwardConnectorId, String targetType, String targetSpecification) throws IOException {
+    public ResponseDTO searchBundleBackward(Document document, QualifiedName forwardConnectorId, ETargetType targetType, String targetSpecification) throws IOException {
 
         var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
-        var searcherConstructor = BundleSearcherRegistry.getSearcherConstructor(targetType);
-        IBundleSearcher searcher = searcherConstructor.apply(targetSpecification);
 
-        Object result = searcher.search(cpmDocument, forwardConnectorId);
-        var connectors = cpmDocument.getBackwardConnectors();
+        var searchFunc = BundleSearcherRegistry.getSearchFunc(targetType);
 
-        return new ResponseDTO(connectors, searcher.serializeResult(result), document);
+        Object result = searchFunc.apply(cpmDocument, forwardConnectorId, targetSpecification);
+
+        ResponseDTO responseDTO = new ResponseDTO(
+                new QualifiedNameDTO(cpmDocument.getBundleId()),
+                result);
+        
+        System.out.println("Response bundleId:\n" + responseDTO.bundleId.toString());
+        System.out.println("Response found results:\n" + responseDTO.found);
+        
+        return responseDTO;
     }
 
     public void loadMetaBundle(String uri) {

@@ -4,12 +4,8 @@ import org.openprovenance.prov.model.QualifiedName;
 
 public class VisitedItem {
     public QualifiedName bundleId;
-    public ECredibility pathCredibility;
-    public ECredibility bundleCredibility;
 
-    public VisitedItem(QualifiedName bundleId, ECredibility pathCredibility, ECredibility bundleCredibility) {
+    public VisitedItem(QualifiedName bundleId) {
         this.bundleId = bundleId;
-        this.pathCredibility = pathCredibility;
-        this.bundleCredibility = bundleCredibility;
     }
 }

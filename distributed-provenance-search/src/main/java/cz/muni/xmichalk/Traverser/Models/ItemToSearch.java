@@ -5,12 +5,11 @@ import org.openprovenance.prov.model.QualifiedName;
 public class ItemToSearch {
     public QualifiedName bundleId;
     public QualifiedName connectorId;
-    public ECredibility pathCredibility;
+    public boolean pathHasIntegrity = false;
 
-    public ItemToSearch(QualifiedName bundleId, QualifiedName connectorId, ECredibility pathCredibility) {
+    public ItemToSearch(QualifiedName bundleId, QualifiedName connectorId) {
         this.bundleId = bundleId;
         this.connectorId = connectorId;
-        this.pathCredibility = pathCredibility;
     }
 
 }

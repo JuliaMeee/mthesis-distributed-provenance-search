@@ -64,4 +64,33 @@ public class ProvJsonUtils {
             return new TextNode(node.asText());
         }
     }
+
+    public static String copyOuterPrefixesIntoBundles(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(json);
+
+            JsonNode outerPrefix = root.path("prefix");
+            JsonNode bundleNode = root.path("bundle");
+            if (outerPrefix.isObject() && bundleNode.isObject()) {
+                for (var it = bundleNode.fieldNames(); it.hasNext(); ) {
+                    String bundleId = it.next();
+                    ObjectNode bundleObj = (ObjectNode) bundleNode.path(bundleId);
+                    
+                    ObjectNode bundlePrefix = bundleObj.has("prefix") && bundleObj.get("prefix").isObject()
+                            ? (ObjectNode) bundleObj.get("prefix")
+                            : mapper.createObjectNode();
+                    
+                    outerPrefix.fields().forEachRemaining(entry -> {
+                        bundlePrefix.set(entry.getKey(), entry.getValue());
+                    });
+
+                    bundleObj.set("prefix", bundlePrefix);
+                }
+            }
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to copy outer prefixes into bundles", e);
+        }
+    }
 }

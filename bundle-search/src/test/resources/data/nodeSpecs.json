@@ -1,0 +1,29 @@
+{
+  "prefix" : {
+    "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+    "blank" : "https://openprovenance.org/blank/",
+    "ex" : "http://example.org/",
+    "prov" : "http://www.w3.org/ns/prov#"
+  },
+  "bundle" : {
+    "ex:connectors_bundle" : {
+      "prefix" : {
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "blank" : "https://openprovenance.org/blank/",
+        "ex" : "http://example.org/",
+        "prov" : "http://www.w3.org/ns/prov#"
+      },
+      "entity" : {
+        "blank:StoredSampleCon_r1": {
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "cpm:backwardConnector"
+            }
+          ]
+        }
+      },
+      "@id" : "ex:connectors_bundle"
+    }
+  }
+}

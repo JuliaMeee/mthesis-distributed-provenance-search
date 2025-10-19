@@ -1,15 +1,21 @@
 package cz.muni.xmichalk.Util;
 
-import org.apache.commons.io.input.CharacterSetFilterReader;
+import cz.muni.fi.cpm.model.INode;
 import org.openprovenance.prov.interop.InteropFramework;
+import org.openprovenance.prov.model.Bundle;
 import org.openprovenance.prov.model.Document;
+import org.openprovenance.prov.model.Namespace;
+import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.interop.Formats;
+import org.openprovenance.prov.model.interop.InteropMediaType;
+import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class ProvDocumentUtils {
     public static final Charset charset = java.nio.charset.StandardCharsets.UTF_8;
@@ -17,7 +23,7 @@ public class ProvDocumentUtils {
     public static String serialize(Document document, Formats.ProvFormat format) {
         var interop = new InteropFramework();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        interop.writeDocument(outputStream, document, format);
+        interop.writeDocument(outputStream, document, InteropMediaType.MEDIA_APPLICATION_JSON, false);
         return outputStream.toString(charset);
     }
 
@@ -37,8 +43,43 @@ public class ProvDocumentUtils {
         if (format == Formats.ProvFormat.JSON) {
             serializedDocument = ProvJsonUtils.addExplicitBundleId(serializedDocument);
             serializedDocument = ProvJsonUtils.stringifyValues(serializedDocument);
+            serializedDocument = ProvJsonUtils.copyOuterPrefixesIntoBundles(serializedDocument);
         }
 
         return serializedDocument;
+    }
+    
+    public static Document encapsulateInDocument(List<INode> nodes, Namespace ns) {
+        ProvFactory pf = ProvFactory.getFactory();
+        Document doc = pf.newDocument();
+        
+        ns.addKnownNamespaces();
+        ns.register("ex", "http://example.org/");
+        doc.setNamespace(ns);
+
+        var bundle = pf.newNamedBundle(pf.newQualifiedName("http://example.org/", "connectors_bundle", "ex"), null);
+
+        for (INode node : nodes) {
+            var elements = node.getElements();
+
+            for (var element : elements) {
+                bundle.getStatement().add(element);
+            }
+        }
+
+        bundle.setNamespace(ns);
+        doc.getStatementOrBundle().add(bundle);
+        
+        return doc;
+    }
+    
+    public static QualifiedName getBundleId(Document document) {
+        for (Object o : document.getStatementOrBundle()) {
+            if (o instanceof final Bundle bundle) {
+                return bundle.getId();
+            }
+        }
+        
+        return null;
     }
 }

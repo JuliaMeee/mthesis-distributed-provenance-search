@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.Traverser.TraverserTable;
+package cz.muni.xmichalk.Traverser.ProvServiceTable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TraverserTable implements ITraverserTable {
+public class ProvServiceTable implements IProvServiceTable {
     private final LinkedHashMap<String, String> table = new LinkedHashMap<>();
 
     public String getTraverserUrl(String resourceUri) {

@@ -4,7 +4,8 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleSearcher.BFSBundleNodeSearcher;
+import cz.muni.xmichalk.BundleSearch.General.FilterNodes;
+import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Element;
 import org.openprovenance.prov.model.Other;
@@ -15,9 +16,9 @@ import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
+import static cz.muni.xmichalk.Util.Constants.CPM_URI;
 import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
 
 public class BundleSearcherTest {
@@ -26,20 +27,46 @@ public class BundleSearcherTest {
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     ProvUtilities u = new ProvUtilities();
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
-
+    
     @Test
-    public void testInvalidStartNodeId() {
-        var doc = TestDocument.getTestDocument1(pF, cPF, cF);
-        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
-        QualifiedName invalidStartNodeId = cPF.newCpmQualifiedName("invalidId");
-
-        var searcher = new BFSBundleNodeSearcher(node -> true);
-        List<INode> results = searcher.search(cpmDoc, invalidStartNodeId);
-
-        assert results.isEmpty();
+    public void testLoadPartialNode(){
+        var file = Path.of(dataFolder + "nodeSpecs.json");
+        try {
+            var doc = deserializeFile(file, Formats.ProvFormat.JSON);
+            var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+            assert cpmDoc.getNodes().size() == 1;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+    
+    
+    /*@Test
+    public void testSearchByAttributes() throws IOException {
+        var nodeAttributes = new NodeAttributes();
+        nodeAttributes.attributes = new ArrayList<NodeAttribute>();
+        nodeAttributes.attributes.add(new NodeAttribute(
+                new org.openprovenance.prov.vanilla.QualifiedName(prov, "type", "prov"),
+                new org.openprovenance.prov.vanilla.QualifiedName(cpm, "forwardConnector", "cpm")
+        ));
+        
+        var dto = new NodeAttributesDTO().from(nodeAttributes);
+        ObjectMapper mapper = new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        String serializedTargetSpecification = mapper.writeValueAsString(dto);
 
-    @Test
+        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        var doc = deserializeFile(file, Formats.ProvFormat.JSON);
+        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        var startNode = new org.openprovenance.prov.vanilla.QualifiedName("https://openprovenance.org/blank/", "StoredSampleCon_r1_Spec", "blank");
+        var searcher = new BFSBundleNodeSearcher(BFSBundleNodeSearcher::translateNodeSpecsToPredicate);
+        
+        var result = searcher.search(cpmDoc, startNode, serializedTargetSpecification);
+        
+        assert result != null;
+    }*/
+
+   /* @Test
     public void testSearchById() {
         var doc = TestDocument.getTestDocument1(pF, cPF, cF);
         var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
@@ -65,7 +92,7 @@ public class BundleSearcherTest {
         }
 
         return null;
-    }
+    }*/
 
 
     private Object FindNodeByAttribute(INode node, QualifiedName targetAttribute, Object targetValue) {
@@ -84,18 +111,47 @@ public class BundleSearcherTest {
         return null;
     }
 
-    /*@Test
-    public void FindInBundle() throws IOException {
-        var file = dataFolder + "dataset1/SamplingBundle_V1.json";
-        var doc = new SerializationRoundTripTest().deserialize(file, Formats.ProvFormat.JSON);
+    @Test
+    public void FindLocationInNodes() throws IOException {
+        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        var doc = deserializeFile(file, Formats.ProvFormat.JSON);
         var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
         var attributeName = new org.openprovenance.prov.vanilla.QualifiedName("http://www.w3.org/ns/prov#", "location", "prov");
 
         cpmDoc.getNodes().forEach(node -> {
-            Object value = new NodeSearcher().tryGetValue(node, attributeName);
+            Object value = new NodeAttributeSearcher().tryGetValue(node, attributeName);
             if (value != null) {
                 System.out.println("Found attribute in node " + node.getId() + ": " + value);
             }
         });
-    }*/
+    }
+    
+    @Test
+    public void FindBackwardConnectors() throws IOException {
+        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        var doc = deserializeFile(file, Formats.ProvFormat.JSON);
+        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        var attributeName = new org.openprovenance.prov.vanilla.QualifiedName("http://www.w3.org/ns/prov#", "type", "prov");
+        var attributeValue = new org.openprovenance.prov.vanilla.QualifiedName(CPM_URI, "backwardConnector", "cpm");
+
+        cpmDoc.getNodes().forEach(node -> {
+            Object value = new NodeAttributeSearcher().tryGetValue(node, attributeName);
+            if (value != null) {
+                System.out.println("Found attribute in node " + node.getId() + ": " + value);
+            }
+        });
+    }
+    
+    @Test
+    public void getBundleId() {
+        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        try {
+            var doc = deserializeFile(file, Formats.ProvFormat.JSON);
+            var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+            var bundleId = cpmDoc.getBundleId();
+            System.out.println("Bundle ID: " + bundleId);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

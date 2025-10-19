@@ -1,17 +1,17 @@
 package cz.muni.xmichalk.Traverser;
 
-import cz.muni.fi.cpm.model.CpmDocument;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
-import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.Traverser.DTO.BundleSearchResponseDTO;
+import cz.muni.xmichalk.Traverser.DTO.ConnectorDTO;
 import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
 import cz.muni.xmichalk.Traverser.Models.*;
-import cz.muni.xmichalk.Traverser.TraverserTable.ITraverserTable;
+import cz.muni.xmichalk.Traverser.ProvServiceTable.IProvServiceTable;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
-import org.openprovenance.prov.model.interop.Formats;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,22 +25,18 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static cz.muni.xmichalk.Traverser.TraverserUtils.getReferencedBundleId;
-import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserialize;
-import static cz.muni.xmichalk.Util.ProvDocumentUtils.prepareForDeserialization;
-
 public class Traverser {
     private final IDocumentLoader documentLoader;
     private final ProvFactory provFactory;
     private final ICpmFactory cpmFactory;
     private final ICpmProvFactory cpmProvFactory;
-    private final ITraverserTable traverserTable;
+    private final IProvServiceTable traverserTable;
     private final int concurrencyDegree = 10;
 
     private static final Comparator<ItemToSearch> toSearchPriorityComparator =
-            Comparator.comparing(e -> e.pathCredibility);
+            Comparator.comparing(e -> !e.pathHasIntegrity);
 
-    public Traverser(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory, ITraverserTable traverserTable) {
+    public Traverser(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory, IProvServiceTable traverserTable) {
         this.documentLoader = documentLoader;
         this.provFactory = provFactory;
         this.cpmFactory = cpmFactory;
@@ -64,7 +60,7 @@ public class Traverser {
                 ConcurrentHashMap.newKeySet()
         );
 
-        searchState.toSearch.add(new ItemToSearch(startBundleId, forwardConnectorId, ECredibility.VALID));
+        searchState.toSearch.add(new ItemToSearch(startBundleId, forwardConnectorId));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -103,9 +99,9 @@ public class Traverser {
     private ItemToSearch pollNextToSearch(SearchState searchState) {
         ItemToSearch itemToSearch;
         while ((itemToSearch = searchState.toSearch.poll()) != null) {
-            if (itemToSearch.pathCredibility != ECredibility.VALID && searchState.processing.values().stream()
-                    .anyMatch(item -> item.pathCredibility == ECredibility.VALID)) {
-                return null; // wait untill all valid bundles are processed before continuing with lower credibility ones
+            if (!itemToSearch.pathHasIntegrity && searchState.processing.values().stream()
+                    .anyMatch(item -> item.pathHasIntegrity)) {
+                return null; // wait until all valid  bundles are processed before continuing with lower credibility ones
             }
             if (searchState.processing.putIfAbsent(itemToSearch.bundleId, itemToSearch) == null) {
                 if (!searchState.visited.containsKey(itemToSearch.bundleId)) {
@@ -127,36 +123,27 @@ public class Traverser {
         runningTasks.incrementAndGet();
         completionService.submit(() -> {
             System.out.println("Processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId + " (running tasks: " + itemToSearch + ")");
-            BundleSearchResponseDTO searchBundleResult = new BundleSearchResponseDTO(null, null); // default value
+            BundleSearchResponseDTO findTargetResult = new BundleSearchResponseDTO(null, null); // default value
+            BundleSearchResponseDTO findConnectorsResult = new BundleSearchResponseDTO(null, null);
             try {
-                searchBundleResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetType, targetSpecification);
+                findTargetResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetType, targetSpecification);
+                var newResult = getNewResult(findTargetResult);
+                if (newResult != null) searchState.results.add(newResult);
+                System.err.println("Got result? :" + (newResult != null));
+
+                findConnectorsResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, "connectors", "backward");
+                var newItemsToSearch = getNewItemsToSearch(findConnectorsResult);
+                searchState.toSearch.addAll(newItemsToSearch);
+                System.err.println("Got connectors: " + newItemsToSearch.size());
+
+                // TODO integrity and validity
+
             } catch (Exception e) {
                 System.err.println("Error during search bundle " + itemToSearch.bundleId.getLocalPart() + ": " + e.getMessage());
             } finally {
-                searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId, itemToSearch.pathCredibility, ECredibility.VALID)); // TODO validity
+                searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId));
                 searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
 
-            }
-
-            ECredibility mergedCredibility = ECredibility.VALID; // TODO mergeCredibility(searchBundleResult.credibility, itemToSearch.pathCredibility);
-
-            if (searchBundleResult.found != null) {
-                searchState.results.add(new FoundResult(itemToSearch.bundleId, searchBundleResult.found, true, true, true, true)); // TODO validity and integrity
-            }
-
-            List<INode> connectors = ParseConnectors(searchBundleResult.connectors);
-
-            for (INode connector : connectors) {
-                var referencedBundleId = getReferencedBundleId(connector);
-                if (referencedBundleId != null) {
-                    searchState.toSearch.add(
-                            new ItemToSearch(
-                                    referencedBundleId,
-                                    connector.getId(),
-                                    mergedCredibility
-                            )
-                    );
-                }
             }
 
             System.out.println("Finished processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId);
@@ -165,18 +152,45 @@ public class Traverser {
         });
     }
 
-    private List<INode> ParseConnectors(String connectorsJson) throws IOException {
-        if (connectorsJson != null) {
-            try {
-                var connectorsDocument = deserialize(prepareForDeserialization(connectorsJson, Formats.ProvFormat.JSON), Formats.ProvFormat.JSON);
-                var connectorsCpmDocument = new CpmDocument(connectorsDocument, provFactory, cpmProvFactory, cpmFactory);
-                return connectorsCpmDocument.getBackwardConnectors();
-            } catch (Exception e) {
-                return new ArrayList<>();
-            }
-        } else {
+    private FoundResult getNewResult(BundleSearchResponseDTO searchBundleResult) {
+        if (searchBundleResult == null || searchBundleResult.found == null) {
+            return null;
+        }
+
+        return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found); // TODO validity and integrity
+    }
+
+    private List<ItemToSearch> getNewItemsToSearch(BundleSearchResponseDTO searchBundleResult) {
+        if (searchBundleResult == null || !(searchBundleResult.found instanceof List<?> foundList) || foundList.isEmpty()) {
+            System.out.println("No connectors found");
             return new ArrayList<>();
         }
+
+        System.out.println("Raw connector dtos count: " + foundList.size());
+
+        List<ItemToSearch> newItemsToSearch = new ArrayList<>();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<ConnectorDTO> connectors = mapper.convertValue(
+                searchBundleResult.found, new TypeReference<List<ConnectorDTO>>() {
+                }
+        );
+
+        for (ConnectorDTO connector : connectors) {
+            if (connector != null && connector.referencedBundleId != null) {
+                System.out.println("Creating item to search");
+                newItemsToSearch.add(
+                        new ItemToSearch(
+                                connector.referencedBundleId.toDomainModel(),
+                                connector.id.toDomainModel()
+                                // TODO validity and integrity
+                        )
+                );
+            }
+        }
+
+        return newItemsToSearch;
     }
 
     public BundleSearchResponseDTO fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, String targetType, String targetSpecification) throws IOException {

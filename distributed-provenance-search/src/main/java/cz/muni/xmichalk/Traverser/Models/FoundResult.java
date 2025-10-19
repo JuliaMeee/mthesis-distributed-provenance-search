@@ -23,4 +23,9 @@ public class FoundResult {
         this.pathValidity = pathValidity;
         this.validity = validity;
     }
+
+    public FoundResult(QualifiedName bundleId, Object result) {
+        this.bundleId = bundleId;
+        this.result = result;
+    }
 }

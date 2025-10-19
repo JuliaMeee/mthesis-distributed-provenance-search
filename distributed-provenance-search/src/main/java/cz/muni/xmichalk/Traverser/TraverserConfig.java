@@ -6,8 +6,8 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.DocumentLoader.StorageDocumentLoader;
-import cz.muni.xmichalk.Traverser.TraverserTable.ITraverserTable;
-import cz.muni.xmichalk.Traverser.TraverserTable.TraverserTable;
+import cz.muni.xmichalk.Traverser.ProvServiceTable.IProvServiceTable;
+import cz.muni.xmichalk.Traverser.ProvServiceTable.ProvServiceTable;
 import org.openprovenance.prov.vanilla.ProvFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,10 +40,10 @@ public class TraverserConfig {
     }
 
     @Bean
-    public ITraverserTable traverserTable() {
-        var table = new TraverserTable();
+    public IProvServiceTable traverserTable() {
+        var table = new ProvServiceTable();
         try {
-            var resource = new ClassPathResource("config" + File.separator + "traverserTable.json");
+            var resource = new ClassPathResource("config" + File.separator + "provServiceTable.json");
             table.loadFromJson(resource.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException("Failed to load traverser table", e);
@@ -52,7 +52,7 @@ public class TraverserConfig {
     }
 
     @Bean
-    public Traverser traverser(IDocumentLoader loader, ProvFactory pf, ICpmFactory cf, ICpmProvFactory cpf, ITraverserTable tt) {
+    public Traverser traverser(IDocumentLoader loader, ProvFactory pf, ICpmFactory cf, ICpmProvFactory cpf, IProvServiceTable tt) {
         return new Traverser(loader, pf, cf, cpf, tt);
     }
 }
