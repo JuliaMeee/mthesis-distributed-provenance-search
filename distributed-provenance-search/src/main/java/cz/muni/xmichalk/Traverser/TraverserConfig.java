@@ -8,6 +8,8 @@ import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.DocumentLoader.StorageDocumentLoader;
 import cz.muni.xmichalk.Traverser.ProvServiceTable.IProvServiceTable;
 import cz.muni.xmichalk.Traverser.ProvServiceTable.ProvServiceTable;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.openprovenance.prov.vanilla.ProvFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,13 @@ import java.io.File;
 import java.io.IOException;
 
 @Configuration
+@OpenAPIDefinition(
+        info = @Info(
+                title = "Provenance search API",
+                version = "1.0.0",
+                description = "REST API for searching through the provenance chain."
+        )
+)
 public class TraverserConfig {
 
     @Bean

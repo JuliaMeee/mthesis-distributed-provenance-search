@@ -1,7 +1,6 @@
 package cz.muni.xmichalk.DTO;
 
 import cz.muni.xmichalk.BundleSearch.ETargetType;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.openprovenance.prov.model.QualifiedName;
 
