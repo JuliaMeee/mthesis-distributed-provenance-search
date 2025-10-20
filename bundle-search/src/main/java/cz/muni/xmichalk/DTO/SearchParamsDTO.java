@@ -1,8 +1,27 @@
 package cz.muni.xmichalk.DTO;
 
 import cz.muni.xmichalk.BundleSearch.ETargetType;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.openprovenance.prov.model.QualifiedName;
 
+@Schema(
+        description = "Parameters for bundle search",
+        example = """
+    {
+      "bundleId": {
+        "nameSpaceUri": "http://example.org/",
+        "localPart": "bundle1"
+      },
+      "connectorId": {
+        "nameSpaceUri": "http://example.org/",
+        "localPart": "connectorA"
+      },
+      "targetType": "CONNECTORS",
+      "targetSpecification": "backward"
+    }
+    """
+)
 public class SearchParamsDTO {
     public QualifiedNameDTO bundleId;
     public QualifiedNameDTO connectorId;

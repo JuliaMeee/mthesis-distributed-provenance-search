@@ -49,7 +49,7 @@ public class BundleSearcherRegistry {
 
     }
 
-    public static List<ETargetType> GetAllTargetTypes() {
+    public static List<ETargetType> getAllTargetTypes() {
         return registry.keySet().stream().toList();
     }
 }

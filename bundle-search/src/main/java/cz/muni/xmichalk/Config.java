@@ -6,11 +6,20 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.DocumentLoader.StorageDocumentLoader;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.openprovenance.prov.vanilla.ProvFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@OpenAPIDefinition(
+        info = @Info(
+                title = "Bundle search API",
+                version = "1.0.0",
+                description = "REST API for searching through the contents of a bundle."
+        )
+)
 public class Config {
 
     @Bean
