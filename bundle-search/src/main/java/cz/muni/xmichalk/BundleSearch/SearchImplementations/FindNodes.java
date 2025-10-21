@@ -1,11 +1,16 @@
 package cz.muni.xmichalk.BundleSearch.SearchImplementations;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.BundleSearch.General.FilterNodes;
+import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
+import cz.muni.xmichalk.DTO.AttributeDTO;
 import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import org.openprovenance.prov.model.*;
@@ -24,32 +29,32 @@ import java.util.function.Predicate;
 import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserialize;
 
 public class FindNodes<T> implements ISearchBundle<T> {
-    private final Function<String, Predicate<INode>> translatePredicate;
+    private final Function<JsonNode, Predicate<INode>> translatePredicate;
     private final Function<List<INode>, T> resultTransformation;
     
-    public FindNodes(Function<String, Predicate<INode>> getPredicate, Function<List<INode>, T> resultTransformation) {
+    public FindNodes(Function<JsonNode, Predicate<INode>> getPredicate, Function<List<INode>, T> resultTransformation) {
         this.translatePredicate = getPredicate;
         this.resultTransformation = resultTransformation;
     }
 
     @Override
-    public T apply(final CpmDocument document, final QualifiedName startNodeId, final String targetSpecification) {
+    public T apply(final CpmDocument document, final QualifiedName startNodeId, final JsonNode targetSpecification) {
         var predicate = translatePredicate.apply(targetSpecification);
         var results = new FilterNodes().apply(document, startNodeId, predicate);
         return resultTransformation.apply(results);
     }
 
-    public static Predicate<INode> translateNodeIdToPredicate(String id) {
-        return (node) -> Objects.equals(node.getId().getUri(), id);
+    public static Predicate<INode> translateNodeIdToPredicate(JsonNode targetSpecification) {
+        return (node) -> Objects.equals(node.getId().getUri(), targetSpecification.asText());
     }
 
-    public static Predicate<INode> translateNodeToPredicate(String targetSpecification) {
+    public static Predicate<INode> translateNodeToPredicate(JsonNode targetSpecification) {
         try {
             var pF = new ProvFactory();
             var cPF = new CpmProvFactory(pF);
             var cF = new CpmMergedFactory();
 
-            var doc = deserialize(targetSpecification, Formats.ProvFormat.JSON);
+            var doc = deserialize(targetSpecification.asText(), Formats.ProvFormat.JSON);
             var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
             var nodes = cpmDoc.getNodes();
             if (nodes.size() != 1) throw new IllegalArgumentException("target specification must contain exactly one node");
@@ -112,11 +117,40 @@ public class FindNodes<T> implements ISearchBundle<T> {
         }
     }
 
-    public static String transformResultsToDocJson(List<INode> nodes, CpmDocument searchedDocument) {
+    public static Predicate<INode> translateAttributesToPredicate(JsonNode targetSpecification) {
+        var attributes = new ObjectMapper().convertValue(targetSpecification, new TypeReference<List<AttributeDTO>>(){});
+        var nodeSearcher = new NodeAttributeSearcher();
+
+        return (node) -> {
+
+            for (AttributeDTO attr : attributes) {
+                var attrName = new org.openprovenance.prov.vanilla.QualifiedName(attr.name().nameSpaceUri, attr.name().localPart, null);
+                var value = nodeSearcher.tryGetValue(node, attrName);
+                if (value == null) {
+                    return false;
+                } else {
+                    var objectMapper = new ObjectMapper();
+                    var attrValue = objectMapper.convertValue(attr.value(), value.getClass());
+                    if (!value.equals(attrValue)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+    }
+
+    public static JsonNode transformResultsToDocJson(List<INode> nodes, CpmDocument searchedDocument) {
         if (nodes == null || nodes.isEmpty()) {return  null;}
 
         Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes, searchedDocument.getNamespaces());
-        return ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
+        var jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
+        var objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readTree(jsonString);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to convert results document to JSON", e);
+        }
     }
 
     public static List<QualifiedNameDTO> transformResultsToIds(List<INode> nodes) {

@@ -1,4 +1,5 @@
 package cz.muni.xmichalk.DTO;
 
-public class AttributeDTO {
-}
+import com.fasterxml.jackson.databind.JsonNode;
+
+public record AttributeDTO(QualifiedNameDTO name, JsonNode value){}

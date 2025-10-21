@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.BundleSearch.SearchImplementations;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
@@ -12,9 +13,9 @@ import java.util.Objects;
 public class FindConnectors implements ISearchBundle<List<ConnectorDTO>> {
     
     @Override
-    public List<ConnectorDTO> apply(CpmDocument document, QualifiedName startNodeId, final String targetSpecification) {
+    public List<ConnectorDTO> apply(CpmDocument document, QualifiedName startNodeId, final JsonNode targetSpecification) {
         List<INode> connectorNodes;
-        if (Objects.equals(targetSpecification, "backward")) {
+        if (Objects.equals(targetSpecification.asText(), "backward")) {
             connectorNodes = document.getBackwardConnectors();
         }
         else {

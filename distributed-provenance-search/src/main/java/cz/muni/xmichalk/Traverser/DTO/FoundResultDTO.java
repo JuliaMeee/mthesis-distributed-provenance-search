@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.Traverser.DTO;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.xmichalk.Traverser.Models.FoundResult;
 
 public class FoundResultDTO implements IDTO<FoundResult> {
@@ -8,7 +9,7 @@ public class FoundResultDTO implements IDTO<FoundResult> {
     public boolean integrity;
     public boolean pathValidity;
     public boolean validity;
-    public Object result;
+    public JsonNode result;
 
 
     public FoundResultDTO() {

@@ -1,20 +1,6 @@
 package cz.muni.xmichalk.DTO;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.JsonNode;
 
-public class ResponseDTO {
-    public QualifiedNameDTO bundleId;
-    
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.CLASS,
-            include = JsonTypeInfo.As.PROPERTY,
-            property = "@class"
-            // include class info for polymorphic deserialization
-    )
-    public Object found;
-    
-    public ResponseDTO(QualifiedNameDTO bundleId, Object found) {
-        this.bundleId = bundleId;
-        this.found = found;
-    }
-}
+public record ResponseDTO(QualifiedNameDTO bundleId, JsonNode found) { }

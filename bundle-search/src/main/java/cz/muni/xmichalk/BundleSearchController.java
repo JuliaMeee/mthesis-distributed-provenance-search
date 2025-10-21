@@ -6,7 +6,9 @@ import cz.muni.xmichalk.DTO.ResponseDTO;
 import cz.muni.xmichalk.DTO.SearchParamsDTO;
 import cz.muni.xmichalk.DTO.TargetTypeInfoDTO;
 import cz.muni.xmichalk.Util.Pair;
+import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.QualifiedName;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +71,7 @@ public class BundleSearchController {
     }
 
     
-/*    @PostMapping(value = "/api/testSearch", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/testSearch", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchTest(
             @RequestBody SearchParamsDTO searchParams) {
 
@@ -96,7 +99,7 @@ public class BundleSearchController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
         }
-    }*/
+    }
     
     private static boolean isMissingRequiredParams(SearchParamsDTO params) {
         return params.bundleId == null || params.connectorId == null || params.targetType == null || params.targetSpecification == null;

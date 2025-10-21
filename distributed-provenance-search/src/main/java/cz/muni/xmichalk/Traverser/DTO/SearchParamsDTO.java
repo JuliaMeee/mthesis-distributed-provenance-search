@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.Traverser.DTO;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.openprovenance.prov.model.QualifiedName;
 
@@ -23,14 +24,14 @@ import org.openprovenance.prov.model.QualifiedName;
 public class SearchParamsDTO {
     public QualifiedNameDTO bundleId;
     public QualifiedNameDTO connectorId;
-    public String targetSpecification;
+    public JsonNode targetSpecification;
     public String targetType;
 
     public SearchParamsDTO() {
 
     }
 
-    public SearchParamsDTO(QualifiedName bundleId, QualifiedName connectorId, String targetType, String targetSpecification) {
+    public SearchParamsDTO(QualifiedName bundleId, QualifiedName connectorId, String targetType, JsonNode targetSpecification) {
         this.bundleId = new QualifiedNameDTO().from(bundleId);
         this.connectorId = new QualifiedNameDTO().from(connectorId);
         this.targetType = targetType;

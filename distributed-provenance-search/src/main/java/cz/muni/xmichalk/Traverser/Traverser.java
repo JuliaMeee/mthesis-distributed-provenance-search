@@ -1,6 +1,7 @@
 package cz.muni.xmichalk.Traverser;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
@@ -52,7 +53,7 @@ public class Traverser {
      * @param targetSpecification - characterization of the nodes we are searching for
      * @return - list of predecessors (jsons)
      */
-    public List<FoundResult> searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, String targetType, String targetSpecification) {
+    public List<FoundResult> searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, String targetType, JsonNode targetSpecification) {
         SearchState searchState = new SearchState(
                 new ConcurrentHashMap<>(),
                 new ConcurrentHashMap<>(),
@@ -117,7 +118,7 @@ public class Traverser {
     private void submitSearchTask(ItemToSearch itemToSearch,
                                   SearchState searchState,
                                   String targetType,
-                                  String targetSpecification,
+                                  JsonNode targetSpecification,
                                   CompletionService<Void> completionService,
                                   AtomicInteger runningTasks) {
         runningTasks.incrementAndGet();
@@ -131,7 +132,7 @@ public class Traverser {
                 if (newResult != null) searchState.results.add(newResult);
                 System.err.println("Got result? :" + (newResult != null));
 
-                findConnectorsResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, "connectors", "backward");
+                findConnectorsResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, "connectors", new ObjectMapper().valueToTree("backward"));
                 var newItemsToSearch = getNewItemsToSearch(findConnectorsResult);
                 searchState.toSearch.addAll(newItemsToSearch);
                 System.err.println("Got connectors: " + newItemsToSearch.size());
@@ -153,7 +154,7 @@ public class Traverser {
     }
 
     private FoundResult getNewResult(BundleSearchResponseDTO searchBundleResult) {
-        if (searchBundleResult == null || searchBundleResult.found == null) {
+        if (searchBundleResult == null || searchBundleResult.found == null || searchBundleResult.found.isNull()) {
             return null;
         }
 
@@ -161,21 +162,26 @@ public class Traverser {
     }
 
     private List<ItemToSearch> getNewItemsToSearch(BundleSearchResponseDTO searchBundleResult) {
-        if (searchBundleResult == null || !(searchBundleResult.found instanceof List<?> foundList) || foundList.isEmpty()) {
+        if (searchBundleResult == null || searchBundleResult.found == null || searchBundleResult.found.isNull()) {
             System.out.println("No connectors found");
             return new ArrayList<>();
         }
 
-        System.out.println("Raw connector dtos count: " + foundList.size());
+        List<ConnectorDTO> connectors;
+
+        try {
+            connectors = new ObjectMapper().convertValue(
+                    searchBundleResult.found, new TypeReference<List<ConnectorDTO>>() {
+                    }
+            );
+        } catch (Exception e) {
+            System.out.println("Error converting found connectors: " + e.getMessage());
+            return new ArrayList<>();
+        }
+
+        System.out.println("Connector dtos count: " + connectors.size());
 
         List<ItemToSearch> newItemsToSearch = new ArrayList<>();
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        List<ConnectorDTO> connectors = mapper.convertValue(
-                searchBundleResult.found, new TypeReference<List<ConnectorDTO>>() {
-                }
-        );
 
         for (ConnectorDTO connector : connectors) {
             if (connector != null && connector.referencedBundleId != null) {
@@ -193,7 +199,7 @@ public class Traverser {
         return newItemsToSearch;
     }
 
-    public BundleSearchResponseDTO fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, String targetType, String targetSpecification) throws IOException {
+    public BundleSearchResponseDTO fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, String targetType, JsonNode targetSpecification) throws IOException {
         SearchParamsDTO searchParams = new SearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
         String traverserAddress = traverserTable.getTraverserUrl(bundleId.getUri());
         if (traverserAddress == null) {

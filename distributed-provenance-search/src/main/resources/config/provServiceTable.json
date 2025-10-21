@@ -1,5 +1,5 @@
 {
-  "http://prov-storage-1:8000": "http://prov-service-1:8000",
-  "http://prov-storage-2:8000": "http://prov-service-2:8000",
-  "http://prov-storage-3:8000": "http://prov-service-3:8000"
+  "http://prov-storage-1:8000": "http://bundle-searcher-1:8000",
+  "http://prov-storage-2:8000": "http://bundle-searcher-2:8000",
+  "http://prov-storage-3:8000": "http://bundle-searcher-3:8000"
 }

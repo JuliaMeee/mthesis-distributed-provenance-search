@@ -1,10 +1,11 @@
 package cz.muni.xmichalk.Traverser.Models;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.openprovenance.prov.model.QualifiedName;
 
 public class FoundResult {
     public QualifiedName bundleId;
-    public Object result;
+    public JsonNode result;
     public boolean pathIntegrity;
     public boolean integrity;
     public boolean pathValidity;
@@ -15,7 +16,7 @@ public class FoundResult {
 
     }
 
-    public FoundResult(QualifiedName bundleId, Object result, boolean pathIntegrity, boolean integrity, boolean pathValidity, boolean validity) {
+    public FoundResult(QualifiedName bundleId, JsonNode result, boolean pathIntegrity, boolean integrity, boolean pathValidity, boolean validity) {
         this.bundleId = bundleId;
         this.result = result;
         this.pathIntegrity = pathIntegrity;
@@ -24,7 +25,7 @@ public class FoundResult {
         this.validity = validity;
     }
 
-    public FoundResult(QualifiedName bundleId, Object result) {
+    public FoundResult(QualifiedName bundleId, JsonNode result) {
         this.bundleId = bundleId;
         this.result = result;
     }

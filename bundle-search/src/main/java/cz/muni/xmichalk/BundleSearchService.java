@@ -1,5 +1,7 @@
 package cz.muni.xmichalk;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
@@ -28,13 +30,13 @@ public class BundleSearchService {
         this.cpmProvFactory = cpmProvFactory;
     }
 
-    public ResponseDTO searchBundleBackward(QualifiedName bundleId, QualifiedName forwardConnectorId, ETargetType targetType, String targetSpecification) throws IOException {
+    public ResponseDTO searchBundleBackward(QualifiedName bundleId, QualifiedName forwardConnectorId, ETargetType targetType, JsonNode targetSpecification) throws IOException {
         DocumentWithIntegrity documentWithIntegrity = documentLoader.loadDocument(bundleId.getUri());
         var document = documentWithIntegrity.document;
         return searchBundleBackward(document, forwardConnectorId, targetType, targetSpecification);
     }
 
-    public ResponseDTO searchBundleBackward(Document document, QualifiedName forwardConnectorId, ETargetType targetType, String targetSpecification) throws IOException {
+    public ResponseDTO searchBundleBackward(Document document, QualifiedName forwardConnectorId, ETargetType targetType, JsonNode targetSpecification) throws IOException {
 
         var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
 
@@ -44,10 +46,10 @@ public class BundleSearchService {
 
         ResponseDTO responseDTO = new ResponseDTO(
                 new QualifiedNameDTO(cpmDocument.getBundleId()),
-                result);
+                new ObjectMapper().valueToTree(result));
         
-        System.out.println("Response bundleId:\n" + responseDTO.bundleId.toString());
-        System.out.println("Response found results:\n" + responseDTO.found);
+        System.out.println("Response bundleId:\n" + responseDTO.bundleId().toString());
+        System.out.println("Response found results:\n" + responseDTO.found());
         
         return responseDTO;
     }

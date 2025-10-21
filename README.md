@@ -17,9 +17,24 @@ Start docker and run `docker-compose up -d`.
 From `/setup` run:
 `./simulation_setup.sh`
 to register organizations and upload provenance files that can be found in `./setup/data`.
-If you get `curl: (52) Empty reply from server`, try again after waiting for a few seconds.
+If you get `curl: (52) Empty reply from server`, wait a few seconds and try again.
 
-Run requests to the traversal/search containers from the debug-shell container running in docker.
+<h2>Services</h2>
+
+The system uses storage and trusted party service from `https://github.com/GajdosDavid/distributed-provenance-system`.
+
+
+
+With all the containers running, you can check the OpenAPI specification for prov-traverser service that does search of distributed provenance at:  
+`http://localhost:8090/swagger-ui/index.html#`.  
+The prov-traverser service searches the provenance chain in the given direction looking for the specified target. It fetches results for individual bundles from their respective provenance controllers (bundle-searcher-x containers).
+You can check out the OpenAPI specification for bundle-searcher services at:  
+`http://localhost:8081/swagger-ui/index.html#`.
+
+
+Run requests to the prov-traversal container from the debug-shell container running in docker.
+
+ If you get `curl: (7) Failed to connect to prov-traverser port 8000 after 6 ms: Connection refused` soon after starting the container, wait a few seconds and try again.
 
 Example request:
 ```
