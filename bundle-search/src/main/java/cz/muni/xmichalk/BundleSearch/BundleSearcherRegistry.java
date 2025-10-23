@@ -19,33 +19,32 @@ public class BundleSearcherRegistry {
     static {
         registry.put(ETargetType.NODE_IDS_BY_ID,
                 new FindNodes<List<QualifiedNameDTO>>(
-                        (JsonNode ts) -> FindNodes.translateNodeIdToPredicate(ts),
-                        (results) -> FindNodes.transformResultsToIds(results))
+                        FindNodes::translateNodeIdToPredicate,
+                        FindNodes::transformResultsToIds)
         );
-        registry.put(ETargetType.NODES_BY_ATTRIBUTES,
-                (CpmDocument document, QualifiedName startNodeId, JsonNode targetSpecification) -> 
-                        new FindNodes<JsonNode>(
-                                (JsonNode ts) -> FindNodes.translateNodeToPredicate(ts), 
-                                (results) -> FindNodes.transformResultsToDocJson(results, document))
+        registry.put(ETargetType.NODES_BY_ID,
+                new FindNodes<JsonNode>(
+                        FindNodes::translateNodeIdToPredicate,
+                        FindNodes::transformResultsToDocJson)
+                
         );
         registry.put(ETargetType.NODE_IDS_BY_ATTRIBUTES,
                 new FindNodes<List<QualifiedNameDTO>>(
-                        (JsonNode ts) -> FindNodes.translateNodeToPredicate(ts),
-                        (results) -> FindNodes.transformResultsToIds(results))
+                        FindNodes::translateNodeToPredicate,
+                        FindNodes::transformResultsToIds)
+        );
+        registry.put(ETargetType.NODES_BY_ATTRIBUTES,
+                new FindNodes<JsonNode>(
+                        FindNodes::translateNodeToPredicate,
+                        FindNodes::transformResultsToDocJson)
         );
         registry.put(ETargetType.CONNECTORS,
                 new FindConnectors()
         );
         registry.put(ETargetType.BUNDLE_ID_BY_META_BUNDLE_ID,
                 new FindBundle<QualifiedNameDTO>(
-                        (JsonNode ts) -> FindBundle.translateMetaBundleIdToPredicate(ts),
+                        FindBundle::translateMetaBundleIdToPredicate,
                         (CpmDocument doc) -> doc == null ? null : new QualifiedNameDTO(doc.getBundleId()))
-        );
-        registry.put(ETargetType.XXX_NODES_BY_ATTRIBUTES,
-                (CpmDocument document, QualifiedName startNodeId, JsonNode targetSpecification) ->
-                        new FindNodes<JsonNode>(
-                                (JsonNode ts) -> FindNodes.translateAttributesToPredicate(ts),
-                                (results) -> FindNodes.transformResultsToDocJson(results, document))
         );
 
         // Add more target types here in the future development

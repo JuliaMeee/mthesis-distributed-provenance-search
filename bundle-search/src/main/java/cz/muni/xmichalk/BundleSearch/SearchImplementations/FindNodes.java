@@ -13,6 +13,7 @@ import cz.muni.xmichalk.BundleSearch.ISearchBundle;
 import cz.muni.xmichalk.DTO.AttributeDTO;
 import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.Util.ProvDocumentUtils;
+import cz.muni.xmichalk.Util.ProvJsonUtils;
 import org.openprovenance.prov.model.*;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
@@ -54,11 +55,13 @@ public class FindNodes<T> implements ISearchBundle<T> {
             var cPF = new CpmProvFactory(pF);
             var cF = new CpmMergedFactory();
 
-            var doc = deserialize(targetSpecification.asText(), Formats.ProvFormat.JSON);
+            var doc = deserialize(targetSpecification.toString(), Formats.ProvFormat.JSON);
             var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
             var nodes = cpmDoc.getNodes();
             if (nodes.size() != 1) throw new IllegalArgumentException("target specification must contain exactly one node");
             var targetNode = nodes.getFirst();
+            
+            System.out.println("Translated node to predicate: " + targetNode.getId().getUri());
 
             return (node) -> {
                 var types = node.getElements().stream().map(elem -> elem.getType()).flatMap(List<Type>::stream);
@@ -117,34 +120,12 @@ public class FindNodes<T> implements ISearchBundle<T> {
         }
     }
 
-    public static Predicate<INode> translateAttributesToPredicate(JsonNode targetSpecification) {
-        var attributes = new ObjectMapper().convertValue(targetSpecification, new TypeReference<List<AttributeDTO>>(){});
-        var nodeSearcher = new NodeAttributeSearcher();
-
-        return (node) -> {
-
-            for (AttributeDTO attr : attributes) {
-                var attrName = new org.openprovenance.prov.vanilla.QualifiedName(attr.name().nameSpaceUri, attr.name().localPart, null);
-                var value = nodeSearcher.tryGetValue(node, attrName);
-                if (value == null) {
-                    return false;
-                } else {
-                    var objectMapper = new ObjectMapper();
-                    var attrValue = objectMapper.convertValue(attr.value(), value.getClass());
-                    if (!value.equals(attrValue)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        };
-    }
-
-    public static JsonNode transformResultsToDocJson(List<INode> nodes, CpmDocument searchedDocument) {
+    public static JsonNode transformResultsToDocJson(List<INode> nodes) {
         if (nodes == null || nodes.isEmpty()) {return  null;}
 
-        Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes, searchedDocument.getNamespaces());
+        Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes);
         var jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
+        jsonString = ProvJsonUtils.removeExplicitBundleId(jsonString);
         var objectMapper = new ObjectMapper();
         try {
             return objectMapper.readTree(jsonString);

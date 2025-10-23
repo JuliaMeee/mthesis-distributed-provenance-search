@@ -38,6 +38,30 @@ public class ProvJsonUtils {
         }
     }
 
+    public static String removeExplicitBundleId(String json) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            var root = mapper.readTree(json);
+
+            var bundleNode = root.path("bundle");
+            if (bundleNode.isObject()) {
+                var fieldNames = bundleNode.fieldNames();
+                if (fieldNames.hasNext()) {
+                    String bundleId = fieldNames.next();
+                    var bundleObj = (ObjectNode) bundleNode.path(bundleId);
+                    
+                    if (bundleObj.has("@id")) {
+                        bundleObj.remove("@id");
+                    }
+                }
+            }
+
+            return mapper.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to remove explicit bundle id", e);
+        }
+    }
+
     public static String stringifyValues(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -45,7 +69,7 @@ public class ProvJsonUtils {
             JsonNode stringified = stringifyNode(root, mapper);
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(stringified);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to add explicit bundle id", e);
+            throw new RuntimeException("Failed to stringify values", e);
         }
     }
 

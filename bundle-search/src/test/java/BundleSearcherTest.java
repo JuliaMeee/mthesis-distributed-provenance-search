@@ -94,7 +94,6 @@ public class BundleSearcherTest {
         return null;
     }*/
 
-
     private Object FindNodeByAttribute(INode node, QualifiedName targetAttribute, Object targetValue) {
         for (Element element : node.getElements()) {
             if (element.getId().equals(targetAttribute)) {

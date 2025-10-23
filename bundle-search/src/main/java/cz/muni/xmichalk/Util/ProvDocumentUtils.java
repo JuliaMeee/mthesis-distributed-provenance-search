@@ -2,12 +2,10 @@ package cz.muni.xmichalk.Util;
 
 import cz.muni.fi.cpm.model.INode;
 import org.openprovenance.prov.interop.InteropFramework;
-import org.openprovenance.prov.model.Bundle;
-import org.openprovenance.prov.model.Document;
-import org.openprovenance.prov.model.Namespace;
-import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.*;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.model.interop.InteropMediaType;
+import org.openprovenance.prov.vanilla.HasAttributes;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.*;
@@ -16,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+
+import static cz.muni.xmichalk.Util.Constants.BLANK_URI;
 
 public class ProvDocumentUtils {
     public static final Charset charset = java.nio.charset.StandardCharsets.UTF_8;
@@ -49,15 +49,13 @@ public class ProvDocumentUtils {
         return serializedDocument;
     }
     
-    public static Document encapsulateInDocument(List<INode> nodes, Namespace ns) {
+    public static Document encapsulateInDocument(List<INode> nodes) {
         ProvFactory pf = ProvFactory.getFactory();
         Document doc = pf.newDocument();
         
-        ns.addKnownNamespaces();
-        ns.register("ex", "http://example.org/");
-        doc.setNamespace(ns);
+        Namespace ns = pf.newNamespace();
 
-        var bundle = pf.newNamedBundle(pf.newQualifiedName("http://example.org/", "connectors_bundle", "ex"), null);
+        var bundle = pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
 
         for (INode node : nodes) {
             var elements = node.getElements();
@@ -66,8 +64,9 @@ public class ProvDocumentUtils {
                 bundle.getStatement().add(element);
             }
         }
-
-        bundle.setNamespace(ns);
+        
+        registerAllNamespaces(ns, bundle);
+        doc.setNamespace(ns);
         doc.getStatementOrBundle().add(bundle);
         
         return doc;
@@ -81,5 +80,42 @@ public class ProvDocumentUtils {
         }
         
         return null;
+    }
+    
+    public static Namespace registerAllNamespaces(Namespace namespace, Object provObject) {
+        if (provObject instanceof Document doc) {
+            for (StatementOrBundle statement : doc.getStatementOrBundle()) {
+                registerAllNamespaces(namespace, statement);
+            }
+        } else if (provObject instanceof Bundle bundle) {
+            QualifiedName bundleId = bundle.getId();
+            if (bundleId != null) {
+                namespace.register(bundleId.getPrefix(), bundleId.getNamespaceURI());
+            }
+            for (Statement statement : bundle.getStatement()) {
+                registerAllNamespaces(namespace, statement);
+            }
+        } else if (provObject instanceof Identifiable identifiable) {
+            QualifiedName id = identifiable.getId();
+            if (id != null) {
+                namespace.register(id.getPrefix(), id.getNamespaceURI());
+            }
+        }
+
+        if (provObject instanceof HasAttributes hasAttributes) {
+            for (Attribute attr : hasAttributes.getAttributes()) {
+                QualifiedName attrName = attr.getElementName();
+                if (attrName != null) {
+                    namespace.register(attrName.getPrefix(), attrName.getNamespaceURI());
+                }
+                
+                Object value = attr.getValue();
+                if (value instanceof QualifiedName qnValue) {
+                    namespace.register(qnValue.getPrefix(), qnValue.getNamespaceURI());
+                }
+            }
+        }
+        
+        return namespace;
     }
 }
