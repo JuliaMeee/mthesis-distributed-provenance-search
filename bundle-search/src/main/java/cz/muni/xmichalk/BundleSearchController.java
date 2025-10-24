@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,9 +42,9 @@ public class BundleSearchController {
         return ResponseEntity.ok(types.collect(Collectors.toList()));
     }
 
-    @Operation(summary = "Search bundle in backward direction", description = "Search bundle in the backward direction starting from the specified connector.")
-    @PostMapping(value = "/api/searchBundleBackward", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> searchBundleBackward(
+    @Operation(summary = "Search bundle looking for given target", description = "Search bundle for given target starting from the specified node.")
+    @PostMapping(value = "/api/searchBundle", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> searchBundle(
             @RequestBody SearchParamsDTO searchParams) {
 
         if (isMissingRequiredParams(searchParams)) {
@@ -53,15 +54,13 @@ public class BundleSearchController {
         }
 
         try {
-
-            System.out.println("Searching bundle backward: " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
-                    + " " + searchParams.connectorId.nameSpaceUri + searchParams.connectorId.localPart + " " + searchParams.targetType + " " + searchParams.targetSpecification);
+            System.out.println("Searching bundle: " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
+                    + " " + searchParams.startNodeId.nameSpaceUri + searchParams.startNodeId.localPart + " " + searchParams.targetType + " " + searchParams.targetSpecification);
 
             QualifiedName bundleId = new QualifiedName(searchParams.bundleId.nameSpaceUri, searchParams.bundleId.localPart, null);
-            QualifiedName connectorId = new QualifiedName(searchParams.connectorId.nameSpaceUri, searchParams.connectorId.localPart, null);
-            
-            ResponseDTO searchBundleResult = bundleSearchService.searchBundleBackward(bundleId, connectorId, searchParams.targetType, searchParams.targetSpecification);
-            
+            QualifiedName connectorId = new QualifiedName(searchParams.startNodeId.nameSpaceUri, searchParams.startNodeId.localPart, null);
+
+            ResponseDTO searchBundleResult = bundleSearchService.searchBundle(bundleId, connectorId, searchParams.targetType, searchParams.targetSpecification);
             return ResponseEntity.ok(searchBundleResult);
         } catch (Exception e) {
             return ResponseEntity
@@ -69,7 +68,6 @@ public class BundleSearchController {
                     .body(e.getMessage());
         }
     }
-
     
     @PostMapping(value = "/api/testSearch", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchTest(
@@ -84,15 +82,16 @@ public class BundleSearchController {
         try {
 
             System.out.println("Searching bundle backward: " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
-                    + " " + searchParams.connectorId.nameSpaceUri + searchParams.connectorId.localPart + " " + searchParams.targetType + " " + searchParams.targetSpecification);
+                    + " " + searchParams.startNodeId.nameSpaceUri + searchParams.startNodeId.localPart + " " + searchParams.targetType + " " + searchParams.targetSpecification);
 
             QualifiedName bundleId = new QualifiedName(searchParams.bundleId.nameSpaceUri, searchParams.bundleId.localPart, null);
-            QualifiedName connectorId = new QualifiedName(searchParams.connectorId.nameSpaceUri, searchParams.connectorId.localPart, null);
+            QualifiedName connectorId = new QualifiedName(searchParams.startNodeId.nameSpaceUri, searchParams.startNodeId.localPart, null);
             
             // var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset3/SpeciesIdentificationBundle_V0.json"), Formats.ProvFormat.JSON);
-            var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset1/SamplingBundle_V1.json"), Formats.ProvFormat.JSON);
+            var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset2/ProcessingBundle_V0.json"), Formats.ProvFormat.JSON);
+            // var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset1/SamplingBundle_V1.json"), Formats.ProvFormat.JSON);
             
-            var searchBundleResult = bundleSearchService.searchBundleBackward(document, connectorId, searchParams.targetType, searchParams.targetSpecification);
+            var searchBundleResult = bundleSearchService.searchDocument(document, connectorId, searchParams.targetType, searchParams.targetSpecification);
             
             return ResponseEntity.ok(searchBundleResult);
         } catch (Exception e) {
@@ -103,6 +102,6 @@ public class BundleSearchController {
     }
     
     private static boolean isMissingRequiredParams(SearchParamsDTO params) {
-        return params.bundleId == null || params.connectorId == null || params.targetType == null || params.targetSpecification == null;
+        return params.bundleId == null || params.startNodeId == null || params.targetType == null || params.targetSpecification == null;
     }
 }

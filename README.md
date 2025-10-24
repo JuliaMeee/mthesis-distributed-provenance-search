@@ -67,7 +67,7 @@ curl -X POST \
       "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
       "localPart": "SpeciesIdentificationBundle_V0"
     },
-    "connectorId": {
+    "startNodeId": {
       "nameSpaceUri": "https://openprovenance.org/blank/",
       "localPart": "IdentifiedSpeciesCon"
     },
@@ -131,7 +131,7 @@ curl -X POST \
       "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
       "localPart": "SpeciesIdentificationBundle_V0"
     },
-    "connectorId": {
+    "startNodeId": {
       "nameSpaceUri": "https://openprovenance.org/blank/",
       "localPart": "IdentifiedSpeciesCon"
     },
@@ -228,7 +228,7 @@ curl -X POST \
       "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
       "localPart": "SpeciesIdentificationBundle_V0"
     },
-    "connectorId": {
+    "startNodeId": {
       "nameSpaceUri": "https://openprovenance.org/blank/",
       "localPart": "IdentifiedSpeciesCon"
     },

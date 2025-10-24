@@ -3,13 +3,10 @@ package cz.muni.xmichalk.BundleSearch.SearchImplementations;
 import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.fi.cpm.template.schema.MainActivity;
-import cz.muni.xmichalk.BundleSearch.General.FilterNodes;
 import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
 import org.openprovenance.prov.model.QualifiedName;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 

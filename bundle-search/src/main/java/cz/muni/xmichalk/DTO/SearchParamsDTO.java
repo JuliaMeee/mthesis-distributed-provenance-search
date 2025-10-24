@@ -13,7 +13,7 @@ import org.openprovenance.prov.model.QualifiedName;
         "nameSpaceUri": "http://example.org/",
         "localPart": "bundle1"
       },
-      "connectorId": {
+      "startNodeId": {
         "nameSpaceUri": "http://example.org/",
         "localPart": "connectorA"
       },
@@ -24,7 +24,7 @@ import org.openprovenance.prov.model.QualifiedName;
 )
 public class SearchParamsDTO {
     public QualifiedNameDTO bundleId;
-    public QualifiedNameDTO connectorId;
+    public QualifiedNameDTO startNodeId;
     public ETargetType targetType;
     public JsonNode targetSpecification;
 
@@ -34,7 +34,7 @@ public class SearchParamsDTO {
 
     public SearchParamsDTO(QualifiedName bundleId, QualifiedName connectorId, ETargetType targetType, JsonNode targetSpecification) {
         this.bundleId = new QualifiedNameDTO(bundleId);
-        this.connectorId = new QualifiedNameDTO(connectorId);
+        this.startNodeId = new QualifiedNameDTO(connectorId);
         this.targetType = targetType;
         this.targetSpecification = targetSpecification;
     }

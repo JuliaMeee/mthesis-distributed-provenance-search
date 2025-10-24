@@ -47,13 +47,13 @@ public class Traverser {
 
 
     /***
-     * Returns all accessible precursors of the given bundleId and forwardConnectorId, collecting them recursively.
+     * Traverses the chain in given direction, searching each bundle for given target. Returns all found results matching the target.
      * @param startBundleId - identifier of the bundle
-     * @param forwardConnectorId - identifier of the forward connector in the bundle
-     * @param targetSpecification - characterization of the nodes we are searching for
-     * @return - list of predecessors (jsons)
+     * @param startNodeId - identifier of the starting node in the bundle
+     * @param searchParams - direction of search and characterization of the target we are searching for
+     * @return - list of found results matching the target
      */
-    public List<FoundResult> searchPredecessors(QualifiedName startBundleId, QualifiedName forwardConnectorId, String targetType, JsonNode targetSpecification) {
+    public List<FoundResult> searchChain(QualifiedName startBundleId, QualifiedName startNodeId, SearchParams searchParams) {
         SearchState searchState = new SearchState(
                 new ConcurrentHashMap<>(),
                 new ConcurrentHashMap<>(),
@@ -61,7 +61,7 @@ public class Traverser {
                 ConcurrentHashMap.newKeySet()
         );
 
-        searchState.toSearch.add(new ItemToSearch(startBundleId, forwardConnectorId));
+        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -71,7 +71,7 @@ public class Traverser {
         for (int i = 0; i < concurrencyDegree; i++) {
             ItemToSearch itemToSearch = pollNextToSearch(searchState);
             if (itemToSearch != null) {
-                submitSearchTask(itemToSearch, searchState, targetType, targetSpecification,
+                submitSearchTask(itemToSearch, searchState, searchParams,
                         completionService, runningTasks);
             }
         }
@@ -84,7 +84,7 @@ public class Traverser {
                 ItemToSearch next;
                 while (runningTasks.get() < concurrencyDegree
                         && (next = pollNextToSearch(searchState)) != null) {
-                    submitSearchTask(next, searchState, targetType, targetSpecification,
+                    submitSearchTask(next, searchState, searchParams,
                             completionService, runningTasks);
                 }
             }
@@ -117,25 +117,23 @@ public class Traverser {
 
     private void submitSearchTask(ItemToSearch itemToSearch,
                                   SearchState searchState,
-                                  String targetType,
-                                  JsonNode targetSpecification,
+                                  SearchParams searchParams,
                                   CompletionService<Void> completionService,
                                   AtomicInteger runningTasks) {
         runningTasks.incrementAndGet();
         completionService.submit(() -> {
-            System.out.println("Processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId + " (running tasks: " + itemToSearch + ")");
-            BundleSearchResponseDTO findTargetResult = new BundleSearchResponseDTO(null, null); // default value
-            BundleSearchResponseDTO findConnectorsResult = new BundleSearchResponseDTO(null, null);
-            try {
-                findTargetResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, targetType, targetSpecification);
-                var newResult = getNewResult(findTargetResult);
-                if (newResult != null) searchState.results.add(newResult);
-                System.err.println("Got result? :" + (newResult != null));
+            System.out.println("Processing bundle: " + itemToSearch.bundleId.getLocalPart());
 
-                findConnectorsResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId, "connectors", new ObjectMapper().valueToTree("backward"));
-                var newItemsToSearch = getNewItemsToSearch(findConnectorsResult);
+            try {
+                var newResult = getNewResult(itemToSearch, searchParams);
+                if (newResult != null) {
+                    searchState.results.add(newResult);
+                    System.out.println("Found result in bundle: " + itemToSearch.bundleId.getLocalPart());
+                }
+
+                var newItemsToSearch = getNewItemsToSearch(itemToSearch, searchParams.searchBackwards);
                 searchState.toSearch.addAll(newItemsToSearch);
-                System.err.println("Got connectors: " + newItemsToSearch.size());
+                System.out.println("Found " + newItemsToSearch.size() + " items to search in bundle: " + itemToSearch.bundleId.getLocalPart());
 
                 // TODO integrity and validity
 
@@ -147,13 +145,15 @@ public class Traverser {
 
             }
 
-            System.out.println("Finished processing bundle: " + itemToSearch.bundleId + " via connector: " + itemToSearch.connectorId);
+            System.out.println("Finished processing bundle: " + itemToSearch.bundleId.getLocalPart());
 
             return null;
         });
     }
 
-    private FoundResult getNewResult(BundleSearchResponseDTO searchBundleResult) {
+    private FoundResult getNewResult(ItemToSearch itemToSearch, SearchParams searchParams) throws IOException {
+        var searchBundleResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId,
+                searchParams.targetType, searchParams.targetSpecification);
         if (searchBundleResult == null || searchBundleResult.found == null || searchBundleResult.found.isNull()) {
             return null;
         }
@@ -161,9 +161,12 @@ public class Traverser {
         return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found); // TODO validity and integrity
     }
 
-    private List<ItemToSearch> getNewItemsToSearch(BundleSearchResponseDTO searchBundleResult) {
+    private List<ItemToSearch> getNewItemsToSearch(ItemToSearch itemToSearch, boolean searchBackwards) throws IOException {
+        var searchBundleResult = fetchSearchBundleResult(
+                itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
+                new ObjectMapper().valueToTree(searchBackwards ? "backward" : "forward"));
+
         if (searchBundleResult == null || searchBundleResult.found == null || searchBundleResult.found.isNull()) {
-            System.out.println("No connectors found");
             return new ArrayList<>();
         }
 
@@ -179,13 +182,10 @@ public class Traverser {
             return new ArrayList<>();
         }
 
-        System.out.println("Connector dtos count: " + connectors.size());
-
         List<ItemToSearch> newItemsToSearch = new ArrayList<>();
 
         for (ConnectorDTO connector : connectors) {
             if (connector != null && connector.referencedBundleId != null) {
-                System.out.println("Creating item to search");
                 newItemsToSearch.add(
                         new ItemToSearch(
                                 connector.referencedBundleId.toDomainModel(),
@@ -199,16 +199,18 @@ public class Traverser {
         return newItemsToSearch;
     }
 
-    public BundleSearchResponseDTO fetchSearchBundleResult(QualifiedName bundleId, QualifiedName connectorId, String targetType, JsonNode targetSpecification) throws IOException {
+    public BundleSearchResponseDTO fetchSearchBundleResult(
+            QualifiedName bundleId, QualifiedName connectorId,
+            String targetType, JsonNode targetSpecification) throws IOException {
         SearchParamsDTO searchParams = new SearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
         String traverserAddress = traverserTable.getTraverserUrl(bundleId.getUri());
         if (traverserAddress == null) {
             throw new IOException("No traverser found for bundle: " + bundleId.getUri());
         }
 
-        String url = traverserAddress + "/api/searchBundleBackward";
+        String url = traverserAddress + "/api/searchBundle";
 
-        System.out.println("Fetching results for bundle via: " + url);
+        System.out.println("Fetching results for bundle " + bundleId.getUri() + " via: " + url + " connector: " + connectorId.getUri() + " targetType: " + targetType + " targetSpec: " + targetSpecification.toString());
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

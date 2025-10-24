@@ -29,11 +29,12 @@ public class ConnectorDTO {
         var referencedMetaBundleIdValue = nodeSearcher.tryGetValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
         referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
                 new QualifiedNameDTO((QualifiedName) referencedMetaBundleIdValue);
-        
 
-        referencedBundleHashValue = 
-                ((LangString) nodeSearcher.tryGetValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE)).getValue();
-        
-        hashAlg = ((LangString)nodeSearcher.tryGetValue(node, ATTR_HASH_ALG)).getValue();
+
+        LangString bundleHashValueObj = (LangString) nodeSearcher.tryGetValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
+        referencedBundleHashValue = bundleHashValueObj != null ? bundleHashValueObj.getValue() : null;
+
+        LangString hashAlgObj = (LangString) nodeSearcher.tryGetValue(node, ATTR_HASH_ALG);
+        hashAlg = hashAlgObj != null ? hashAlgObj.getValue() : null;
     }
 }

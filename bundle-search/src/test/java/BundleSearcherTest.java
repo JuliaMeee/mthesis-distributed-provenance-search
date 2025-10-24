@@ -4,7 +4,6 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleSearch.General.FilterNodes;
 import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Element;

@@ -1,16 +1,13 @@
 package cz.muni.xmichalk.BundleSearch.SearchImplementations;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleSearch.General.FilterNodes;
-import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
+import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearch;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
-import cz.muni.xmichalk.DTO.AttributeDTO;
 import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import cz.muni.xmichalk.Util.ProvJsonUtils;
@@ -41,7 +38,7 @@ public class FindNodes<T> implements ISearchBundle<T> {
     @Override
     public T apply(final CpmDocument document, final QualifiedName startNodeId, final JsonNode targetSpecification) {
         var predicate = translatePredicate.apply(targetSpecification);
-        var results = new FilterNodes().apply(document, startNodeId, predicate);
+        var results = BundleNodesSearch.search(document, startNodeId, predicate);
         return resultTransformation.apply(results);
     }
 

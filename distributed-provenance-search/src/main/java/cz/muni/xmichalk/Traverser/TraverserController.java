@@ -4,6 +4,7 @@ package cz.muni.xmichalk.Traverser;
 import cz.muni.xmichalk.Traverser.DTO.FoundResultDTO;
 import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
 import cz.muni.xmichalk.Traverser.Models.FoundResult;
+import cz.muni.xmichalk.Traverser.Models.SearchParams;
 import io.swagger.v3.oas.annotations.Operation;
 import org.openprovenance.prov.vanilla.QualifiedName;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,21 @@ public class TraverserController {
         this.traverser = traverser;
     }
 
-    @Operation(summary = "Search this bundle and its predecessors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and connector, and then searches through all its predecessors. Returns all found results.")
+    @Operation(summary = "Search this bundle and its predecessors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and node, and then searches through all its predecessors. Returns all found results.")
     @PostMapping(value = "/api/searchPredecessors", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchPredecessors(
             @RequestBody SearchParamsDTO searchParams) {
+        return searchChain(searchParams, true);
+    }
+
+    @Operation(summary = "Search this bundle and its successors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and node, and then searches through all its successors. Returns all found results.")
+    @PostMapping(value = "/api/searchSuccessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> searchSuccessors(
+            @RequestBody SearchParamsDTO searchParams) {
+        return searchChain(searchParams, false);
+    }
+
+    private ResponseEntity searchChain(SearchParamsDTO searchParams, boolean searchBackwards) {
         if (isMissingRequiredParams(searchParams)) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -35,17 +47,20 @@ public class TraverserController {
 
         try {
 
-            System.out.println("Searching predecessors: " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
-                    + " " + searchParams.connectorId.nameSpaceUri + searchParams.connectorId.localPart + " " + searchParams.targetSpecification);
+            System.out.println("Searching " + (searchBackwards ? "predecessors" : "successors") + ": " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
+                    + " " + searchParams.startNodeId.nameSpaceUri + searchParams.startNodeId.localPart + " " + searchParams.targetSpecification);
 
             QualifiedName bundleId = new QualifiedName(searchParams.bundleId.nameSpaceUri, searchParams.bundleId.localPart, null);
-            QualifiedName connectorId = new QualifiedName(searchParams.connectorId.nameSpaceUri, searchParams.connectorId.localPart, null);
+            QualifiedName connectorId = new QualifiedName(searchParams.startNodeId.nameSpaceUri, searchParams.startNodeId.localPart, null);
 
-            List<FoundResult> results = traverser.searchPredecessors(
+            List<FoundResult> results = traverser.searchChain(
                     bundleId,
                     connectorId,
-                    searchParams.targetType,
-                    searchParams.targetSpecification
+                    new SearchParams(
+                            searchBackwards,
+                            searchParams.targetType,
+                            searchParams.targetSpecification
+                    )
             );
 
             List<FoundResultDTO> resultsDTO = results.stream()
@@ -61,6 +76,6 @@ public class TraverserController {
     }
 
     private static boolean isMissingRequiredParams(SearchParamsDTO params) {
-        return params.bundleId == null || params.connectorId == null || params.targetType == null || params.targetSpecification == null;
+        return params.bundleId == null || params.startNodeId == null || params.targetType == null || params.targetSpecification == null;
     }
 }
