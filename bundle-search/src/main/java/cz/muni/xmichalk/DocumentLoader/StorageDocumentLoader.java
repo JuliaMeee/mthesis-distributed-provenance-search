@@ -25,7 +25,7 @@ public class StorageDocumentLoader implements IDocumentLoader {
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     @Override
-    public DocumentWithIntegrity loadDocument(String uri) {
+    public StorageDocument loadDocument(String uri) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
             String responseBody = getRequest(uri);
@@ -33,15 +33,14 @@ public class StorageDocumentLoader implements IDocumentLoader {
             GetDocumentResponse storageResponse = mapper.readValue(responseBody, GetDocumentResponse.class);
             String decodedDocument = decodeData(storageResponse.document);
             Document document = deserialize(decodedDocument, FORMAT);
-            boolean integrity = StorageDocumentIntegrityVerifier.verifyIntegrity(decodedDocument, storageResponse.token);
-            return new DocumentWithIntegrity(document, integrity);
+            return new StorageDocument(document, storageResponse.token);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to retrieve document " + uri, e);
+            throw new RuntimeException("Failed to load document " + uri, e);
         }
     }
 
     @Override
-    public DocumentWithIntegrity loadMetaDocument(String uri) {
+    public StorageDocument loadMetaDocument(String uri) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
             String responseBody = getRequest(uri);
@@ -49,10 +48,9 @@ public class StorageDocumentLoader implements IDocumentLoader {
             GetMetaResponse storageResponse = mapper.readValue(responseBody, GetMetaResponse.class);
             String decodedDocument = decodeData(storageResponse.graph);
             Document document = deserialize(decodedDocument, FORMAT);
-            boolean integrity = StorageDocumentIntegrityVerifier.verifyIntegrity(decodedDocument, storageResponse.token);
-            return new DocumentWithIntegrity(document, integrity);
+            return new StorageDocument(document, storageResponse.token);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to retrieve document " + uri, e);
+            throw new RuntimeException("Failed to load document " + uri, e);
         }
     }
 

@@ -32,10 +32,10 @@ public class FoundResultDTO implements IDTO<FoundResult> {
     public FoundResultDTO from(final FoundResult domainModel) {
         this.bundleId = new QualifiedNameDTO().from(domainModel.bundleId);
         this.result = domainModel.result;
-        this.pathIntegrity = domainModel.pathIntegrity;
-        this.integrity = domainModel.integrity;
-        this.pathValidity = domainModel.pathValidity;
-        this.validity = domainModel.validity;
+        this.pathIntegrity = domainModel.hasPathIntegrity;
+        this.integrity = domainModel.hasIntegrity;
+        this.pathValidity = domainModel.isPathValid;
+        this.validity = domainModel.isValid;
         return this;
     }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
+import cz.muni.xmichalk.DocumentLoader.StorageDocumentIntegrityVerifier;
 import cz.muni.xmichalk.Traverser.DTO.BundleSearchResponseDTO;
 import cz.muni.xmichalk.Traverser.DTO.ConnectorDTO;
 import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
@@ -35,7 +36,7 @@ public class Traverser {
     private final int concurrencyDegree = 10;
 
     private static final Comparator<ItemToSearch> toSearchPriorityComparator =
-            Comparator.comparing(e -> !e.pathHasIntegrity);
+            Comparator.comparing(e -> !e.hasPathIntegrity);
 
     public Traverser(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory, IProvServiceTable traverserTable) {
         this.documentLoader = documentLoader;
@@ -61,7 +62,7 @@ public class Traverser {
                 ConcurrentHashMap.newKeySet()
         );
 
-        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId));
+        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId, true));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -100,8 +101,8 @@ public class Traverser {
     private ItemToSearch pollNextToSearch(SearchState searchState) {
         ItemToSearch itemToSearch;
         while ((itemToSearch = searchState.toSearch.poll()) != null) {
-            if (!itemToSearch.pathHasIntegrity && searchState.processing.values().stream()
-                    .anyMatch(item -> item.pathHasIntegrity)) {
+            if (!itemToSearch.hasPathIntegrity && searchState.processing.values().stream()
+                    .anyMatch(item -> item.hasPathIntegrity)) {
                 return null; // wait until all valid  bundles are processed before continuing with lower credibility ones
             }
             if (searchState.processing.putIfAbsent(itemToSearch.bundleId, itemToSearch) == null) {
@@ -158,7 +159,9 @@ public class Traverser {
             return null;
         }
 
-        return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found); // TODO validity and integrity
+        boolean hasIntegrity = StorageDocumentIntegrityVerifier.verifySignature(searchBundleResult.token);
+
+        return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found, itemToSearch.hasPathIntegrity, hasIntegrity); // TODO validity
     }
 
     private List<ItemToSearch> getNewItemsToSearch(ItemToSearch itemToSearch, boolean searchBackwards) throws IOException {
@@ -182,6 +185,8 @@ public class Traverser {
             return new ArrayList<>();
         }
 
+        boolean hasIntegrity = StorageDocumentIntegrityVerifier.verifySignature(searchBundleResult.token);
+
         List<ItemToSearch> newItemsToSearch = new ArrayList<>();
 
         for (ConnectorDTO connector : connectors) {
@@ -189,8 +194,9 @@ public class Traverser {
                 newItemsToSearch.add(
                         new ItemToSearch(
                                 connector.referencedBundleId.toDomainModel(),
-                                connector.id.toDomainModel()
-                                // TODO validity and integrity
+                                connector.id.toDomainModel(),
+                                itemToSearch.hasPathIntegrity && hasIntegrity
+                                // TODO validity
                         )
                 );
             }

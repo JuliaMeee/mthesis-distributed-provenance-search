@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
-import cz.muni.fi.cpm.template.schema.BackwardConnector;
 import cz.muni.xmichalk.BundleSearch.BundleSearcherRegistry;
 import cz.muni.xmichalk.BundleSearch.ETargetType;
 import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.DTO.ResponseDTO;
-import cz.muni.xmichalk.DocumentLoader.DocumentWithIntegrity;
+import cz.muni.xmichalk.DocumentLoader.StorageDocument;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.ProvFactory;
@@ -32,9 +31,10 @@ public class BundleSearchService {
     }
 
     public ResponseDTO searchBundle(QualifiedName bundleId, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws IOException {
-        DocumentWithIntegrity documentWithIntegrity = documentLoader.loadDocument(bundleId.getUri());
-        var document = documentWithIntegrity.document;
-        return searchDocument(document, startNodeId, targetType, targetSpecification);
+        StorageDocument retrievedDocument = documentLoader.loadDocument(bundleId.getUri());
+        var document = retrievedDocument.document;
+        var response = searchDocument(document, startNodeId, targetType, targetSpecification);
+        return new ResponseDTO(response.bundleId(), retrievedDocument.token, response.found());
     }
 
     public ResponseDTO searchDocument(Document document, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws IOException {
@@ -47,6 +47,7 @@ public class BundleSearchService {
 
         ResponseDTO responseDTO = new ResponseDTO(
                 new QualifiedNameDTO(cpmDocument.getBundleId()),
+                null,
                 new ObjectMapper().valueToTree(result));
         
         System.out.println("Response bundleId:\n" + responseDTO.bundleId().toString());

@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.DocumentLoader;
 
 public interface IDocumentLoader {
-    DocumentWithIntegrity loadDocument(String uri);
+    StorageDocument loadDocument(String uri);
 
-    DocumentWithIntegrity loadMetaDocument(String uri);
+    StorageDocument loadMetaDocument(String uri);
 }
