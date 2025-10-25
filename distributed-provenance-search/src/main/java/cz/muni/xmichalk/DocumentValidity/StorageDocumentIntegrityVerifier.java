@@ -1,7 +1,7 @@
-package cz.muni.xmichalk.DocumentLoader;
+package cz.muni.xmichalk.DocumentValidity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.DocumentLoader.TokenDTO.Token;
+import cz.muni.xmichalk.DTO.TokenDTO.Token;
 import org.erdtman.jcs.JsonCanonicalizer;
 
 import java.io.ByteArrayInputStream;
@@ -14,10 +14,6 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 
 public class StorageDocumentIntegrityVerifier {
-    public static boolean verifyIntegrity(String document, Token token) {
-        return verifySignature(token) && verifyHash(document, token.data.additionalData.hashFunction, token.data.documentDigest);
-    }
-
     public static boolean verifySignature(Token token) {
         try {
             PublicKey publicKey = loadPublicKeyFromCertificate(token.data.additionalData.trustedPartyCertificate);

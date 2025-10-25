@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.Traverser.ProvServiceTable;
+package cz.muni.xmichalk.ProvServiceTable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

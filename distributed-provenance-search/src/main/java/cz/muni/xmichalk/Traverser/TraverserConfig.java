@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.Traverser;
 
-import cz.muni.xmichalk.Traverser.ProvServiceTable.IProvServiceTable;
-import cz.muni.xmichalk.Traverser.ProvServiceTable.ProvServiceTable;
+import cz.muni.xmichalk.ProvServiceTable.IProvServiceTable;
+import cz.muni.xmichalk.ProvServiceTable.ProvServiceTable;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.context.annotation.Bean;

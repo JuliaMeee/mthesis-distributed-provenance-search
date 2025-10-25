@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.Traverser.DTO;
+package cz.muni.xmichalk.DTO;
 
 public interface IDTO<T> {
     T toDomainModel();

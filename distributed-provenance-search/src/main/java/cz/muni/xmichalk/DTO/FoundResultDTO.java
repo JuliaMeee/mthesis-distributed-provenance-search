@@ -1,7 +1,7 @@
-package cz.muni.xmichalk.Traverser.DTO;
+package cz.muni.xmichalk.DTO;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.Traverser.Models.FoundResult;
+import cz.muni.xmichalk.Models.FoundResult;
 
 public class FoundResultDTO implements IDTO<FoundResult> {
     public QualifiedNameDTO bundleId;

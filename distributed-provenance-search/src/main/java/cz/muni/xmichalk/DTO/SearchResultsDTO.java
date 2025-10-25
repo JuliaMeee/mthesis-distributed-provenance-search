@@ -1,6 +1,6 @@
-package cz.muni.xmichalk.Traverser.DTO;
+package cz.muni.xmichalk.DTO;
 
-import cz.muni.xmichalk.Traverser.Models.SearchResults;
+import cz.muni.xmichalk.Models.SearchResults;
 
 import java.util.List;
 

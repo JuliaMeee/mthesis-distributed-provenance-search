@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.Traverser.Models;
+package cz.muni.xmichalk.Models;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.openprovenance.prov.model.QualifiedName;
@@ -23,12 +23,5 @@ public class FoundResult {
         this.hasIntegrity = hasIntegrity;
         this.isPathValid = isPathValid;
         this.isValid = isValid;
-    }
-
-    public FoundResult(QualifiedName bundleId, JsonNode result, boolean hasPathIntegrity, boolean hasIntegrity) {
-        this.bundleId = bundleId;
-        this.result = result;
-        this.hasPathIntegrity = hasPathIntegrity;
-        this.hasIntegrity = hasIntegrity;
     }
 }

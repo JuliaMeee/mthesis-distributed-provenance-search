@@ -3,12 +3,13 @@ package cz.muni.xmichalk.Traverser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.DocumentLoader.StorageDocumentIntegrityVerifier;
-import cz.muni.xmichalk.Traverser.DTO.BundleSearchResponseDTO;
-import cz.muni.xmichalk.Traverser.DTO.ConnectorDTO;
-import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
-import cz.muni.xmichalk.Traverser.Models.*;
-import cz.muni.xmichalk.Traverser.ProvServiceTable.IProvServiceTable;
+import cz.muni.xmichalk.DTO.BundleSearchResponseDTO;
+import cz.muni.xmichalk.DTO.ConnectorDTO;
+import cz.muni.xmichalk.DTO.SearchParamsDTO;
+import cz.muni.xmichalk.DocumentValidity.StorageDocumentIntegrityVerifier;
+import cz.muni.xmichalk.DocumentValidity.StorageDocumentValidityVerifier;
+import cz.muni.xmichalk.Models.*;
+import cz.muni.xmichalk.ProvServiceTable.IProvServiceTable;
 import org.openprovenance.prov.model.QualifiedName;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -50,7 +51,7 @@ public class Traverser {
                 ConcurrentHashMap.newKeySet()
         );
 
-        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId, true));
+        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId, true, true));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -148,8 +149,9 @@ public class Traverser {
         }
 
         boolean hasIntegrity = StorageDocumentIntegrityVerifier.verifySignature(searchBundleResult.token);
+        boolean isValid = new StorageDocumentValidityVerifier().verifyValidity(searchBundleResult.token);
 
-        return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found, itemToSearch.hasPathIntegrity, hasIntegrity); // TODO validity
+        return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found, itemToSearch.hasPathIntegrity, hasIntegrity, itemToSearch.isPathValid, isValid);
     }
 
     private List<ItemToSearch> getNewItemsToSearch(ItemToSearch itemToSearch, boolean searchBackwards) throws IOException {
@@ -174,6 +176,7 @@ public class Traverser {
         }
 
         boolean hasIntegrity = StorageDocumentIntegrityVerifier.verifySignature(searchBundleResult.token);
+        boolean isValid = new StorageDocumentValidityVerifier().verifyValidity(searchBundleResult.token);
 
         List<ItemToSearch> newItemsToSearch = new ArrayList<>();
 
@@ -183,8 +186,8 @@ public class Traverser {
                         new ItemToSearch(
                                 connector.referencedBundleId.toDomainModel(),
                                 connector.id.toDomainModel(),
-                                itemToSearch.hasPathIntegrity && hasIntegrity
-                                // TODO validity
+                                itemToSearch.hasPathIntegrity && hasIntegrity,
+                                itemToSearch.isPathValid && isValid
                         )
                 );
             }

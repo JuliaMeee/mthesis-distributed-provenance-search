@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.Traverser.DTO;
+package cz.muni.xmichalk.DTO;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;

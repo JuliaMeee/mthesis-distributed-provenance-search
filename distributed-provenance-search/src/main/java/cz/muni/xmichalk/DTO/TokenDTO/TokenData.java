@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.DocumentLoader.TokenDTO;
+package cz.muni.xmichalk.DTO.TokenDTO;
 
 public class TokenData {
     public String originatorId;

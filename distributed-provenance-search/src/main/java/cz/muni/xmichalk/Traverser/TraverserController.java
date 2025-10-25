@@ -1,10 +1,10 @@
 package cz.muni.xmichalk.Traverser;
 
 
-import cz.muni.xmichalk.Traverser.DTO.FoundResultDTO;
-import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
-import cz.muni.xmichalk.Traverser.Models.FoundResult;
-import cz.muni.xmichalk.Traverser.Models.SearchParams;
+import cz.muni.xmichalk.DTO.FoundResultDTO;
+import cz.muni.xmichalk.DTO.SearchParamsDTO;
+import cz.muni.xmichalk.Models.FoundResult;
+import cz.muni.xmichalk.Models.SearchParams;
 import io.swagger.v3.oas.annotations.Operation;
 import org.openprovenance.prov.vanilla.QualifiedName;
 import org.springframework.http.HttpStatus;

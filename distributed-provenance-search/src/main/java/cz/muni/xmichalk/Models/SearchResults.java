@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.Traverser.Models;
+package cz.muni.xmichalk.Models;
 
 import java.util.List;
 
