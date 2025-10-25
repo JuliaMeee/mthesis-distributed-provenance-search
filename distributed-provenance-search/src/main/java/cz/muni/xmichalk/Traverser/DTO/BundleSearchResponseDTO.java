@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.Traverser.DTO;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.DocumentLoader.StorageDTO.Token;
+import cz.muni.xmichalk.DocumentLoader.TokenDTO.Token;
 
 public class BundleSearchResponseDTO {
     public QualifiedNameDTO bundleId;

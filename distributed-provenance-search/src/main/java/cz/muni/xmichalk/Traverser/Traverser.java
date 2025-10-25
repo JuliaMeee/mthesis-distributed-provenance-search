@@ -3,16 +3,12 @@ package cz.muni.xmichalk.Traverser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.fi.cpm.model.ICpmFactory;
-import cz.muni.fi.cpm.model.ICpmProvFactory;
-import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.DocumentLoader.StorageDocumentIntegrityVerifier;
 import cz.muni.xmichalk.Traverser.DTO.BundleSearchResponseDTO;
 import cz.muni.xmichalk.Traverser.DTO.ConnectorDTO;
 import cz.muni.xmichalk.Traverser.DTO.SearchParamsDTO;
 import cz.muni.xmichalk.Traverser.Models.*;
 import cz.muni.xmichalk.Traverser.ProvServiceTable.IProvServiceTable;
-import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,21 +24,13 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Traverser {
-    private final IDocumentLoader documentLoader;
-    private final ProvFactory provFactory;
-    private final ICpmFactory cpmFactory;
-    private final ICpmProvFactory cpmProvFactory;
     private final IProvServiceTable traverserTable;
     private final int concurrencyDegree = 10;
 
     private static final Comparator<ItemToSearch> toSearchPriorityComparator =
             Comparator.comparing(e -> !e.hasPathIntegrity);
 
-    public Traverser(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory, IProvServiceTable traverserTable) {
-        this.documentLoader = documentLoader;
-        this.provFactory = provFactory;
-        this.cpmFactory = cpmFactory;
-        this.cpmProvFactory = cpmProvFactory;
+    public Traverser(IProvServiceTable traverserTable) {
         this.traverserTable = traverserTable;
     }
 

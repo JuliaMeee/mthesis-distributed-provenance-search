@@ -1,17 +1,17 @@
 package cz.muni.xmichalk.DocumentLoader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.DocumentLoader.StorageDTO.Token;
+import cz.muni.xmichalk.DocumentLoader.TokenDTO.Token;
 import org.erdtman.jcs.JsonCanonicalizer;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-
-import java.security.MessageDigest;
 
 public class StorageDocumentIntegrityVerifier {
     public static boolean verifyIntegrity(String document, Token token) {
