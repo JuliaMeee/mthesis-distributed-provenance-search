@@ -21,6 +21,14 @@ public class QualifiedNameDTO {
         this.localPart = domainModel.getLocalPart();
     }
     
+    public QualifiedName toQN() {
+        return new org.openprovenance.prov.vanilla.QualifiedName(
+                this.nameSpaceUri,
+                this.localPart,
+                null
+        );
+    }
+    
     @Override
     public String toString(){
         return nameSpaceUri + localPart;

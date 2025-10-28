@@ -1,11 +1,11 @@
 package cz.muni.xmichalk.DTO;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
+import cz.muni.xmichalk.Util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
 
-import static cz.muni.xmichalk.Util.Constants.*;
+import static cz.muni.xmichalk.Util.AttributeNames.*;
 
 public class ConnectorDTO {
     public QualifiedNameDTO id;
@@ -18,23 +18,21 @@ public class ConnectorDTO {
     }
     
     public ConnectorDTO(INode node) {
-        var nodeSearcher = new NodeAttributeSearcher();
-        
         id = new QualifiedNameDTO(node.getId());
         
-        var referencedBundleIdValue = nodeSearcher.tryGetValue(node, ATTR_REFERENCED_BUNDLE_ID);
+        var referencedBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
         referencedBundleId = referencedBundleIdValue == null ? null : 
                 new QualifiedNameDTO((QualifiedName) referencedBundleIdValue);
         
-        var referencedMetaBundleIdValue = nodeSearcher.tryGetValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
+        var referencedMetaBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
         referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
                 new QualifiedNameDTO((QualifiedName) referencedMetaBundleIdValue);
 
 
-        LangString bundleHashValueObj = (LangString) nodeSearcher.tryGetValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
+        LangString bundleHashValueObj = (LangString) CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
         referencedBundleHashValue = bundleHashValueObj != null ? bundleHashValueObj.getValue() : null;
 
-        LangString hashAlgObj = (LangString) nodeSearcher.tryGetValue(node, ATTR_HASH_ALG);
+        LangString hashAlgObj = (LangString) CpmUtils.getAttributeValue(node, ATTR_HASH_ALG);
         hashAlg = hashAlgObj != null ? hashAlgObj.getValue() : null;
     }
 }

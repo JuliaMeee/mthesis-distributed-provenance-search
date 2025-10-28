@@ -4,7 +4,8 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
+import cz.muni.xmichalk.BundleVersionPicker.PickerImplementations.LatestVersionPicker;
+import cz.muni.xmichalk.Util.CpmUtils;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Element;
 import org.openprovenance.prov.model.Other;
@@ -17,7 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static cz.muni.xmichalk.Util.Constants.CPM_URI;
+import static cz.muni.xmichalk.Util.NameSpaceConstants.CPM_URI;
 import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
 
 public class BundleSearcherTest {
@@ -37,6 +38,35 @@ public class BundleSearcherTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    @Test
+    public void testPickNewestVersion() throws IOException {
+        var file = Path.of(dataFolder + "metaDocument.json");
+        
+        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+
+        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        
+        var bundleId = LatestVersionPicker.pickFrom(
+                new org.openprovenance.prov.vanilla.QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "SamplingBundle_V0", "storage"),
+                cpmDoc
+        );
+        
+        assert bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1");
+    }
+
+    @Test
+    public void testGetMetaBundleId() throws IOException {
+        var file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
+
+        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+
+        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+
+        var metaId = CpmUtils.getMetaBundleId(cpmDoc);
+
+        assert metaId != null;
     }
     
     
@@ -117,7 +147,7 @@ public class BundleSearcherTest {
         var attributeName = new org.openprovenance.prov.vanilla.QualifiedName("http://www.w3.org/ns/prov#", "location", "prov");
 
         cpmDoc.getNodes().forEach(node -> {
-            Object value = new NodeAttributeSearcher().tryGetValue(node, attributeName);
+            Object value = CpmUtils.getAttributeValue(node, attributeName);
             if (value != null) {
                 System.out.println("Found attribute in node " + node.getId() + ": " + value);
             }
@@ -133,7 +163,7 @@ public class BundleSearcherTest {
         var attributeValue = new org.openprovenance.prov.vanilla.QualifiedName(CPM_URI, "backwardConnector", "cpm");
 
         cpmDoc.getNodes().forEach(node -> {
-            Object value = new NodeAttributeSearcher().tryGetValue(node, attributeName);
+            Object value = CpmUtils.getAttributeValue(node, attributeName);
             if (value != null) {
                 System.out.println("Found attribute in node " + node.getId() + ": " + value);
             }

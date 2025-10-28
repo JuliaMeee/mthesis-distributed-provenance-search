@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -39,10 +40,11 @@ public class TraverserController {
     }
 
     private ResponseEntity searchChain(SearchParamsDTO searchParams, boolean searchBackwards) {
-        if (isMissingRequiredParams(searchParams)) {
+        List<String> missingParams = getMissingParams(searchParams);
+        if (!missingParams.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("Missing required fields in the request body.");
+                    .body(getMissingParamsMessage(missingParams));
         }
 
         try {
@@ -58,6 +60,7 @@ public class TraverserController {
                     connectorId,
                     new SearchParams(
                             searchBackwards,
+                            searchParams.versionPreference,
                             searchParams.targetType,
                             searchParams.targetSpecification
                     )
@@ -75,7 +78,25 @@ public class TraverserController {
         }
     }
 
-    private static boolean isMissingRequiredParams(SearchParamsDTO params) {
-        return params.bundleId == null || params.startNodeId == null || params.targetType == null || params.targetSpecification == null;
+    private static String getMissingParamsMessage(List<String> missingParams) {
+        StringBuilder builder = new StringBuilder("Missing required fields in the request body: ");
+        for (int i = 0; i < missingParams.size(); i++) {
+            builder.append(missingParams.get(i));
+            if (i < missingParams.size() - 1) {
+                builder.append(", ");
+            }
+        }
+        builder.append(".");
+        return builder.toString();
+    }
+
+    private static List<String> getMissingParams(SearchParamsDTO params) {
+        List<String> missing = new ArrayList<String>();
+        if (params.bundleId == null) missing.add("bundleId");
+        if (params.startNodeId == null) missing.add("startNodeId");
+        if (params.targetType == null) missing.add("targetType");
+        if (params.targetSpecification == null) missing.add("targetSpecification");
+
+        return missing;
     }
 }

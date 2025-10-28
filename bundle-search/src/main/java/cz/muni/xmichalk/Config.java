@@ -4,6 +4,8 @@ import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
+import cz.muni.xmichalk.BundleSearch.BundleSearcherRegistry;
+import cz.muni.xmichalk.BundleVersionPicker.VersionPickerRegistry;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
 import cz.muni.xmichalk.DocumentLoader.StorageDocumentLoader;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -33,15 +35,37 @@ public class Config {
     }
 
     @Bean
-    public ICpmProvFactory cpmProvFactory(ProvFactory pf) {
-        return new CpmProvFactory(pf);
+    public ICpmProvFactory cpmProvFactory(ProvFactory provFactory) {
+        return new CpmProvFactory(provFactory);
     }
 
     @Bean
-    public IDocumentLoader documentLoader() {
-        return new StorageDocumentLoader();
+    public IDocumentLoader documentLoader(
+            ProvFactory provFactory,
+            ICpmFactory cpmFactory,
+            ICpmProvFactory cpmProvFactory
+    ) {
+        return new StorageDocumentLoader(provFactory, cpmFactory, cpmProvFactory);
     }
 
     @Bean
-    public BundleSearchService bundleSearchService(IDocumentLoader documentLoader, ProvFactory provFactory,  ICpmFactory cpmFactory,  ICpmProvFactory cpmProvFactory) {return new BundleSearchService(documentLoader, provFactory, cpmFactory, cpmProvFactory);}
+    public BundleSearcherRegistry bundleSearcherRegistry() {
+        return new BundleSearcherRegistry();
+    }
+    
+    @Bean
+    public VersionPickerRegistry versionPickerRegistry(
+            IDocumentLoader documentLoader
+    ) {
+        
+        return new VersionPickerRegistry(documentLoader);
+    }
+
+    @Bean
+    public BundleSearchService bundleSearchService(
+            IDocumentLoader documentLoader,
+            BundleSearcherRegistry bundleSearcherRegistry
+    ) {
+        return new BundleSearchService(documentLoader, bundleSearcherRegistry);
+    }
 }

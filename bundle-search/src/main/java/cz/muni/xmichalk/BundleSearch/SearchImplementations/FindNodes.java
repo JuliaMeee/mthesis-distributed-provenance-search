@@ -6,7 +6,7 @@ import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearch;
+import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearcher;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
 import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.Util.ProvDocumentUtils;
@@ -38,7 +38,7 @@ public class FindNodes<T> implements ISearchBundle<T> {
     @Override
     public T apply(final CpmDocument document, final QualifiedName startNodeId, final JsonNode targetSpecification) {
         var predicate = translatePredicate.apply(targetSpecification);
-        var results = BundleNodesSearch.search(document, startNodeId, predicate);
+        var results = BundleNodesSearcher.search(document, startNodeId, predicate);
         return resultTransformation.apply(results);
     }
 

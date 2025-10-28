@@ -1,52 +1,59 @@
 package cz.muni.xmichalk;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.xmichalk.BundleSearch.BundleSearcherRegistry;
 import cz.muni.xmichalk.BundleSearch.ETargetType;
+import cz.muni.xmichalk.BundleVersionPicker.EVersionPreferrence;
+import cz.muni.xmichalk.BundleVersionPicker.VersionPickerRegistry;
 import cz.muni.xmichalk.DTO.QualifiedNameDTO;
 import cz.muni.xmichalk.DTO.ResponseDTO;
+import cz.muni.xmichalk.DocumentLoader.StorageCpmDocument;
 import cz.muni.xmichalk.DocumentLoader.StorageDocument;
 import cz.muni.xmichalk.DocumentLoader.IDocumentLoader;
+import cz.muni.xmichalk.Exceptions.UnsupportedTargetTypeException;
+import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.ProvFactory;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.interop.Formats;
 
 import java.io.IOException;
+import java.util.List;
 
 public class BundleSearchService {
     private final IDocumentLoader documentLoader;
-    private final ProvFactory provFactory;
-    private final ICpmFactory cpmFactory;
-    private final ICpmProvFactory cpmProvFactory;
+    private final BundleSearcherRegistry bundleSearcherRegistry;
     
-    public BundleSearchService(IDocumentLoader documentLoader, ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory) {
+    public BundleSearchService(IDocumentLoader documentLoader, BundleSearcherRegistry bundleSearcher) {
         this.documentLoader = documentLoader;
-        this.provFactory = provFactory;
-        this.cpmFactory = cpmFactory;
-        this.cpmProvFactory = cpmProvFactory;
+        this.bundleSearcherRegistry = bundleSearcher;
     }
 
-    public ResponseDTO searchBundle(QualifiedName bundleId, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws IOException {
-        StorageDocument retrievedDocument = documentLoader.loadDocument(bundleId.getUri());
+    public ResponseDTO searchBundle(QualifiedName bundleId, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws IOException, UnsupportedTargetTypeException {
+        StorageCpmDocument retrievedDocument = documentLoader.loadCpmDocument(bundleId.getUri());
         var document = retrievedDocument.document;
         var response = searchDocument(document, startNodeId, targetType, targetSpecification);
         return new ResponseDTO(response.bundleId(), retrievedDocument.token, response.found());
     }
 
-    public ResponseDTO searchDocument(Document document, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws IOException {
+    public ResponseDTO searchDocument(CpmDocument document, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws IOException, UnsupportedTargetTypeException {
 
-        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
+        var bundleSearcher = bundleSearcherRegistry.getSearchFunc(targetType);
+        
+        if (bundleSearcher == null) {
+            throw new UnsupportedTargetTypeException("No search function registered for target type: " + targetType);
+        }
 
-        var searchFunc = BundleSearcherRegistry.getSearchFunc(targetType);
-
-        Object result = searchFunc.apply(cpmDocument, startNodeId, targetSpecification);
+        Object result = bundleSearcher.apply(document, startNodeId, targetSpecification);
 
         ResponseDTO responseDTO = new ResponseDTO(
-                new QualifiedNameDTO(cpmDocument.getBundleId()),
+                new QualifiedNameDTO(document.getBundleId()),
                 null,
                 new ObjectMapper().valueToTree(result));
         
@@ -55,13 +62,9 @@ public class BundleSearchService {
         
         return responseDTO;
     }
-
-    public void loadMetaBundle(String uri) {
-        var loadedMeta = documentLoader.loadMetaDocument(uri);
-        var document = loadedMeta.document;
-        var cpmDocument = new CpmDocument(document, provFactory, cpmProvFactory, cpmFactory);
-        // var integrity = loadedMeta.integrityCheckPassed ? ECredibility.VALID : ECredibility.INVALID;
-    }
     
+    public List<ETargetType> getSupportedTargetTypes() {
+        return bundleSearcherRegistry.getAllTargetTypes();
+    }
     
 }

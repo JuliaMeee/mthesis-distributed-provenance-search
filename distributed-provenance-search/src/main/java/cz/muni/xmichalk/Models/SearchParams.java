@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class SearchParams {
     public boolean searchBackwards;
+    public String versionPreference;
     public String targetType;
     public JsonNode targetSpecification;
 
@@ -11,8 +12,9 @@ public class SearchParams {
 
     }
 
-    public SearchParams(boolean searchBackwards, String targetType, JsonNode targetSpecification) {
+    public SearchParams(boolean searchBackwards, String versionPreference, String targetType, JsonNode targetSpecification) {
         this.searchBackwards = searchBackwards;
+        this.versionPreference = versionPreference;
         this.targetType = targetType;
         this.targetSpecification = targetSpecification;
     }

@@ -89,7 +89,7 @@ def add_version_chain_to_bundle(bundle: ProvBundle, gen_entity: Entity):
         except KeyError:
             ns = Namespace(
                 org,
-                config.fqdn + f"/api/v1/organizations/{org}/graphs/",
+                "http://" + config.fqdn + f"/api/v1/organizations/{org}/documents/",
             )
             NAMESPACES[org] = ns
 

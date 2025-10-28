@@ -21,7 +21,7 @@ import java.io.IOException;
 )
 public class TraverserConfig {
     @Bean
-    public IProvServiceTable traverserTable() {
+    public IProvServiceTable provServiceTable() {
         var table = new ProvServiceTable();
         try {
             var resource = new ClassPathResource("config" + File.separator + "provServiceTable.json");

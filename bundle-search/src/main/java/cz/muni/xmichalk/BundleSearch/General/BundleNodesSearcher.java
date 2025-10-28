@@ -8,7 +8,7 @@ import org.openprovenance.prov.model.*;
 import java.util.*;
 import java.util.function.Predicate;
 
-public final class BundleNodesSearch {
+public final class BundleNodesSearcher {
     public static List<INode> search(CpmDocument document, QualifiedName startNodeId, Predicate<INode> filter) {
         Set<INode> visited = new HashSet<>();
         Queue<INode> queue = new ArrayDeque<>();
@@ -16,10 +16,7 @@ public final class BundleNodesSearch {
 
         INode start = document.getNode(startNodeId);
         if (start == null) {
-            // TODO throw an error or return a message?
-            // or do queue.addAll(doc.getNodes()); and continue?
-            System.out.println("Could not find start node with id: " + startNodeId);
-            return null;
+            throw new IllegalArgumentException("Start node with id " + startNodeId.getUri() + " does not exist in document " + document.getBundleId().getUri());
         }
 
         queue.add(start);

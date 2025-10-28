@@ -54,6 +54,21 @@ Run requests to the prov-traversal container from the <b>debug-shell</b> contain
 
  If you get `curl: (7) Failed to connect to prov-traverser port 8000 after 6 ms: Connection refused` soon after starting the container, wait a few seconds and try again.
 
+ <h2>Storage compatibility issues and java serialization issues</h2>
+This is a list of issues encountered when working with the storage service and java prov toolbox library.
+
+- Issue: In meta document, id of entity representing a version did not match represented bundle id.  
+Fix: Changed the entity id namespaceUri generation in
+`prov_storage\distributed-provenance-system\distributed_prov_system\provenance\neomodel2prov.py`.
+- Issue: Some values in meta documents were not strings. prov toolbox then could not load the document.  
+Fix: Before deserializing json document, stringify all values.
+- Issue: In meta documents, "prov:type" attribute values were not serialized as a list of typed values. Prov toolbox then failed to load this attribute.  
+Fix: Before deserializing json document, rewrite all "prov:type" attribute values into expected format.
+- Issue: Prov toolbox demands explicit bundle id property as "@id".  
+Fix: Before deserializing json document, find bundle id and add explicit "@id" property.
+- Issue: Prov toolbox does not load bundle id namespaceUri unless prefixes are defined inside the bundle entity.  
+Fix: Before deserializing json document, copy document namespace declaration into the bundle entity.
+
 <h2>Example requests</h2>
 
 Example 1:
@@ -311,4 +326,3 @@ curl -X POST \
   }
 ]
 ```
-

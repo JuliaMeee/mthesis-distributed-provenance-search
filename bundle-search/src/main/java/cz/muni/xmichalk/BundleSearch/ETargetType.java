@@ -1,7 +1,5 @@
 package cz.muni.xmichalk.BundleSearch;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum ETargetType {
     NODE_IDS_BY_ID("Finds nodes with ids matching the given id, returns their ids. Expects target specification in the form of target id URI."),
     NODES_BY_ID("Finds nodes with ids matching the given id, returns the full nodes encapsulated in a prov document serialized as a JSON. Expects target specification in the form of target id URI."),

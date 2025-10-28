@@ -3,9 +3,7 @@ package cz.muni.xmichalk.Traverser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.DTO.BundleSearchResponseDTO;
-import cz.muni.xmichalk.DTO.ConnectorDTO;
-import cz.muni.xmichalk.DTO.SearchParamsDTO;
+import cz.muni.xmichalk.DTO.*;
 import cz.muni.xmichalk.DocumentValidity.StorageDocumentIntegrityVerifier;
 import cz.muni.xmichalk.DocumentValidity.StorageDocumentValidityVerifier;
 import cz.muni.xmichalk.Models.*;
@@ -25,14 +23,14 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Traverser {
-    private final IProvServiceTable traverserTable;
+    private final IProvServiceTable provServiceTable;
     private final int concurrencyDegree = 10;
 
     private static final Comparator<ItemToSearch> toSearchPriorityComparator =
             Comparator.comparing(e -> !e.hasPathIntegrity);
 
     public Traverser(IProvServiceTable traverserTable) {
-        this.traverserTable = traverserTable;
+        this.provServiceTable = traverserTable;
     }
 
 
@@ -121,11 +119,11 @@ public class Traverser {
                     System.out.println("Found result in bundle: " + itemToSearch.bundleId.getLocalPart());
                 }
 
-                var newItemsToSearch = getNewItemsToSearch(itemToSearch, searchParams.searchBackwards);
+                var newItemsToSearch = getNewItemsToSearch(itemToSearch, searchParams);
                 searchState.toSearch.addAll(newItemsToSearch);
                 System.out.println("Found " + newItemsToSearch.size() + " items to search in bundle: " + itemToSearch.bundleId.getLocalPart());
 
-                // TODO integrity and validity
+                // TODO validity
 
             } catch (Exception e) {
                 System.err.println("Error during search bundle " + itemToSearch.bundleId.getLocalPart() + ": " + e.getMessage());
@@ -154,10 +152,10 @@ public class Traverser {
         return new FoundResult(searchBundleResult.bundleId.toDomainModel(), searchBundleResult.found, itemToSearch.hasPathIntegrity, hasIntegrity, itemToSearch.isPathValid, isValid);
     }
 
-    private List<ItemToSearch> getNewItemsToSearch(ItemToSearch itemToSearch, boolean searchBackwards) throws IOException {
+    private List<ItemToSearch> getNewItemsToSearch(ItemToSearch itemToSearch, SearchParams searchParams) throws IOException {
         var searchBundleResult = fetchSearchBundleResult(
                 itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
-                new ObjectMapper().valueToTree(searchBackwards ? "backward" : "forward"));
+                new ObjectMapper().valueToTree(searchParams.searchBackwards ? "backward" : "forward"));
 
         if (searchBundleResult == null || searchBundleResult.found == null || searchBundleResult.found.isNull()) {
             return new ArrayList<>();
@@ -175,22 +173,33 @@ public class Traverser {
             return new ArrayList<>();
         }
 
-        boolean hasIntegrity = StorageDocumentIntegrityVerifier.verifySignature(searchBundleResult.token);
-        boolean isValid = new StorageDocumentValidityVerifier().verifyValidity(searchBundleResult.token);
+        boolean hasPathIntegrity = itemToSearch.hasPathIntegrity && StorageDocumentIntegrityVerifier.verifySignature(searchBundleResult.token);
+        boolean isPathValid = itemToSearch.isPathValid && new StorageDocumentValidityVerifier().verifyValidity(searchBundleResult.token);
 
+        return convertToNewItemsToSearch(connectors, searchParams, hasPathIntegrity, isPathValid);
+    }
+
+    public List<ItemToSearch> convertToNewItemsToSearch(List<ConnectorDTO> connectors, SearchParams searchParams, boolean hasPathIntegrity, boolean isPathValid) throws IOException {
         List<ItemToSearch> newItemsToSearch = new ArrayList<>();
 
         for (ConnectorDTO connector : connectors) {
-            if (connector != null && connector.referencedBundleId != null) {
-                newItemsToSearch.add(
-                        new ItemToSearch(
-                                connector.referencedBundleId.toDomainModel(),
-                                connector.id.toDomainModel(),
-                                itemToSearch.hasPathIntegrity && hasIntegrity,
-                                itemToSearch.isPathValid && isValid
-                        )
-                );
+            if (connector == null || connector.referencedBundleId == null) continue;
+
+            var referencedBundleId = connector.referencedBundleId.toDomainModel();
+            var preferredVersion = fetchPreferredBundleVersion(referencedBundleId, searchParams.versionPreference);
+
+            if (preferredVersion == null) {
+                continue;
             }
+
+            newItemsToSearch.add(
+                    new ItemToSearch(
+                            preferredVersion.toDomainModel(),
+                            connector.id.toDomainModel(),
+                            hasPathIntegrity,
+                            isPathValid
+                    )
+            );
         }
 
         return newItemsToSearch;
@@ -199,13 +208,13 @@ public class Traverser {
     public BundleSearchResponseDTO fetchSearchBundleResult(
             QualifiedName bundleId, QualifiedName connectorId,
             String targetType, JsonNode targetSpecification) throws IOException {
-        SearchParamsDTO searchParams = new SearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
-        String traverserAddress = traverserTable.getTraverserUrl(bundleId.getUri());
-        if (traverserAddress == null) {
-            throw new IOException("No traverser found for bundle: " + bundleId.getUri());
+        BundleSearchParamsDTO searchParams = new BundleSearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
+        String ServiceUri = provServiceTable.getServiceUri(bundleId.getUri());
+        if (ServiceUri == null) {
+            throw new IOException("No prov service found for bundle: " + bundleId.getUri());
         }
 
-        String url = traverserAddress + "/api/searchBundle";
+        String url = ServiceUri + "/api/searchBundle";
 
         System.out.println("Fetching results for bundle " + bundleId.getUri() + " via: " + url + " connector: " + connectorId.getUri() + " targetType: " + targetType + " targetSpec: " + targetSpecification.toString());
 
@@ -213,7 +222,7 @@ public class Traverser {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<SearchParamsDTO> request = new HttpEntity<>(searchParams, headers);
+        HttpEntity<BundleSearchParamsDTO> request = new HttpEntity<>(searchParams, headers);
 
         ResponseEntity<BundleSearchResponseDTO> response = restTemplate.postForEntity(
                 url, request, BundleSearchResponseDTO.class);
@@ -225,6 +234,36 @@ public class Traverser {
         BundleSearchResponseDTO searchBundleResultDTO = response.getBody();
 
         return searchBundleResultDTO;
+    }
+
+    public QualifiedNameDTO fetchPreferredBundleVersion(QualifiedName bundleId, String versionpreference) throws IOException {
+        PickVersionParamsDTO params = new PickVersionParamsDTO(
+                new QualifiedNameDTO().from(bundleId),
+                versionpreference);
+
+        String serviceUri = provServiceTable.getServiceUri(bundleId.getUri());
+        if (serviceUri == null) {
+            throw new IOException("No prov service found for bundle: " + bundleId.getUri());
+        }
+
+        String url = serviceUri + "/api/pickVersion";
+
+        System.out.println("Fetching pick version result for bundle " + bundleId.getUri() + " via: " + url + " with version preference: " + versionpreference);
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<PickVersionParamsDTO> request = new HttpEntity<>(params, headers);
+
+        ResponseEntity<QualifiedNameDTO> response = restTemplate.postForEntity(
+                url, request, QualifiedNameDTO.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new IOException("API call failed with status: " + response.getStatusCode());
+        }
+
+        return response.getBody();
     }
 
     private ECredibility mergeCredibility(ECredibility bundleCredibility, ECredibility pathCredibility) {

@@ -10,7 +10,7 @@ import java.util.Map;
 public class ProvServiceTable implements IProvServiceTable {
     private final LinkedHashMap<String, String> table = new LinkedHashMap<>();
 
-    public String getTraverserUrl(String resourceUri) {
+    public String getServiceUri(String resourceUri) {
         for (Map.Entry<String, String> entry : table.entrySet()) {
             if (resourceUri.startsWith(entry.getKey())) {
                 return entry.getValue();

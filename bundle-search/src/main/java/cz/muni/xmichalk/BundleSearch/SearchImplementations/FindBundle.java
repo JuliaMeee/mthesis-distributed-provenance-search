@@ -3,14 +3,14 @@ package cz.muni.xmichalk.BundleSearch.SearchImplementations;
 import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.BundleSearch.General.NodeAttributeSearcher;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
+import cz.muni.xmichalk.Util.CpmUtils;
 import org.openprovenance.prov.model.QualifiedName;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static cz.muni.xmichalk.Util.Constants.*;
+import static cz.muni.xmichalk.Util.AttributeNames.*;
 
 public class FindBundle<T> implements ISearchBundle<T> {
     private final Function<JsonNode, Predicate<CpmDocument>> translatePredicate;
@@ -32,7 +32,7 @@ public class FindBundle<T> implements ISearchBundle<T> {
         return (CpmDocument doc) -> {
             INode mainActivity = doc.getMainActivity();
             if (mainActivity != null) {
-                var value = new NodeAttributeSearcher().tryGetValue(mainActivity, ATTR_REFERENCED_META_BUNDLE_ID);
+                var value = CpmUtils.getAttributeValue(mainActivity, ATTR_REFERENCED_META_BUNDLE_ID);
                 if (value instanceof QualifiedName qnValue) {
                     return targetSpecification.asText().equals(qnValue.getUri());
                 }

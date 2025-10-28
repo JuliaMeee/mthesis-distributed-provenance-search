@@ -14,8 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-import static cz.muni.xmichalk.Util.Constants.BLANK_URI;
+import static cz.muni.xmichalk.Util.NameSpaceConstants.BLANK_URI;
 
 public class ProvDocumentUtils {
     public static final Charset charset = java.nio.charset.StandardCharsets.UTF_8;
@@ -41,9 +43,7 @@ public class ProvDocumentUtils {
 
     public static String prepareForDeserialization(String serializedDocument, Formats.ProvFormat format) {
         if (format == Formats.ProvFormat.JSON) {
-            serializedDocument = ProvJsonUtils.addExplicitBundleId(serializedDocument);
-            serializedDocument = ProvJsonUtils.stringifyValues(serializedDocument);
-            serializedDocument = ProvJsonUtils.copyOuterPrefixesIntoBundles(serializedDocument);
+           serializedDocument = ProvJsonUtils.prepareJsonForDeserialization(serializedDocument);
         }
 
         return serializedDocument;
@@ -65,7 +65,7 @@ public class ProvDocumentUtils {
             }
         }
         
-        registerAllNamespaces(ns, bundle);
+        registerAllPrefixes(ns, bundle);
         doc.setNamespace(ns);
         doc.getStatementOrBundle().add(bundle);
         
@@ -82,23 +82,23 @@ public class ProvDocumentUtils {
         return null;
     }
     
-    public static Namespace registerAllNamespaces(Namespace namespace, Object provObject) {
+    public static void doForEachQualifiedName(Object provObject, Consumer<QualifiedName> action) {
         if (provObject instanceof Document doc) {
             for (StatementOrBundle statement : doc.getStatementOrBundle()) {
-                registerAllNamespaces(namespace, statement);
+                doForEachQualifiedName(statement, action);
             }
         } else if (provObject instanceof Bundle bundle) {
             QualifiedName bundleId = bundle.getId();
             if (bundleId != null) {
-                namespace.register(bundleId.getPrefix(), bundleId.getNamespaceURI());
+                action.accept(bundleId);
             }
             for (Statement statement : bundle.getStatement()) {
-                registerAllNamespaces(namespace, statement);
+                doForEachQualifiedName(statement, action);
             }
         } else if (provObject instanceof Identifiable identifiable) {
             QualifiedName id = identifiable.getId();
             if (id != null) {
-                namespace.register(id.getPrefix(), id.getNamespaceURI());
+                action.accept(id);
             }
         }
 
@@ -106,15 +106,29 @@ public class ProvDocumentUtils {
             for (Attribute attr : hasAttributes.getAttributes()) {
                 QualifiedName attrName = attr.getElementName();
                 if (attrName != null) {
-                    namespace.register(attrName.getPrefix(), attrName.getNamespaceURI());
+                    action.accept(attrName);
                 }
-                
+
                 Object value = attr.getValue();
                 if (value instanceof QualifiedName qnValue) {
-                    namespace.register(qnValue.getPrefix(), qnValue.getNamespaceURI());
+                    action.accept(qnValue);
+                }
+                
+                if (value instanceof List<?> listValue) {
+                    for (Object item : listValue) {
+                        if (item instanceof QualifiedName qnItem) {
+                            action.accept(qnItem);
+                        }
+                    }
                 }
             }
         }
+    }
+    
+    public static Namespace registerAllPrefixes(Namespace namespace, Object provObject) {
+        doForEachQualifiedName(
+                provObject, 
+                qn -> namespace.register(qn.getPrefix(), qn.getNamespaceURI()));
         
         return namespace;
     }

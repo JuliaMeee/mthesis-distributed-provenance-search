@@ -13,10 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public class BundleSearcherRegistry {
-    private static final Map<ETargetType, ISearchBundle> registry = new HashMap<>();
-    // Maps target type to searcher constructor function that takes a target specification as input
-
-    static {
+    private final Map<ETargetType, ISearchBundle> registry = new HashMap<>();
+    
+    public BundleSearcherRegistry(){
         registry.put(ETargetType.NODE_IDS_BY_ID,
                 new FindNodes<List<QualifiedNameDTO>>(
                         FindNodes::translateNodeIdToPredicate,
@@ -26,7 +25,6 @@ public class BundleSearcherRegistry {
                 new FindNodes<JsonNode>(
                         FindNodes::translateNodeIdToPredicate,
                         FindNodes::transformResultsToDocJson)
-                
         );
         registry.put(ETargetType.NODE_IDS_BY_ATTRIBUTES,
                 new FindNodes<List<QualifiedNameDTO>>(
@@ -47,15 +45,19 @@ public class BundleSearcherRegistry {
                         (CpmDocument doc) -> doc == null ? null : new QualifiedNameDTO(doc.getBundleId()))
         );
 
-        // Add more target types here in the future development
+        // Add more target types here in future development
+    }
+    
+    public BundleSearcherRegistry(Map<ETargetType, ISearchBundle> registry){
+        this.registry.putAll(registry);
     }
 
-    public static ISearchBundle getSearchFunc(ETargetType id) {
+    public ISearchBundle getSearchFunc(ETargetType id) {
         return registry.get(id);
 
     }
 
-    public static List<ETargetType> getAllTargetTypes() {
+    public List<ETargetType> getAllTargetTypes() {
         return registry.keySet().stream().toList();
     }
 }

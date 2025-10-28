@@ -1,0 +1,129 @@
+package cz.muni.xmichalk.Util;
+
+import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearcher;
+import org.openprovenance.prov.model.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
+
+import static cz.muni.xmichalk.Util.AttributeNames.*;
+import static cz.muni.xmichalk.Util.NameSpaceConstants.CPM_URI;
+
+public class CpmUtils {
+    public static QualifiedName getMetaBundleId(CpmDocument bundle) {
+        INode startNode = chooseStartNode(bundle);
+        if (startNode == null) {
+            return null;
+        }
+        List<INode> mainActivities = BundleNodesSearcher.search(bundle, startNode.getId(), 
+                node -> hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
+                        qName -> qName.getUri().equals(CPM_URI + "mainActivity"))
+                );
+        
+        if (mainActivities == null || mainActivities.size() != 1) {return null;}
+        
+        return (QualifiedName) getAttributeValue(mainActivities.getFirst(), ATTR_REFERENCED_META_BUNDLE_ID);
+    }
+    
+    public static <T> boolean hasAttributeTargetValue(INode node, QualifiedName attributeName, Class<T> targetClass, Predicate<T> isTargetValue) {
+        var value = getAttributeValue(node, attributeName);
+        return isTargetValue(value, targetClass, isTargetValue);
+    }
+    
+    public static INode chooseStartNode(CpmDocument document) {
+        var forwardConnectors = document.getForwardConnectors();
+        if (!forwardConnectors.isEmpty()) {
+            return forwardConnectors.getFirst();
+        }
+        var backwardConnectors = document.getBackwardConnectors();
+        if (!backwardConnectors.isEmpty()) {
+            return backwardConnectors.getFirst();
+        }
+        var nodes = document.getNodes();
+        if (!nodes.isEmpty()) {
+            return nodes.getFirst();
+        }
+        return null;
+    }
+
+    public static Object getAttributeValue(INode node, QualifiedName attributeName) {
+        List<Object> values = new ArrayList<>();
+        boolean isList = false;
+        boolean found = false;
+        
+        for (Element element : node.getElements()) {
+            Object value = getAttributeValue(element, attributeName);
+            if (value == null) {continue;}
+            
+            found = true;
+            if (value instanceof Collection) {
+                isList = true;
+                values.addAll((Collection<?>) value);
+            } else {
+                values.add(value);
+            }
+        }
+        
+        if (!found) return null; // does not have the attribute
+        if (isList) return values; // found list(s) of values (possibly empty)
+        if (values.size() == 1) return values.getFirst(); // only found one value instance and not a list
+        return values; // multiple single values found
+    }
+
+    public static Object getAttributeValue(Element element, QualifiedName attributeName) {
+        if (element.getKind() == StatementOrBundle.Kind.PROV_ACTIVITY) {
+            if (attributeName.equals(ATTR_START_TIME)) {
+                return ((Activity) element).getStartTime();
+            } else if (attributeName.equals(ATTR_END_TIME)) {
+                return ((Activity) element).getEndTime();
+            }
+        }
+        if (attributeName.equals(ATTR_LOCATION)) {
+            return element.getLocation();
+        }
+        if (attributeName.equals(ATTR_PROV_TYPE)){
+            for (Type type : element.getType()) {
+                if (type.getElementName().equals(attributeName)) {
+                    return type.getValue();
+                }
+            }
+        }
+        if (attributeName.equals(ATTR_LABEL)) {
+            if (element.getLabel() != null){
+                return element.getLabel();
+            }
+        }
+        for (Other other : element.getOther()) {
+            org.openprovenance.prov.model.QualifiedName name = other.getElementName();
+            if (name.equals(attributeName)) {
+                return other.getValue();
+            }
+        }
+
+        return null;
+    }
+
+    public static <T> boolean isTargetValue(Object value, Class<T> targetClass, Predicate<T> predicate){
+
+        if (targetClass.isInstance(value)) {
+            return predicate.test((T) value);
+        }
+
+        if (value instanceof Collection) {
+            for (Object item : (Collection<?>) value) {
+                if (targetClass.isInstance(item)) {
+                    if (predicate.test((T) item)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        return false;
+    }
+}
