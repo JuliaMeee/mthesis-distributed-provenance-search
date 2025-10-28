@@ -1,26 +1,25 @@
-package cz.muni.xmichalk.DTO;
+package cz.muni.xmichalk.Models;
 
-import org.openprovenance.apache.commons.lang.builder.ToString;
 import org.openprovenance.prov.model.QualifiedName;
 
-public class QualifiedNameDTO {
+public class QualifiedNameData {
     public String nameSpaceUri;
     public String localPart;
 
-    public QualifiedNameDTO() {
+    public QualifiedNameData() {
     }
-    
-    public QualifiedNameDTO(String nameSpaceUri, String localPart) {
+
+    public QualifiedNameData(String nameSpaceUri, String localPart) {
         this.nameSpaceUri = nameSpaceUri;
         this.localPart = localPart;
     }
 
 
-    public QualifiedNameDTO(QualifiedName domainModel) {
+    public QualifiedNameData(QualifiedName domainModel) {
         this.nameSpaceUri = domainModel.getNamespaceURI();
         this.localPart = domainModel.getLocalPart();
     }
-    
+
     public QualifiedName toQN() {
         return new org.openprovenance.prov.vanilla.QualifiedName(
                 this.nameSpaceUri,
@@ -28,9 +27,9 @@ public class QualifiedNameDTO {
                 null
         );
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return nameSpaceUri + localPart;
     }
 }

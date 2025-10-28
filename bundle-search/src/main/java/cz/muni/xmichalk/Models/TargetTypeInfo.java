@@ -1,10 +1,10 @@
-package cz.muni.xmichalk.DTO;
+package cz.muni.xmichalk.Models;
 
 
 import cz.muni.xmichalk.BundleSearch.ETargetType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record TargetTypeInfoDTO (
+public record TargetTypeInfo(
         @Schema(
                 description = "the target type",
                 example = "CONNECTORS"

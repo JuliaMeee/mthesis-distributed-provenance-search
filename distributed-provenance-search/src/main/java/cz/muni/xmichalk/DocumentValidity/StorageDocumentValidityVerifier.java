@@ -1,6 +1,6 @@
 package cz.muni.xmichalk.DocumentValidity;
 
-import cz.muni.xmichalk.DTO.TokenDTO.Token;
+import cz.muni.xmichalk.DTO.Token.Token;
 
 public class StorageDocumentValidityVerifier implements IValidityVerifier {
 

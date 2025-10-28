@@ -1,32 +1,31 @@
-package cz.muni.xmichalk.DTO;
+package cz.muni.xmichalk.Models;
 
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.Util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
-import org.openprovenance.prov.model.QualifiedName;
 
 import static cz.muni.xmichalk.Util.AttributeNames.*;
 
-public class ConnectorDTO {
-    public QualifiedNameDTO id;
-    public QualifiedNameDTO referencedBundleId;
-    public QualifiedNameDTO referencedMetaBundleId;
+public class ConnectorData {
+    public QualifiedNameData id;
+    public QualifiedNameData referencedBundleId;
+    public QualifiedNameData referencedMetaBundleId;
     public String referencedBundleHashValue;
     public String hashAlg;
 
-    public ConnectorDTO() {
+    public ConnectorData() {
     }
-    
-    public ConnectorDTO(INode node) {
-        id = new QualifiedNameDTO(node.getId());
-        
+
+    public ConnectorData(INode node) {
+        id = new QualifiedNameData(node.getId());
+
         var referencedBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
-        referencedBundleId = referencedBundleIdValue == null ? null : 
-                new QualifiedNameDTO((QualifiedName) referencedBundleIdValue);
-        
+        referencedBundleId = referencedBundleIdValue == null ? null :
+                new QualifiedNameData((org.openprovenance.prov.model.QualifiedName) referencedBundleIdValue);
+
         var referencedMetaBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
         referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
-                new QualifiedNameDTO((QualifiedName) referencedMetaBundleIdValue);
+                new QualifiedNameData((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
 
 
         LangString bundleHashValueObj = (LangString) CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);

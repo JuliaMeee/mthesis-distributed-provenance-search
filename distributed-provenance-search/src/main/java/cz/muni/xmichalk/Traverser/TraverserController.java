@@ -6,7 +6,7 @@ import cz.muni.xmichalk.DTO.SearchParamsDTO;
 import cz.muni.xmichalk.Models.FoundResult;
 import cz.muni.xmichalk.Models.SearchParams;
 import io.swagger.v3.oas.annotations.Operation;
-import org.openprovenance.prov.vanilla.QualifiedName;
+import org.openprovenance.prov.model.QualifiedName;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,11 +49,8 @@ public class TraverserController {
 
         try {
 
-            System.out.println("Searching " + (searchBackwards ? "predecessors" : "successors") + ": " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
-                    + " " + searchParams.startNodeId.nameSpaceUri + searchParams.startNodeId.localPart + " " + searchParams.targetSpecification);
-
-            QualifiedName bundleId = new QualifiedName(searchParams.bundleId.nameSpaceUri, searchParams.bundleId.localPart, null);
-            QualifiedName connectorId = new QualifiedName(searchParams.startNodeId.nameSpaceUri, searchParams.startNodeId.localPart, null);
+            QualifiedName bundleId = searchParams.bundleId.toDomainModel();
+            QualifiedName connectorId = searchParams.startNodeId.toDomainModel();
 
             List<FoundResult> results = traverser.searchChain(
                     bundleId,
@@ -71,6 +68,7 @@ public class TraverserController {
                     .toList();
 
             return ResponseEntity.ok(resultsDTO);
+
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -1,6 +1,8 @@
 package cz.muni.xmichalk.ProvServiceTable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,7 @@ import java.util.Map;
 
 public class ProvServiceTable implements IProvServiceTable {
     private final LinkedHashMap<String, String> table = new LinkedHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(ProvServiceTable.class);
 
     public String getServiceUri(String resourceUri) {
         for (Map.Entry<String, String> entry : table.entrySet()) {
@@ -26,6 +29,6 @@ public class ProvServiceTable implements IProvServiceTable {
                         mapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, String.class));
         table.putAll(loaded);
 
-        System.out.println("Loaded traverser table: " + table);
+        log.info("Loaded traverser table: {}", table);
     }
 }

@@ -5,8 +5,7 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.xmichalk.BundleSearch.SearchImplementations.FindBundle;
 import cz.muni.xmichalk.BundleSearch.SearchImplementations.FindConnectors;
 import cz.muni.xmichalk.BundleSearch.SearchImplementations.FindNodes;
-import cz.muni.xmichalk.DTO.QualifiedNameDTO;
-import org.openprovenance.prov.model.QualifiedName;
+import cz.muni.xmichalk.Models.QualifiedNameData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +13,10 @@ import java.util.Map;
 
 public class BundleSearcherRegistry {
     private final Map<ETargetType, ISearchBundle> registry = new HashMap<>();
-    
-    public BundleSearcherRegistry(){
+
+    public BundleSearcherRegistry() {
         registry.put(ETargetType.NODE_IDS_BY_ID,
-                new FindNodes<List<QualifiedNameDTO>>(
+                new FindNodes<List<QualifiedNameData>>(
                         FindNodes::translateNodeIdToPredicate,
                         FindNodes::transformResultsToIds)
         );
@@ -27,7 +26,7 @@ public class BundleSearcherRegistry {
                         FindNodes::transformResultsToDocJson)
         );
         registry.put(ETargetType.NODE_IDS_BY_ATTRIBUTES,
-                new FindNodes<List<QualifiedNameDTO>>(
+                new FindNodes<List<QualifiedNameData>>(
                         FindNodes::translateNodeToPredicate,
                         FindNodes::transformResultsToIds)
         );
@@ -40,15 +39,15 @@ public class BundleSearcherRegistry {
                 new FindConnectors()
         );
         registry.put(ETargetType.BUNDLE_ID_BY_META_BUNDLE_ID,
-                new FindBundle<QualifiedNameDTO>(
+                new FindBundle<QualifiedNameData>(
                         FindBundle::translateMetaBundleIdToPredicate,
-                        (CpmDocument doc) -> doc == null ? null : new QualifiedNameDTO(doc.getBundleId()))
+                        (CpmDocument doc) -> doc == null ? null : new QualifiedNameData(doc.getBundleId()))
         );
 
         // Add more target types here in future development
     }
-    
-    public BundleSearcherRegistry(Map<ETargetType, ISearchBundle> registry){
+
+    public BundleSearcherRegistry(Map<ETargetType, ISearchBundle> registry) {
         this.registry.putAll(registry);
     }
 

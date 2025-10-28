@@ -8,7 +8,7 @@ import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearcher;
 import cz.muni.xmichalk.BundleSearch.ISearchBundle;
-import cz.muni.xmichalk.DTO.QualifiedNameDTO;
+import cz.muni.xmichalk.Models.QualifiedNameData;
 import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import cz.muni.xmichalk.Util.ProvJsonUtils;
 import org.openprovenance.prov.model.*;
@@ -29,14 +29,14 @@ import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserialize;
 public class FindNodes<T> implements ISearchBundle<T> {
     private final Function<JsonNode, Predicate<INode>> translatePredicate;
     private final Function<List<INode>, T> resultTransformation;
-    
+
     public FindNodes(Function<JsonNode, Predicate<INode>> getPredicate, Function<List<INode>, T> resultTransformation) {
         this.translatePredicate = getPredicate;
         this.resultTransformation = resultTransformation;
     }
 
     @Override
-    public T apply(final CpmDocument document, final QualifiedName startNodeId, final JsonNode targetSpecification) {
+    public T apply(final CpmDocument document, final org.openprovenance.prov.model.QualifiedName startNodeId, final JsonNode targetSpecification) {
         var predicate = translatePredicate.apply(targetSpecification);
         var results = BundleNodesSearcher.search(document, startNodeId, predicate);
         return resultTransformation.apply(results);
@@ -55,10 +55,9 @@ public class FindNodes<T> implements ISearchBundle<T> {
             var doc = deserialize(targetSpecification.toString(), Formats.ProvFormat.JSON);
             var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
             var nodes = cpmDoc.getNodes();
-            if (nodes.size() != 1) throw new IllegalArgumentException("target specification must contain exactly one node");
+            if (nodes.size() != 1)
+                throw new IllegalArgumentException("target specification must contain exactly one node");
             var targetNode = nodes.getFirst();
-            
-            System.out.println("Translated node to predicate: " + targetNode.getId().getUri());
 
             return (node) -> {
                 var types = node.getElements().stream().map(elem -> elem.getType()).flatMap(List<Type>::stream);
@@ -118,7 +117,9 @@ public class FindNodes<T> implements ISearchBundle<T> {
     }
 
     public static JsonNode transformResultsToDocJson(List<INode> nodes) {
-        if (nodes == null || nodes.isEmpty()) {return  null;}
+        if (nodes == null || nodes.isEmpty()) {
+            return null;
+        }
 
         Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes);
         var jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
@@ -131,11 +132,13 @@ public class FindNodes<T> implements ISearchBundle<T> {
         }
     }
 
-    public static List<QualifiedNameDTO> transformResultsToIds(List<INode> nodes) {
-        if (nodes == null || nodes.isEmpty()) {return  null;}
+    public static List<QualifiedNameData> transformResultsToIds(List<INode> nodes) {
+        if (nodes == null || nodes.isEmpty()) {
+            return null;
+        }
 
         return nodes.stream()
-                .map(node -> new QualifiedNameDTO(node.getId()))
+                .map(node -> new QualifiedNameData(node.getId()))
                 .toList();
     }
 }

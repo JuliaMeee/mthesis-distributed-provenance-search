@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.DocumentValidity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.DTO.TokenDTO.Token;
+import cz.muni.xmichalk.DTO.Token.Token;
 import org.erdtman.jcs.JsonCanonicalizer;
 
 import java.io.ByteArrayInputStream;
@@ -16,13 +16,13 @@ import java.util.Base64;
 public class StorageDocumentIntegrityVerifier {
     public static boolean verifySignature(Token token) {
         try {
-            PublicKey publicKey = loadPublicKeyFromCertificate(token.data.additionalData.trustedPartyCertificate);
+            PublicKey publicKey = loadPublicKeyFromCertificate(token.data().additionalData().trustedPartyCertificate());
 
             ObjectMapper mapper = new ObjectMapper();
-            String tokenDataJsonString = mapper.writeValueAsString(token.data);
+            String tokenDataJsonString = mapper.writeValueAsString(token.data());
             byte[] canonized = new JsonCanonicalizer(tokenDataJsonString).getEncodedUTF8();
 
-            byte[] signatureBytes = Base64.getDecoder().decode(token.signature);
+            byte[] signatureBytes = Base64.getDecoder().decode(token.signature());
 
             Signature verifier = Signature.getInstance("SHA256withECDSA");
             verifier.initVerify(publicKey);
