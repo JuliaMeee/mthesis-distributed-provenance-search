@@ -2,10 +2,9 @@
 
 <h2>Project structure:</h2>
 
-`/bundle-search`: implementation of <b>bundle-searcher</b> service that should represent a provenance controller and can answer search queries for individual bundles in storage of this provenance controller.  
-`/distributed-provenance-search`: implementation of <b>prov-traverser</b>   
-`/prov_storage`: implementation of provenance storage from https://github.com/GajdosDavid/distributed-provenance-system  
-`/trusted_party`: implementation of a third trusted party from https://github.com/GajdosDavid/distributed-provenance-system  
+`/bundle-search`: implementation of <b>bundle-searcher</b> service that should represent a provenance controller and can answer search queries about individual bundles in storage of this provenance controller.  
+`/distributed-provenance-search`: implementation of <b>prov-traverser</b>.   
+`/prov_storage`: implementation of provenance storage and trusted party from https://gitlab.fi.muni.cz/xmojzis1/provenance-system-tests.  
 `/setup`: has sripts and data for demo setup.  
 
 <h2>Setup:</h2>
