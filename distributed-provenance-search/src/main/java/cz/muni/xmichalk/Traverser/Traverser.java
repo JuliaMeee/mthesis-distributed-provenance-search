@@ -27,13 +27,15 @@ import java.util.stream.Collectors;
 public class Traverser {
     private final IProvServiceTable provServiceTable;
     private static final Logger log = LoggerFactory.getLogger(Traverser.class);
-    private final int concurrencyDegree = 10;
+    private final int concurrencyDegree;
 
     private static final Comparator<ItemToSearch> toSearchPriorityComparator =
             Comparator.comparing(e -> !e.hasPathIntegrity);
 
-    public Traverser(IProvServiceTable traverserTable) {
+    public Traverser(IProvServiceTable traverserTable, int concurrencyDegree) {
         this.provServiceTable = traverserTable;
+        this.concurrencyDegree = concurrencyDegree;
+        log.info("Instantiated traverser with concurrency degree: {}", concurrencyDegree);
     }
 
 
@@ -112,6 +114,8 @@ public class Traverser {
                     searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
                 }
             }
+            log.info("Already searched bundle: {}", itemToSearch.bundleId.getUri());
+
         }
         return null;
     }

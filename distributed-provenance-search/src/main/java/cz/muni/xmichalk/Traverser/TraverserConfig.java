@@ -4,6 +4,7 @@ import cz.muni.xmichalk.ProvServiceTable.IProvServiceTable;
 import cz.muni.xmichalk.ProvServiceTable.ProvServiceTable;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +21,9 @@ import java.io.IOException;
         )
 )
 public class TraverserConfig {
+    @Value("${traverser.concurrencyDegree:10}")
+    private int traverserConcurrencyDegree;
+
     @Bean
     public IProvServiceTable provServiceTable() {
         var table = new ProvServiceTable();
@@ -34,6 +38,6 @@ public class TraverserConfig {
 
     @Bean
     public Traverser traverser(IProvServiceTable tt) {
-        return new Traverser(tt);
+        return new Traverser(tt, traverserConcurrencyDegree);
     }
 }
