@@ -2,6 +2,7 @@ package cz.muni.xmichalk.DTO;
 
 public class ConnectorDTO {
     public QualifiedNameDTO id;
+    public QualifiedNameDTO referencedConnectorId;
     public QualifiedNameDTO referencedBundleId;
     public QualifiedNameDTO referencedMetaBundleId;
     public String referencedBundleHashValue;

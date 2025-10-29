@@ -8,6 +8,7 @@ import static cz.muni.xmichalk.Util.AttributeNames.*;
 
 public class ConnectorData {
     public QualifiedNameData id;
+    public QualifiedNameData referencedConnectorId;
     public QualifiedNameData referencedBundleId;
     public QualifiedNameData referencedMetaBundleId;
     public String referencedBundleHashValue;
@@ -18,6 +19,10 @@ public class ConnectorData {
 
     public ConnectorData(INode node) {
         id = new QualifiedNameData(node.getId());
+
+        var referencedConnectorIdValue = CpmUtils.getConnectorIdInReferencedBundle(node);
+        referencedConnectorId =
+                new QualifiedNameData(referencedConnectorIdValue == null ? node.getId() : referencedConnectorIdValue);
 
         var referencedBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
         referencedBundleId = referencedBundleIdValue == null ? null :

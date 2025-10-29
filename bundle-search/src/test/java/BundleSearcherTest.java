@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static cz.muni.xmichalk.Util.NameSpaceConstants.BLANK_URI;
 import static cz.muni.xmichalk.Util.NameSpaceConstants.CPM_URI;
 import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
 
@@ -27,9 +28,9 @@ public class BundleSearcherTest {
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     ProvUtilities u = new ProvUtilities();
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
-    
+
     @Test
-    public void testLoadPartialNode(){
+    public void testLoadPartialNode() {
         var file = Path.of(dataFolder + "nodeSpecs.json");
         try {
             var doc = deserializeFile(file, Formats.ProvFormat.JSON);
@@ -39,20 +40,20 @@ public class BundleSearcherTest {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Test
     public void testPickNewestVersion() throws IOException {
         var file = Path.of(dataFolder + "metaDocument.json");
-        
+
         var document = deserializeFile(file, Formats.ProvFormat.JSON);
 
         var cpmDoc = new CpmDocument(document, pF, cPF, cF);
-        
+
         var bundleId = LatestVersionPicker.pickFrom(
                 new org.openprovenance.prov.vanilla.QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "SamplingBundle_V0", "storage"),
                 cpmDoc
         );
-        
+
         assert bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1");
     }
 
@@ -67,6 +68,23 @@ public class BundleSearcherTest {
         var metaId = CpmUtils.getMetaBundleId(cpmDoc);
 
         assert metaId != null;
+    }
+
+    @Test
+    public void testGetReferencedConnectorId() throws IOException {
+        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+
+        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+
+        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+
+        var connectorNode = cpmDoc.getNode(
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank")
+        );
+
+        var referencedConnectorId = CpmUtils.getConnectorIdInReferencedBundle(connectorNode);
+
+        assert referencedConnectorId.getUri().equals(BLANK_URI + "StoredSampleCon_r1");
     }
     
     
@@ -153,7 +171,7 @@ public class BundleSearcherTest {
             }
         });
     }
-    
+
     @Test
     public void FindBackwardConnectors() throws IOException {
         var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
@@ -169,7 +187,7 @@ public class BundleSearcherTest {
             }
         });
     }
-    
+
     @Test
     public void getBundleId() {
         var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");

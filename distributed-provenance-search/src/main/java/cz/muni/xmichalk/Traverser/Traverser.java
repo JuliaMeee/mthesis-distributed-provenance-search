@@ -210,7 +210,7 @@ public class Traverser {
             newItemsToSearch.add(
                     new ItemToSearch(
                             connector.referencedBundleId.toDomainModel(),
-                            connector.id.toDomainModel(),
+                            connector.referencedConnectorId.toDomainModel(),
                             itemSearched.hasPathIntegrity && hasIntegrity,
                             itemSearched.isPathValid && isValid
                     )

@@ -1,13 +1,16 @@
 package cz.muni.xmichalk.Util;
 
 import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearcher;
+import cz.muni.xmichalk.BundleSearch.General.LinearSubgraphFinder;
 import org.openprovenance.prov.model.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static cz.muni.xmichalk.Util.AttributeNames.*;
@@ -19,21 +22,53 @@ public class CpmUtils {
         if (startNode == null) {
             return null;
         }
-        List<INode> mainActivities = BundleNodesSearcher.search(bundle, startNode.getId(), 
+        List<INode> mainActivities = BundleNodesSearcher.search(bundle, startNode.getId(),
                 node -> hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
                         qName -> qName.getUri().equals(CPM_URI + "mainActivity"))
-                );
-        
-        if (mainActivities == null || mainActivities.size() != 1) {return null;}
-        
+        );
+
+        if (mainActivities == null || mainActivities.size() != 1) {
+            return null;
+        }
+
         return (QualifiedName) getAttributeValue(mainActivities.getFirst(), ATTR_REFERENCED_META_BUNDLE_ID);
     }
-    
+
+    public static QualifiedName getConnectorIdInReferencedBundle(INode connectorNode) {
+        // backward connector id matches general forward connector id in the other bundle
+        // specific forward connector id is not present in the other bundle as a backward connector, resolve it to general forward connector id
+        var provType = getAttributeValue(connectorNode, ATTR_PROV_TYPE);
+        if (provType == null) {
+            return null;
+        }
+        if (isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "backwardConnector"))) {
+            return connectorNode.getId();
+        }
+        if (isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "forwardConnector"))) {
+            var subgraphConstraints = new ArrayList<BiPredicate<IEdge, INode>>();
+            subgraphConstraints.add((edge, node) -> node.equals(connectorNode));
+            subgraphConstraints.add((edge, node) -> {
+                boolean isSpecialization = edge.getRelations().stream().anyMatch((relation) -> relation.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION);
+                boolean isGeneralEntity = edge.getCause() == node;
+                boolean isForwardConnector = hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
+                        qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
+                return isSpecialization && isGeneralEntity && isForwardConnector;
+            });
+            var subgraphs = LinearSubgraphFinder.findFrom(connectorNode, subgraphConstraints);
+            if (subgraphs.isEmpty() || subgraphs.getFirst().size() != 2) {
+                return null;
+            }
+            return subgraphs.getFirst().getLast().node().getId();
+        }
+
+        return null;
+    }
+
     public static <T> boolean hasAttributeTargetValue(INode node, QualifiedName attributeName, Class<T> targetClass, Predicate<T> isTargetValue) {
         var value = getAttributeValue(node, attributeName);
         return isTargetValue(value, targetClass, isTargetValue);
     }
-    
+
     public static INode chooseStartNode(CpmDocument document) {
         var forwardConnectors = document.getForwardConnectors();
         if (!forwardConnectors.isEmpty()) {
@@ -54,11 +89,13 @@ public class CpmUtils {
         List<Object> values = new ArrayList<>();
         boolean isList = false;
         boolean found = false;
-        
+
         for (Element element : node.getElements()) {
             Object value = getAttributeValue(element, attributeName);
-            if (value == null) {continue;}
-            
+            if (value == null) {
+                continue;
+            }
+
             found = true;
             if (value instanceof Collection) {
                 isList = true;
@@ -67,7 +104,7 @@ public class CpmUtils {
                 values.add(value);
             }
         }
-        
+
         if (!found) return null; // does not have the attribute
         if (isList) return values; // found list(s) of values (possibly empty)
         if (values.size() == 1) return values.getFirst(); // only found one value instance and not a list
@@ -85,7 +122,7 @@ public class CpmUtils {
         if (attributeName.equals(ATTR_LOCATION)) {
             return element.getLocation();
         }
-        if (attributeName.equals(ATTR_PROV_TYPE)){
+        if (attributeName.equals(ATTR_PROV_TYPE)) {
             for (Type type : element.getType()) {
                 if (type.getElementName().equals(attributeName)) {
                     return type.getValue();
@@ -93,7 +130,7 @@ public class CpmUtils {
             }
         }
         if (attributeName.equals(ATTR_LABEL)) {
-            if (element.getLabel() != null){
+            if (element.getLabel() != null) {
                 return element.getLabel();
             }
         }
@@ -107,7 +144,7 @@ public class CpmUtils {
         return null;
     }
 
-    public static <T> boolean isTargetValue(Object value, Class<T> targetClass, Predicate<T> predicate){
+    public static <T> boolean isTargetValue(Object value, Class<T> targetClass, Predicate<T> predicate) {
 
         if (targetClass.isInstance(value)) {
             return predicate.test((T) value);
