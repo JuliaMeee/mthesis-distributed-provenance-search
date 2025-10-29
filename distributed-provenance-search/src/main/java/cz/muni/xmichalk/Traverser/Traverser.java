@@ -133,7 +133,7 @@ public class Traverser {
                         itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
                         new ObjectMapper().valueToTree(searchParams.searchBackwards ? "backward" : "forward"));
 
-                boolean hasIntegrity = hasIntegrity(findTargetResult, findConnectorsResult);
+                boolean hasIntegrity = hasIntegrity(itemToSearch.bundleId, findTargetResult, findConnectorsResult);
                 boolean isValid = false;// TODO validity
 
                 var newResult = convertToNewResult(itemToSearch, findTargetResult, hasIntegrity, isValid);
@@ -150,7 +150,7 @@ public class Traverser {
 
 
             } catch (Exception e) {
-                log.error("Error while processing bundle {}: {}", itemToSearch.bundleId.getUri(), e.getMessage());
+                log.error("Error while processing bundle {}: {}", itemToSearch.bundleId.getUri(), e);
             } finally {
                 searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId));
                 searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
@@ -163,18 +163,18 @@ public class Traverser {
         });
     }
 
-    private boolean hasIntegrity(BundleSearchResultDTO targetSearchResult, BundleSearchResultDTO connectorsSearchResult) {
+    private boolean hasIntegrity(QualifiedName bundleId, BundleSearchResultDTO targetSearchResult, BundleSearchResultDTO connectorsSearchResult) {
         if (targetSearchResult == null && connectorsSearchResult == null) {
             return false;
         }
         if (targetSearchResult == null) {
-            return StorageDocumentIntegrityVerifier.verifySignature(connectorsSearchResult.token());
+            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, connectorsSearchResult.token());
         }
         if (connectorsSearchResult == null) {
-            return StorageDocumentIntegrityVerifier.verifySignature(targetSearchResult.token());
+            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token());
         }
         return targetSearchResult.token().equals(connectorsSearchResult.token())
-                && StorageDocumentIntegrityVerifier.verifySignature(targetSearchResult.token());
+                && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token());
     }
 
     private FoundResult convertToNewResult(ItemToSearch itemSearched, BundleSearchResultDTO findTargetResult, boolean hasIntegrity, boolean isValid) {
@@ -198,7 +198,7 @@ public class Traverser {
                     findConnectorsResult.found(), new TypeReference<List<ConnectorDTO>>() {
                     });
         } catch (Exception e) {
-            log.error("While converting connectors from bundle {} got error: {}", itemSearched.bundleId.getUri(), e.getMessage());
+            log.error("While converting connectors from bundle {} got error: {}", itemSearched.bundleId.getUri(), e);
             return new ArrayList<>();
         }
 

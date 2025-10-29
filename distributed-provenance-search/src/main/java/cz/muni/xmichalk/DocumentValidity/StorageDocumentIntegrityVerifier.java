@@ -3,6 +3,13 @@ package cz.muni.xmichalk.DocumentValidity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.xmichalk.DTO.Token.Token;
 import org.erdtman.jcs.JsonCanonicalizer;
+import org.openprovenance.prov.model.QualifiedName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,8 +19,15 @@ import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.List;
 
 public class StorageDocumentIntegrityVerifier {
+    private static final Logger log = LoggerFactory.getLogger(StorageDocumentIntegrityVerifier.class);
+
+    public static boolean verifyIntegrity(QualifiedName document, Token token) {
+        return verifySignature(token) && verifyTokenExists(document, token);
+    }
+
     public static boolean verifySignature(Token token) {
         try {
             PublicKey publicKey = loadPublicKeyFromCertificate(token.data().additionalData().trustedPartyCertificate());
@@ -32,6 +46,35 @@ public class StorageDocumentIntegrityVerifier {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean verifyTokenExists(QualifiedName document, Token token) {
+        String trustedPartyUri = token.data().additionalData().trustedPartyUri();
+        String url = trustedPartyUri + "/api/v1/organizations/" + token.data().originatorId() + "/tokens";
+        if (!url.startsWith("http")) {
+            url = "http://" + url;
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<List<Token>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Token>>() {
+                }
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.error("Get document token API call failed with status: {}", response.getStatusCode());
+            return false;
+        }
+
+        if (response.getBody() == null) {
+            return false;
+        }
+
+        return response.getBody().contains(token);
+
     }
 
     public static PublicKey loadPublicKeyFromCertificate(String pemCert) throws Exception {
