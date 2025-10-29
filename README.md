@@ -85,6 +85,7 @@ curl -X POST \
       "nameSpaceUri": "https://openprovenance.org/blank/",
       "localPart": "IdentifiedSpeciesCon"
     },
+    "versionPreference":"latest",
     "targetSpecification": "https://openprovenance.org/blank/ABSPermit_ircc2345678",
     "targetType": "nodes_by_id"
   }' \
@@ -95,9 +96,12 @@ curl -X POST \
 # Request 1 response: full data about node matching the id, encapsulated in prov document, serialized as json.
 [
   {
-    "bundleId": { "nameSpaceUri": null, "localPart": "SamplingBundle_V0" },
-    "pathIntegrity": false,
-    "integrity": false,
+    "bundleId": {
+      "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+      "localPart": "SamplingBundle_V1"
+    },
+    "pathIntegrity": true,
+    "integrity": true,
     "pathValidity": false,
     "validity": false,
     "result": {
@@ -137,18 +141,19 @@ curl -X POST \
 ---
 Example 2:
 ```sh
-# Request 2: in predecessors find nodes with matching attributes. Return only their ids. Atributes to match are encapsulated in a single node in a bundle in a document, serialzied as json.
+# Request 2: in successors find nodes with matching attributes. Return only their ids. Atributes to match are encapsulated in a single node in a bundle in a document, serialzied as json.
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "bundleId": {
-      "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
-      "localPart": "SpeciesIdentificationBundle_V0"
+      "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+      "localPart": "SamplingBundle_V0"
     },
     "startNodeId": {
       "nameSpaceUri": "https://openprovenance.org/blank/",
-      "localPart": "IdentifiedSpeciesCon"
+      "localPart": "Sampling"
     },
+    "versionPreference": "latest",
     "targetSpecification": {
       "prefix": {
         "cpm": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
@@ -174,17 +179,40 @@ curl -X POST \
     },
     "targetType": "NODE_IDS_BY_ATTRIBUTES"
   }' \
-  http://prov-traverser:8000/api/searchPredecessors
+  http://prov-traverser:8000/api/searchSuccessors
 
 ```
 
 ```sh
-# Request 2 response: qualified names of found nodes matching the attributes. Matches were found in 3 different bundles.
+# Request 2 response: qualified names of found nodes matching the attributes. Matches were found in 4 different bundles, their order might differ.
 [
   {
-    "bundleId": { "nameSpaceUri": null, "localPart": "ProcessingBundle_V0" },
-    "pathIntegrity": false,
-    "integrity": false,
+    "bundleId": {
+      "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+      "localPart": "SamplingBundle_V1"
+    },
+    "pathIntegrity": true,
+    "integrity": true,
+    "pathValidity": true,
+    "validity": false,
+    "result": [
+      {
+        "nameSpaceUri": "https://orcid.org/",
+        "localPart": "0000-0001-0001-0002"
+      },
+      {
+        "nameSpaceUri": "https://orcid.org/",
+        "localPart": "0000-0001-0001-0001"
+      }
+    ]
+  },
+  {
+    "bundleId": {
+      "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+      "localPart": "SpeciesIdentificationBundle_V0"
+    },
+    "pathIntegrity": true,
+    "integrity": true,
     "pathValidity": false,
     "validity": false,
     "result": [
@@ -196,11 +224,11 @@ curl -X POST \
   },
   {
     "bundleId": {
-      "nameSpaceUri": null,
-      "localPart": "SpeciesIdentificationBundle_V0"
+      "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+      "localPart": "ProcessingBundle_V1"
     },
-    "pathIntegrity": false,
-    "integrity": false,
+    "pathIntegrity": true,
+    "integrity": true,
     "pathValidity": false,
     "validity": false,
     "result": [
@@ -211,9 +239,12 @@ curl -X POST \
     ]
   },
   {
-    "bundleId": { "nameSpaceUri": null, "localPart": "SamplingBundle_V0" },
-    "pathIntegrity": false,
-    "integrity": false,
+    "bundleId": {
+      "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+      "localPart": "DnaSequencingBundle_V0"
+    },
+    "pathIntegrity": true,
+    "integrity": true,
     "pathValidity": false,
     "validity": false,
     "result": [
@@ -222,8 +253,8 @@ curl -X POST \
         "localPart": "0000-0001-0001-0002"
       },
       {
-        "nameSpaceUri": "https://orcid.org/",
-        "localPart": "0000-0001-0001-0001"
+        "nameSpaceUri": "https://openprovenance.org/blank/",
+        "localPart": "DNATechnicianPerson"
       }
     ]
   }
@@ -246,6 +277,7 @@ curl -X POST \
       "nameSpaceUri": "https://openprovenance.org/blank/",
       "localPart": "IdentifiedSpeciesCon"
     },
+    "versionPreference":"latest",
     "targetSpecification": "backward",
     "targetType": "connectors"
   }' \
@@ -255,14 +287,21 @@ curl -X POST \
 # Request 3 response: found backward connectors data in custom DTO.
 [
   {
-    "bundleId": { "nameSpaceUri": null, "localPart": "ProcessingBundle_V0" },
-    "pathIntegrity": false,
-    "integrity": false,
+    "bundleId": {
+      "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+      "localPart": "ProcessingBundle_V1"
+    },
+    "pathIntegrity": true,
+    "integrity": true,
     "pathValidity": false,
     "validity": false,
     "result": [
       {
         "id": {
+          "nameSpaceUri": "https://openprovenance.org/blank/",
+          "localPart": "StoredSampleCon_r1"
+        },
+        "referencedConnectorId": {
           "nameSpaceUri": "https://openprovenance.org/blank/",
           "localPart": "StoredSampleCon_r1"
         },
@@ -281,16 +320,20 @@ curl -X POST \
   },
   {
     "bundleId": {
-      "nameSpaceUri": null,
+      "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
       "localPart": "SpeciesIdentificationBundle_V0"
     },
-    "pathIntegrity": false,
-    "integrity": false,
-    "pathValidity": false,
+    "pathIntegrity": true,
+    "integrity": true,
+    "pathValidity": true,
     "validity": false,
     "result": [
       {
         "id": {
+          "nameSpaceUri": "https://openprovenance.org/blank/",
+          "localPart": "ProcessedSampleCon"
+        },
+        "referencedConnectorId": {
           "nameSpaceUri": "https://openprovenance.org/blank/",
           "localPart": "ProcessedSampleCon"
         },
@@ -307,6 +350,10 @@ curl -X POST \
       },
       {
         "id": {
+          "nameSpaceUri": "https://openprovenance.org/blank/",
+          "localPart": "StoredSampleCon_r1"
+        },
+        "referencedConnectorId": {
           "nameSpaceUri": "https://openprovenance.org/blank/",
           "localPart": "StoredSampleCon_r1"
         },
