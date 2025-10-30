@@ -51,6 +51,17 @@ services:
       timeout: 5s
       retries: 10
 
+  neo4j-storage-4:
+    container_name: neo4j-storage-4
+    image: neo4j:bullseye
+    environment:
+      NEO4J_dbms_usage__report_enabled: false
+      NEO4J_AUTH: neo4j/password
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1" ]
+      timeout: 5s
+      retries: 10
+
   trusted-party:
     container_name: trusted-party
     # build:
@@ -130,6 +141,27 @@ services:
       retries: 10
       test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
   
+  prov-storage-4:
+    container_name: prov-storage-4
+    # build:
+    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
+    image: distributed_prov_system
+    environment:
+      NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-4:7687
+    configs:
+      - source: storage-4-ps-config
+        target: /dbprov/config/config.json
+        mode: 0600
+    ports:
+      - 8004:8000
+    depends_on:
+      trusted-party:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+  
   bundle-searcher-1:
     container_name: bundle-searcher-1
     image: bundle_search_image
@@ -169,6 +201,19 @@ services:
       retries: 10
       test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
 
+  bundle-searcher-4:
+    container_name: bundle-searcher-4
+    image: bundle_search_image
+    ports:
+      - 8084:8000
+    depends_on:
+      prov-storage-4:
+        condition: service_healthy
+    healthcheck:
+      timeout: 5s
+      retries: 10
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:8000/health/ || exit 1" ]
+
   prov-traverser:
     container_name: prov-traverser
     image: traverser_image
@@ -202,4 +247,6 @@ configs:
     file: ./setup/configs/config-storage-2.json
   storage-3-ps-config:
     file: ./setup/configs/config-storage-3.json
+  storage-4-ps-config:
+    file: ./setup/configs/config-storage-4.json
 

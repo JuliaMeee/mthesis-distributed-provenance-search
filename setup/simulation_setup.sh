@@ -10,6 +10,9 @@ echo "--Register ORG2"
 echo "--Register ORG3"
 ./register_org.sh prov-storage-3 ORG3 ./certificates/ORG3.pem
 
+echo "--Register ORG4"
+./register_org.sh prov-storage-4 ORG4 ./certificates/ORG4.pem
+
 
 # Store documents
 echo "--Store document SamplingBundle_V0.json"
@@ -25,7 +28,7 @@ echo "--Store document SpeciesIdentificationBundle_V0.json"
 echo
 
 echo "--Store document DnaSequencingBundle_V0.json"
-./store_doc.sh prov-storage-1 ORG1 ./certificates/ORG1.key ./data/dataset4/DnaSequencingBundle_V0.json
+./store_doc.sh prov-storage-4 ORG4 ./certificates/ORG4.key ./data/dataset4/DnaSequencingBundle_V0.json
 echo
 
 

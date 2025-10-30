@@ -7,11 +7,11 @@ from cryptography.x509 import load_pem_x509_certificate
 import datetime
 from pathlib import Path
 
-# functions from Matej Gallos simmulation of the provenance application https://gitlab.ics.muni.cz/422328/dbprov/
+# functions from Matej Gallos simulation of the provenance application https://gitlab.ics.muni.cz/422328/dbprov/
 def generate_certificate(
     country_tag: str,
     name: str,
-    auth_key: Path | serialization.SSHCertPrivateKeyTypes | None = None,
+    auth_key: Path | ec.EllipticCurvePrivateKey | None = None,
     auth_cert: Path | x509.Certificate | None = None,
     ca: bool = True,
     path_length: int | None = None,
@@ -118,15 +118,15 @@ def parse_certificate(certificate: x509.Certificate | Path, as_string: bool = Fa
 
 
 def parse_key(
-    key: serialization.SSHCertPrivateKeyTypes | Path, password: str | None = None
+    key: ec.EllipticCurvePrivateKey | Path, password: str | None = None
 ):
-    if isinstance(key, serialization.SSHCertPrivateKeyTypes):
+    if isinstance(key, ec.EllipticCurvePrivateKey):
         return key
     elif isinstance(key, Path):
         return load_private_key(key, password)
     else:
         raise ValueError(
-            f"Invalid private key type. Expected 'Path' or 'SSHCertPrivateTypes' but got {type(key)} instead."
+            f"Invalid private key type. Expected 'Path' or 'ec.EllipticCurvePrivateKey' but got {type(key)} instead."
         )
 
 def export_key(key, filepath):
@@ -171,6 +171,15 @@ def main():
     
     export_key(org3_key, Path("./ORG3.key"))
     export_cert(org3_cert, Path("./ORG3.pem"))
+    
+    org4_key, org4_cert = generate_certificate("SK", "ORG4", auth_key=Path("int2.key"),
+                                            auth_cert=Path("int2.pem"),
+                                            ca=False,
+                                            path_length=None,
+                                            )
+    
+    export_key(org4_key, Path("./ORG4.key"))
+    export_cert(org4_cert, Path("./ORG4.pem"))
     
 if __name__ == "__main__":
     main()
