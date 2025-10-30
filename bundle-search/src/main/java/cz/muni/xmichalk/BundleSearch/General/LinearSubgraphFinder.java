@@ -4,39 +4,24 @@ import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.Models.EdgeToNode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
 public class LinearSubgraphFinder {
     public static List<List<EdgeToNode>> findAnywhere(INode startNode, List<BiPredicate<IEdge, INode>> filters) {
-
-        Set<INode> visited = new HashSet<>();
-        Queue<INode> queue = new ArrayDeque<>();
         List<List<EdgeToNode>> results = new ArrayList<>();
 
         if (startNode == null) {
             throw new IllegalArgumentException("Start node cannot be null");
         }
 
-        queue.add(startNode);
-
-        while (!queue.isEmpty()) {
-            INode node = queue.remove();
-
-            if (visited.contains(node)) continue;
-
-            visited.add(node);
-
+        BundleNodesTraverser.traverseAndExecute(startNode, node -> {
             var subgraphsFromNode = findFrom(node, filters);
             results.addAll(subgraphsFromNode);
-
-            for (IEdge e : node.getCauseEdges()) {
-                queue.add(e.getEffect());
-            }
-            for (IEdge e : node.getEffectEdges()) {
-                queue.add(e.getCause());
-            }
-        }
+        });
 
         return results;
     }
@@ -49,7 +34,7 @@ public class LinearSubgraphFinder {
         return results;
     }
 
-    private static void recursiveSearch(EdgeToNode current, List<EdgeToNode> foundPart, List<BiPredicate<IEdge, INode>> constraints, Set<INode> visited, List<List<EdgeToNode>> results) {
+    private static void recursiveSearch(EdgeToNode current, List<EdgeToNode> foundPart, List<BiPredicate<IEdge, INode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
         if (current == null) return;
         if (foundPart == null) foundPart = new ArrayList<>();
 
@@ -59,16 +44,16 @@ public class LinearSubgraphFinder {
 
         if (node == null) return;
 
-        if (visited.contains(node)) return;
-        visited.add(node);
+        if (visited.contains(edge)) return;
+        visited.add(edge);
 
-        if (constraints.size() <= index) return;
+        if (specification.size() <= index) return;
 
-        if (!constraints.get(index).test(edge, node)) return;
+        if (!specification.get(index).test(edge, node)) return;
 
         foundPart.add(new EdgeToNode(edge, node));
 
-        if (foundPart.size() == constraints.size()) {
+        if (foundPart.size() == specification.size()) {
             results.add(foundPart);
             return;
         }
@@ -77,13 +62,13 @@ public class LinearSubgraphFinder {
             recursiveSearch(
                     new EdgeToNode(e, e.getEffect()),
                     new ArrayList<>(foundPart),
-                    constraints, new HashSet<>(visited), results);
+                    specification, new HashSet<>(visited), results);
         }
         for (IEdge e : node.getEffectEdges()) {
             recursiveSearch(
                     new EdgeToNode(e, e.getCause()),
                     new ArrayList<>(foundPart),
-                    constraints, new HashSet<>(visited), results);
+                    specification, new HashSet<>(visited), results);
         }
     }
 }

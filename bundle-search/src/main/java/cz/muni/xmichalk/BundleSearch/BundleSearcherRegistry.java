@@ -1,11 +1,15 @@
 package cz.muni.xmichalk.BundleSearch;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.xmichalk.BundleSearch.SearchImplementations.FindBundle;
 import cz.muni.xmichalk.BundleSearch.SearchImplementations.FindConnectors;
 import cz.muni.xmichalk.BundleSearch.SearchImplementations.FindNodes;
 import cz.muni.xmichalk.Models.QualifiedNameData;
+import cz.muni.xmichalk.TargetSpecification.BundleSpecification;
+import org.openprovenance.prov.model.QualifiedName;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,12 @@ public class BundleSearcherRegistry {
                         FindBundle::translateMetaBundleIdToPredicate,
                         (CpmDocument doc) -> doc == null ? null : new QualifiedNameData(doc.getBundleId()))
         );
+        registry.put(ETargetType.TEST_FITS, (CpmDocument document, QualifiedName startNodeId, JsonNode targetSpecification) -> {
+            ObjectMapper mapper = new ObjectMapper();
+            BundleSpecification requirement = mapper.convertValue(targetSpecification, new TypeReference<BundleSpecification>() {
+            });
+            return requirement.test(document, startNodeId);
+        });
 
         // Add more target types here in future development
     }

@@ -49,12 +49,7 @@ public class BundleSearchService {
 
         Object result = bundleSearcher.apply(document, startNodeId, targetSpecification);
 
-        if (result == null) {
-            log.info("No results found.");
-            return null;
-        } else {
-            log.info("Found result(s).");
-        }
+        log.info("Search result: {}", result == null ? "null" : result.toString());
 
 
         return result;

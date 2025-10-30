@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
@@ -5,19 +6,20 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.BundleVersionPicker.PickerImplementations.LatestVersionPicker;
+import cz.muni.xmichalk.TargetSpecification.AttributeSpecification.QualifiedNameAttrSpecification;
+import cz.muni.xmichalk.TargetSpecification.*;
 import cz.muni.xmichalk.Util.CpmUtils;
 import org.junit.jupiter.api.Test;
-import org.openprovenance.prov.model.Element;
-import org.openprovenance.prov.model.Other;
-import org.openprovenance.prov.model.ProvUtilities;
-import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.*;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
+import static cz.muni.xmichalk.Util.AttributeNames.ATTR_PROV_TYPE;
 import static cz.muni.xmichalk.Util.NameSpaceConstants.BLANK_URI;
 import static cz.muni.xmichalk.Util.NameSpaceConstants.CPM_URI;
 import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
@@ -85,6 +87,82 @@ public class BundleSearcherTest {
         var referencedConnectorId = CpmUtils.getConnectorIdInReferencedBundle(connectorNode);
 
         assert referencedConnectorId.getUri().equals(BLANK_URI + "StoredSampleCon_r1");
+    }
+
+    @Test
+    public void testBundleRequirements() throws IOException {
+        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+
+        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+
+        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+
+        var node1Requirement = new NodeSpecification(
+                ".*StoredSampleCon_r1",
+                StatementOrBundle.Kind.PROV_ENTITY,
+                null,
+                List.of(ATTR_PROV_TYPE.getUri()),
+                List.of(
+                        new QualifiedNameAttrSpecification(
+                                ATTR_PROV_TYPE.getUri(),
+                                ".*Connector"
+                        )
+                ));
+
+        var node2Requirement = new NodeSpecification(
+                null,
+                StatementOrBundle.Kind.PROV_ACTIVITY,
+                null,
+                List.of(ATTR_PROV_TYPE.getUri()),
+                null);
+
+        LinearSubgraphSpecification subgraphRequirement = new LinearSubgraphSpecification(
+                node1Requirement,
+                List.of(new EdgeToNodeSpecification(
+                        StatementOrBundle.Kind.PROV_GENERATION,
+                        null,
+                        false,
+                        node2Requirement
+                ))
+        );
+
+        LinearSubgraphSpecification bannedSubgraphRequirement = new LinearSubgraphSpecification(
+                node2Requirement,
+                List.of(new EdgeToNodeSpecification(
+                        StatementOrBundle.Kind.PROV_GENERATION,
+                        null,
+                        false,
+                        node1Requirement
+                ))
+        );
+
+        BundleSpecification bundleRequirement = new BundleSpecification(
+                List.of(
+                        new CountSpecification(
+                                node1Requirement,
+                                EComparisonResult.GREATER_THAN_OR_EQUALS,
+                                1
+                        ),
+                        new CountSpecification(
+                                subgraphRequirement,
+                                EComparisonResult.GREATER_THAN_OR_EQUALS,
+                                1
+                        ),
+                        new CountSpecification(
+                                bannedSubgraphRequirement,
+                                EComparisonResult.EQUALS,
+                                0
+                        )
+                )
+        );
+
+        var mapper = new ObjectMapper();
+        var jsonNode = mapper.valueToTree(bundleRequirement);
+        var json = jsonNode.toString();
+
+        var match = bundleRequirement.test(cpmDoc, new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank"));
+
+        assert match;
     }
     
     

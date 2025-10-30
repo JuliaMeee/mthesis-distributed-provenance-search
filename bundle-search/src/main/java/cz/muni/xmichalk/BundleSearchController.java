@@ -1,12 +1,18 @@
 package cz.muni.xmichalk;
 
+import cz.muni.fi.cpm.merged.CpmMergedFactory;
+import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.BundleVersionPicker.EVersionPreferrence;
 import cz.muni.xmichalk.BundleVersionPicker.VersionPickerRegistry;
 import cz.muni.xmichalk.Exceptions.UnsupportedTargetTypeException;
 import cz.muni.xmichalk.Exceptions.UnsupportedVersionPreferrenceException;
 import cz.muni.xmichalk.Models.*;
+import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.interop.Formats;
+import org.openprovenance.prov.vanilla.ProvFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +54,7 @@ public class BundleSearchController {
         return ResponseEntity.ok(preferences);
     }
 
-    @Operation(summary = "Chooses bundle version based on set preference", description = "based on supplied bundle id and version preference returns the preferred bundle version id.")
+    @Operation(summary = "Chooses bundle version based on set preference", description = "Based on supplied bundle id and version preference returns the preferred bundle version id.")
     @PostMapping(value = "/api/pickVersion", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> pickVersion(@RequestBody PickVersionParams params) {
         try {
@@ -95,10 +102,10 @@ public class BundleSearchController {
                     .body(e.getMessage());
         }
     }
-    
-    /*@PostMapping(value = "/api/testSearch", produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @PostMapping(value = "/api/testSearch", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchTest(
-            @RequestBody SearchParamsDTO searchParams) {
+            @RequestBody SearchParams searchParams) {
 
         List<String> missingParams = getMissingParams(searchParams);
         if (!missingParams.isEmpty()) {
@@ -112,22 +119,23 @@ public class BundleSearchController {
             System.out.println("Searching bundle backward: " + searchParams.bundleId.nameSpaceUri + searchParams.bundleId.localPart
                     + " " + searchParams.startNodeId.nameSpaceUri + searchParams.startNodeId.localPart + " " + searchParams.targetType + " " + searchParams.targetSpecification);
 
-            QualifiedName bundleId = new QualifiedName(searchParams.bundleId.nameSpaceUri, searchParams.bundleId.localPart, null);
-            QualifiedName connectorId = new QualifiedName(searchParams.startNodeId.nameSpaceUri, searchParams.startNodeId.localPart, null);
-            
+            QualifiedName bundleId = searchParams.bundleId.toQN();
+            QualifiedName connectorId = searchParams.startNodeId.toQN();
+
             // var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset3/SpeciesIdentificationBundle_V0.json"), Formats.ProvFormat.JSON);
-            var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset2/ProcessingBundle_V0.json"), Formats.ProvFormat.JSON);
-            // var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset1/SamplingBundle_V1.json"), Formats.ProvFormat.JSON);
-            
-            var searchBundleResult = bundleSearchService.searchDocument(document, connectorId, searchParams.targetType, searchParams.targetSpecification);
-            
+            // var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset2/ProcessingBundle_V0.json"), Formats.ProvFormat.JSON);
+            var document = ProvDocumentUtils.deserializeFile(Path.of(System.getProperty("user.dir") + "/src/main/resources/data/dataset1/SamplingBundle_V1.json"), Formats.ProvFormat.JSON);
+            var cpmDocument = new CpmDocument(document, new ProvFactory(), new CpmProvFactory(), new CpmMergedFactory());
+
+            var searchBundleResult = bundleSearchService.searchDocument(cpmDocument, connectorId, searchParams.targetType, searchParams.targetSpecification);
+
             return ResponseEntity.ok(searchBundleResult);
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
         }
-    }*/
+    }
 
     private static String getMissingParamsMessage(List<String> missingParams) {
         StringBuilder builder = new StringBuilder("Missing required fields in the request body: ");

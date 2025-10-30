@@ -3,7 +3,7 @@ package cz.muni.xmichalk.Util;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.BundleSearch.General.BundleNodesSearcher;
+import cz.muni.xmichalk.BundleSearch.General.BundleNodesTraverser;
 import cz.muni.xmichalk.BundleSearch.General.LinearSubgraphFinder;
 import org.openprovenance.prov.model.*;
 
@@ -22,7 +22,7 @@ public class CpmUtils {
         if (startNode == null) {
             return null;
         }
-        List<INode> mainActivities = BundleNodesSearcher.search(bundle, startNode.getId(),
+        List<INode> mainActivities = BundleNodesTraverser.traverseAndFind(bundle, startNode.getId(),
                 node -> hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
                         qName -> qName.getUri().equals(CPM_URI + "mainActivity"))
         );
@@ -69,6 +69,11 @@ public class CpmUtils {
         return isTargetValue(value, targetClass, isTargetValue);
     }
 
+    public static <T> boolean hasAttributeTargetValue(INode node, String attributeNameUri, Class<T> targetClass, Predicate<T> isTargetValue) {
+        var value = getAttributeValue(node, attributeNameUri);
+        return isTargetValue(value, targetClass, isTargetValue);
+    }
+
     public static INode chooseStartNode(CpmDocument document) {
         var forwardConnectors = document.getForwardConnectors();
         if (!forwardConnectors.isEmpty()) {
@@ -86,12 +91,16 @@ public class CpmUtils {
     }
 
     public static Object getAttributeValue(INode node, QualifiedName attributeName) {
+        return getAttributeValue(node, attributeName.getUri());
+    }
+
+    public static Object getAttributeValue(INode node, String attributeNameUri) {
         List<Object> values = new ArrayList<>();
         boolean isList = false;
         boolean found = false;
 
         for (Element element : node.getElements()) {
-            Object value = getAttributeValue(element, attributeName);
+            Object value = getAttributeValue(element, attributeNameUri);
             if (value == null) {
                 continue;
             }
@@ -112,31 +121,35 @@ public class CpmUtils {
     }
 
     public static Object getAttributeValue(Element element, QualifiedName attributeName) {
+        return getAttributeValue(element, attributeName.getUri());
+    }
+
+    public static Object getAttributeValue(Element element, String attributeNameUri) {
         if (element.getKind() == StatementOrBundle.Kind.PROV_ACTIVITY) {
-            if (attributeName.equals(ATTR_START_TIME)) {
+            if (attributeNameUri.equals(ATTR_START_TIME.getUri())) {
                 return ((Activity) element).getStartTime();
-            } else if (attributeName.equals(ATTR_END_TIME)) {
+            } else if (attributeNameUri.equals(ATTR_END_TIME.getUri())) {
                 return ((Activity) element).getEndTime();
             }
         }
-        if (attributeName.equals(ATTR_LOCATION)) {
+        if (attributeNameUri.equals(ATTR_LOCATION.getUri())) {
             return element.getLocation();
         }
-        if (attributeName.equals(ATTR_PROV_TYPE)) {
+        if (attributeNameUri.equals(ATTR_PROV_TYPE.getUri())) {
             for (Type type : element.getType()) {
-                if (type.getElementName().equals(attributeName)) {
+                if (type.getElementName().getUri().equals(attributeNameUri)) {
                     return type.getValue();
                 }
             }
         }
-        if (attributeName.equals(ATTR_LABEL)) {
+        if (attributeNameUri.equals(ATTR_LABEL.getUri())) {
             if (element.getLabel() != null) {
                 return element.getLabel();
             }
         }
         for (Other other : element.getOther()) {
             org.openprovenance.prov.model.QualifiedName name = other.getElementName();
-            if (name.equals(attributeName)) {
+            if (name.getUri().equals(attributeNameUri)) {
                 return other.getValue();
             }
         }
