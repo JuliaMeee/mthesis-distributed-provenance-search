@@ -54,7 +54,8 @@ public class Traverser {
                 ConcurrentHashMap.newKeySet()
         );
 
-        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId, true, true));
+        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId,
+                provServiceTable.getServiceUri(startBundleId.getUri()), true, true));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -91,6 +92,7 @@ public class Traverser {
     }
 
     private ItemToSearch pollNextToSearch(SearchState searchState, String versionPreference) {
+        log.info("Poll next item to search");
         ItemToSearch itemToSearch;
         while ((itemToSearch = searchState.toSearch.poll()) != null) {
             if (!itemToSearch.hasPathIntegrity && searchState.processing.values().stream()
@@ -98,7 +100,7 @@ public class Traverser {
                 return null; // wait until all valid  bundles are processed before continuing with lower credibility ones
             }
 
-            var preferredVersion = fetchPreferredBundleVersion(itemToSearch.bundleId, versionPreference);
+            var preferredVersion = fetchPreferredBundleVersion(itemToSearch.provServiceUri, itemToSearch.bundleId, versionPreference);
             if (preferredVersion != null) {
 
                 log.info("Fetch preferred version for bundle: {} returned {}", itemToSearch.bundleId.getUri(), preferredVersion.getUri());
@@ -109,6 +111,8 @@ public class Traverser {
 
             if (searchState.processing.putIfAbsent(itemToSearch.bundleId, itemToSearch) == null) {
                 if (!searchState.visited.containsKey(itemToSearch.bundleId)) {
+                    log.info("Next to search bundle id: {}, connector id: {}, hasPathIntegrity: {}, isPathValid: {}",
+                            itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri(), itemToSearch.hasPathIntegrity, itemToSearch.isPathValid);
                     return itemToSearch;
                 } else {
                     searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
@@ -130,11 +134,11 @@ public class Traverser {
             log.info("Started processing bundle {} from connector {}", itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri());
 
             try {
-                var findTargetResult = fetchSearchBundleResult(itemToSearch.bundleId, itemToSearch.connectorId,
+                var findTargetResult = fetchSearchBundleResult(itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId,
                         searchParams.targetType, searchParams.targetSpecification);
 
                 var findConnectorsResult = fetchSearchBundleResult(
-                        itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
+                        itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
                         new ObjectMapper().valueToTree(searchParams.searchBackwards ? "backward" : "forward"));
 
                 boolean hasIntegrity = hasIntegrity(itemToSearch.bundleId, findTargetResult, findConnectorsResult);
@@ -211,10 +215,16 @@ public class Traverser {
         for (ConnectorDTO connector : connectors) {
             if (connector == null || connector.referencedBundleId == null) continue;
 
+            String provServiceUri = connector.provenanceServiceUri;
+            if (provServiceUri == null) {
+                provServiceUri = provServiceTable.getServiceUri(connector.referencedBundleId.toDomainModel().getUri());
+            }
+
             newItemsToSearch.add(
                     new ItemToSearch(
                             connector.referencedBundleId.toDomainModel(),
                             connector.referencedConnectorId.toDomainModel(),
+                            provServiceUri,
                             itemSearched.hasPathIntegrity && hasIntegrity,
                             itemSearched.isPathValid && isValid
                     )
@@ -224,16 +234,16 @@ public class Traverser {
         return newItemsToSearch;
     }
 
-    public BundleSearchResultDTO fetchSearchBundleResult(
-            QualifiedName bundleId, QualifiedName connectorId,
-            String targetType, JsonNode targetSpecification) throws IOException {
+    public BundleSearchResultDTO fetchSearchBundleResult(String serviceUri,
+                                                         QualifiedName bundleId, QualifiedName connectorId,
+                                                         String targetType, JsonNode targetSpecification) throws IOException {
         BundleSearchParamsDTO searchParams = new BundleSearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
-        String ServiceUri = provServiceTable.getServiceUri(bundleId.getUri());
-        if (ServiceUri == null) {
+
+        if (serviceUri == null) {
             throw new IOException("No prov service found for bundle: " + bundleId.getUri());
         }
 
-        String url = ServiceUri + "/api/searchBundle";
+        String url = serviceUri + "searchBundle";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -253,18 +263,17 @@ public class Traverser {
         return searchBundleResultDTO;
     }
 
-    public QualifiedName fetchPreferredBundleVersion(QualifiedName bundleId, String versionpreference) {
+    public QualifiedName fetchPreferredBundleVersion(String serviceUri, QualifiedName bundleId, String versionpreference) {
         PickVersionParamsDTO params = new PickVersionParamsDTO(
                 new QualifiedNameDTO().from(bundleId),
                 versionpreference);
 
-        String serviceUri = provServiceTable.getServiceUri(bundleId.getUri());
         if (serviceUri == null) {
             log.error("No prov service found for bundle: {}", bundleId.getUri());
             return null;
         }
 
-        String url = serviceUri + "/api/pickVersion";
+        String url = serviceUri + "pickVersion";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

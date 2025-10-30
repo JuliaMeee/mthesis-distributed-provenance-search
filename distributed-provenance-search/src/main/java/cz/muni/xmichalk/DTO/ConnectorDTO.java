@@ -7,6 +7,7 @@ public class ConnectorDTO {
     public QualifiedNameDTO referencedMetaBundleId;
     public String referencedBundleHashValue;
     public String hashAlg;
+    public String provenanceServiceUri;
 
     public ConnectorDTO() {
     }

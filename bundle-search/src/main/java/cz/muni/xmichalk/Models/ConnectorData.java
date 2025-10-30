@@ -12,6 +12,7 @@ public class ConnectorData {
     public QualifiedNameData referencedBundleId;
     public QualifiedNameData referencedMetaBundleId;
     public String referencedBundleHashValue;
+    public String provenanceServiceUri;
     public String hashAlg;
 
     public ConnectorData() {
@@ -31,6 +32,9 @@ public class ConnectorData {
         var referencedMetaBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
         referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
                 new QualifiedNameData((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
+
+        var provServiceUriValue = CpmUtils.getAttributeValue(node, ATTR_PROVENANCE_SERVICE_URI);
+        provenanceServiceUri = provServiceUriValue == null ? null : ((LangString) provServiceUriValue).getValue();
 
 
         LangString bundleHashValueObj = (LangString) CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
