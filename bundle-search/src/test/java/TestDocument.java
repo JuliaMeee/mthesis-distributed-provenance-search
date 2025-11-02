@@ -29,7 +29,7 @@ public class TestDocument {
         Relation relation2 = cPF.getProvFactory().newWasAssociatedWith(cPF.newCpmQualifiedName("assoc"), activityId, agentId);
         Relation relation3 = cPF.getProvFactory().newWasGeneratedBy(cPF.newCpmQualifiedName("gen"), entityId, activityId);
 
-        QualifiedName bundleId = pF.newQualifiedName("www.example.com/", "bundle1", "ex");
+        QualifiedName bundleId = pF.newQualifiedName("www.example.com/", "bundleA", "ex");
 
         CpmDocument cpmDocument = new CpmDocument(List.of(entity, agent, activity, relation, relation2, relation3), bundleId, pF, cPF, cF);
         return cpmDocument.toDocument();
@@ -41,7 +41,7 @@ public class TestDocument {
             TraversalInformation ti = new TraversalInformation();
 
             ti.setPrefixes(Map.of("ex", "www.example.com/"));
-            ti.setBundleName(ti.getNamespace().qualifiedName("ex", "bundle2", pF));
+            ti.setBundleName(ti.getNamespace().qualifiedName("ex", "bundleB", pF));
 
             MainActivity mA = new MainActivity(ti.getNamespace().qualifiedName("ex", "activity1", pF));
             mA.setStartTime(datatypeFactory.newXMLGregorianCalendar("2011-11-16T16:05:00"));

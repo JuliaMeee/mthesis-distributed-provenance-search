@@ -2,7 +2,7 @@ document
 prefix dct <http://purl.org/dc/terms/>
 prefix ex <www.example.com/>
 prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
-bundle ex:bundle1
+bundle ex:bundleA
 
 entity(cpm:entity1)
 activity(cpm:activity1,2025-08-16T12:00:00.000+02:00,2025-08-16T13:00:00.000+02:00)

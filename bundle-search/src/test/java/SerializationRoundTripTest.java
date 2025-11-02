@@ -3,27 +3,22 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
+import cz.muni.xmichalk.Util.ProvDocumentUtils;
 import org.junit.jupiter.api.Test;
-import org.openprovenance.prov.interop.InteropFramework;
-import org.openprovenance.prov.model.*;
+import org.openprovenance.prov.model.Document;
+import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Path;
 
 public class SerializationRoundTripTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/serialization/";
-
-    public QualifiedName getBundleId(Document document) {
-        Bundle bundle = (Bundle) document.getStatementOrBundle().get(0);
-        return bundle.getId();
-    }
 
     public static String getExtension(Formats.ProvFormat format) {
         return switch (format) {
@@ -37,23 +32,24 @@ public class SerializationRoundTripTest {
         };
     }
 
-    public String serialize(Document document, Formats.ProvFormat format) {
-        var filePath = dataFolder + getBundleId(document).getLocalPart() + "_" + format.toString() + getExtension(format);
-        var interop = new InteropFramework();
-        interop.writeDocument(filePath, document, format);
-        return filePath;
-    }
+    public void testFormat(Document document, Formats.ProvFormat format) throws IOException {
+        QualifiedName bundleId = ProvDocumentUtils.getBundleId(document);
+        String id = bundleId.getLocalPart();
 
-    public Document deserialize(String filePath, Formats.ProvFormat format) throws IOException {
-        var interop = new InteropFramework();
-        InputStream inputStream = new FileInputStream(filePath);
-        return interop.readDocument(inputStream, format);
-    }
+        Path filePath1 = Path.of(dataFolder, id + "_1" + getExtension(format));
+        ProvDocumentUtils.serializeIntoFile(filePath1, document, format);
+        Document deserializedDocument1 = ProvDocumentUtils.deserializeFile(filePath1, format);
+        CpmDocument cpmDocument1 = new CpmDocument(deserializedDocument1, pF, cPF, cF);
 
-    public CpmDocument testFormat(Document document, Formats.ProvFormat format) throws IOException {
-        String filePath = serialize(document, format);
-        Document deserializedDocument = deserialize(filePath, format);
-        return new CpmDocument(deserializedDocument, pF, cPF, cF);
+        Path filePath2 = Path.of(dataFolder, id + "_2" + getExtension(format));
+        ProvDocumentUtils.serializeIntoFile(filePath2, deserializedDocument1, format);
+        Document deserializedDocument2 = ProvDocumentUtils.deserializeFile(filePath2, format);
+        CpmDocument cpmDocument2 = new CpmDocument(deserializedDocument2, pF, cPF, cF);
+
+        assert (cpmDocument1.getNodes().size() == cpmDocument2.getNodes().size());
+        assert (cpmDocument1.getEdges().size() == cpmDocument2.getEdges().size());
+        assert (cpmDocument1.getBundleId().equals(cpmDocument2.getBundleId()));
+        assert (cpmDocument1.getBundleId().equals(bundleId));
     }
 
     @Test
@@ -77,7 +73,7 @@ public class SerializationRoundTripTest {
                     testFormat(document, format);
                 } catch (Exception e) {
                     System.err.println("Error testing format: " + format +
-                            " for document with bundle ID: " + getBundleId(document).getLocalPart());
+                            " for document with bundle ID: " + ProvDocumentUtils.getBundleId(document).getLocalPart());
                     e.printStackTrace();
                     allTestsPassed = false;
                 }

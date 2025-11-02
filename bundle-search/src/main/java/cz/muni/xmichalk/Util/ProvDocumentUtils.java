@@ -8,25 +8,32 @@ import org.openprovenance.prov.model.interop.InteropMediaType;
 import org.openprovenance.prov.vanilla.HasAttributes;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static cz.muni.xmichalk.Util.NameSpaceConstants.BLANK_URI;
 
 public class ProvDocumentUtils {
     public static final Charset charset = java.nio.charset.StandardCharsets.UTF_8;
-    
+
     public static String serialize(Document document, Formats.ProvFormat format) {
         var interop = new InteropFramework();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        interop.writeDocument(outputStream, document, InteropMediaType.MEDIA_APPLICATION_JSON, false);
+        interop.writeDocument(outputStream, document, ProvFormatToIntermediaType(format), false);
         return outputStream.toString(charset);
+    }
+
+    public static void serializeIntoFile(Path filePath, Document document, Formats.ProvFormat format) throws IOException {
+        var string = serialize(document, format);
+        Files.writeString(filePath, string, charset);
     }
 
     public static Document deserialize(String serialized, Formats.ProvFormat format) throws IOException {
@@ -43,16 +50,16 @@ public class ProvDocumentUtils {
 
     public static String prepareForDeserialization(String serializedDocument, Formats.ProvFormat format) {
         if (format == Formats.ProvFormat.JSON) {
-           serializedDocument = ProvJsonUtils.prepareJsonForDeserialization(serializedDocument);
+            serializedDocument = ProvJsonUtils.prepareJsonForDeserialization(serializedDocument);
         }
 
         return serializedDocument;
     }
-    
+
     public static Document encapsulateInDocument(List<INode> nodes) {
         ProvFactory pf = ProvFactory.getFactory();
         Document doc = pf.newDocument();
-        
+
         Namespace ns = pf.newNamespace();
 
         var bundle = pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
@@ -64,24 +71,24 @@ public class ProvDocumentUtils {
                 bundle.getStatement().add(element);
             }
         }
-        
+
         registerAllPrefixes(ns, bundle);
         doc.setNamespace(ns);
         doc.getStatementOrBundle().add(bundle);
-        
+
         return doc;
     }
-    
+
     public static QualifiedName getBundleId(Document document) {
         for (Object o : document.getStatementOrBundle()) {
             if (o instanceof final Bundle bundle) {
                 return bundle.getId();
             }
         }
-        
+
         return null;
     }
-    
+
     public static void doForEachQualifiedName(Object provObject, Consumer<QualifiedName> action) {
         if (provObject instanceof Document doc) {
             for (StatementOrBundle statement : doc.getStatementOrBundle()) {
@@ -113,7 +120,7 @@ public class ProvDocumentUtils {
                 if (value instanceof QualifiedName qnValue) {
                     action.accept(qnValue);
                 }
-                
+
                 if (value instanceof List<?> listValue) {
                     for (Object item : listValue) {
                         if (item instanceof QualifiedName qnItem) {
@@ -124,12 +131,24 @@ public class ProvDocumentUtils {
             }
         }
     }
-    
+
     public static Namespace registerAllPrefixes(Namespace namespace, Object provObject) {
         doForEachQualifiedName(
-                provObject, 
+                provObject,
                 qn -> namespace.register(qn.getPrefix(), qn.getNamespaceURI()));
-        
+
         return namespace;
+    }
+
+    public static String ProvFormatToIntermediaType(Formats.ProvFormat format) {
+        return switch (format) {
+            case JSON -> InteropMediaType.MEDIA_APPLICATION_JSON;
+            case JSONLD -> InteropMediaType.MEDIA_APPLICATION_JSONLD;
+            case PROVN -> InteropMediaType.MEDIA_TEXT_PROVENANCE_NOTATION;
+            case TURTLE -> InteropMediaType.MEDIA_TEXT_TURTLE;
+            case TRIG -> InteropMediaType.MEDIA_APPLICATION_TRIG;
+            case RDFXML -> InteropMediaType.MEDIA_APPLICATION_XML;
+            default -> throw new IllegalStateException("Switch case for: " + format + " is not defined.");
+        };
     }
 }

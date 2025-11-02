@@ -2,7 +2,7 @@ document
 prefix dct <http://purl.org/dc/terms/>
 prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
 prefix ex <www.example.com/>
-bundle ex:bundle2
+bundle ex:bundleB
 
 activity(ex:activity1,2011-11-16T16:05:00,2011-11-16T18:05:00,[prov:type = 'cpm:mainActivity'])
 used(ex:activity1,ex:backConnector1,-)

@@ -9,7 +9,7 @@
   "@graph" : [ {
     "@type" : "Bundle",
     "@context" : [ { }, "https://openprovenance.org/prov-jsonld/context.jsonld" ],
-    "@id" : "ex:bundle2",
+    "@id" : "ex:bundleB",
     "@graph" : [ {
       "@type" : "Activity",
       "@id" : "ex:activity1",
