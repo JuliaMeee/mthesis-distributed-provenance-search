@@ -1,8 +1,8 @@
 package cz.muni.xmichalk.TargetSpecification;
 
-import cz.muni.fi.cpm.model.INode;
+import cz.muni.fi.cpm.model.CpmDocument;
 
-public class CountSpecification {
+public class CountSpecification implements ITestableSpecification<CpmDocument> {
     public ICountableInDocument countableInDocument;
     public EComparisonResult comparisonResult;
     public Integer count;
@@ -16,12 +16,12 @@ public class CountSpecification {
         this.count = count;
     }
 
-    public boolean test(INode startNode) {
+    public boolean test(CpmDocument document) {
         if (count == null || comparisonResult == null || countableInDocument == null) {
             throw new IllegalStateException("Missing values in count specification.");
         }
 
-        int actualCount = countableInDocument.countInDocument(startNode);
+        int actualCount = countableInDocument.countInDocument(document);
 
         return switch (comparisonResult) {
             case EComparisonResult.EQUALS -> actualCount == count;

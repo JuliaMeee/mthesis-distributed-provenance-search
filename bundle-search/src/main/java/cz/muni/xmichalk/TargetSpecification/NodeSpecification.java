@@ -1,14 +1,13 @@
 package cz.muni.xmichalk.TargetSpecification;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.BundleSearch.General.BundleNodesTraverser;
 import cz.muni.xmichalk.TargetSpecification.AttributeSpecification.AttrSpecification;
 import cz.muni.xmichalk.Util.CpmUtils;
 import org.openprovenance.prov.model.StatementOrBundle;
 
 import java.util.List;
 
-public class NodeSpecification implements ICountableInDocument {
+public class NodeSpecification implements ITestableSpecification<INode> {
     public String idUriRegex;
     public StatementOrBundle.Kind isKind;
     public StatementOrBundle.Kind isNotKind;
@@ -34,15 +33,18 @@ public class NodeSpecification implements ICountableInDocument {
         }
 
         if (isKind != null) {
+            var nodeKind = node.getKind();
             if (!node.getKind().equals(isKind)) {
                 return false;
             }
         }
 
         if (isNotKind != null) {
+            var nodeKind = node.getKind();
             if (node.getKind().equals(isNotKind)) {
                 return false;
             }
+            System.out.print("nodeKind: " + nodeKind);
         }
 
         if (hasAttributes != null) {
@@ -63,12 +65,5 @@ public class NodeSpecification implements ICountableInDocument {
         }
 
         return true;
-    }
-
-    @Override
-    public int countInDocument(INode startNode) {
-        var fittingNodes = BundleNodesTraverser.traverseAndFind(startNode, this::test);
-
-        return fittingNodes.size();
     }
 }

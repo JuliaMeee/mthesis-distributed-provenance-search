@@ -57,9 +57,15 @@ public class BundleSearchController {
     @Operation(summary = "Chooses bundle version based on set preference", description = "Based on supplied bundle id and version preference returns the preferred bundle version id.")
     @PostMapping(value = "/api/pickVersion", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> pickVersion(@RequestBody PickVersionParams params) {
+        List<String> missingParams = getMissingParams(params);
+        if (!missingParams.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(getMissingParamsMessage(missingParams));
+        }
+
         try {
-            var picker = versionPickerRegistry.getVersionPicker(params.versionPreference());
-            var pickedBundleVersion = picker.apply(params.bundleId().toQN());
+            var pickedBundleVersion = versionPickerRegistry.pickVersion(params.bundleId().toQN(), params.versionPreference());
 
             return ResponseEntity.ok(new QualifiedNameData(pickedBundleVersion));
         } catch (UnsupportedVersionPreferrenceException e) {
@@ -155,6 +161,14 @@ public class BundleSearchController {
         if (params.startNodeId == null) missing.add("startNodeId");
         if (params.targetType == null) missing.add("targetType");
         if (params.targetSpecification == null) missing.add("targetSpecification");
+
+        return missing;
+    }
+
+    private static List<String> getMissingParams(PickVersionParams params) {
+        List<String> missing = new ArrayList<String>();
+        if (params.bundleId() == null) missing.add("bundleId");
+        if (params.versionPreference() == null) missing.add("versionPreference");
 
         return missing;
     }

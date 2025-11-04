@@ -83,6 +83,10 @@ public class CpmUtils {
         if (!backwardConnectors.isEmpty()) {
             return backwardConnectors.getFirst();
         }
+        var mainActivity = document.getMainActivity();
+        if (mainActivity != null) {
+            return mainActivity;
+        }
         var nodes = document.getNodes();
         if (!nodes.isEmpty()) {
             return nodes.getFirst();

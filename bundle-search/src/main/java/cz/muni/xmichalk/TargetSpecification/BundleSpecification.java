@@ -1,38 +1,31 @@
 package cz.muni.xmichalk.TargetSpecification;
 
 import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.INode;
-import org.openprovenance.prov.model.QualifiedName;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BundleSpecification {
-    public List<CountSpecification> specifications;
+public class BundleSpecification implements ITestableSpecification<CpmDocument> {
+    public List<ITestableSpecification<CpmDocument>> specifications;
 
     public BundleSpecification() {
     }
 
-    public BundleSpecification(List<CountSpecification> specifications) {
-        this.specifications = new ArrayList<CountSpecification>(specifications);
+    public BundleSpecification(List<ITestableSpecification<CpmDocument>> specifications) {
+        this.specifications = new ArrayList<ITestableSpecification<CpmDocument>>(specifications);
     }
 
-    public boolean test(CpmDocument document, QualifiedName startNodeId) {
+    public boolean test(CpmDocument document) {
 
         if (specifications == null || specifications.isEmpty()) {
             return true;
         }
 
-        INode startNode = document.getNode(startNodeId);
-        if (startNode == null) {
-            throw new IllegalArgumentException("Start node with id " + startNodeId.getUri() + " does not exist in document " + document.getBundleId().getUri());
-        }
-
-        for (CountSpecification spec : specifications) {
+        for (ITestableSpecification<CpmDocument> spec : specifications) {
             if (spec == null) {
                 continue;
             }
-            if (!spec.test(startNode)) {
+            if (!spec.test(document)) {
                 return false;
             }
         }

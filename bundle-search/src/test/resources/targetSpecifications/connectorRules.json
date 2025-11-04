@@ -1,0 +1,42 @@
+{
+  "type": "BundleSpecification",
+  "specifications": [
+    {
+      "type": "AllNodes",
+      "predicate": {
+        "type": "Implication",
+        "premise": {
+          "type": "NodeSpecification",
+          "isKind": "PROV_ENTITY",
+          "hasAttributeValues": [
+            {
+              "type": "QualifiedNameAttrSpecification",
+              "attributeNameUri": "http://www.w3.org/ns/prov#type",
+              "uriRegex": ".*commonprovenancemodel.*Connector"
+            }
+          ]
+        },
+        "consequence": {
+          "type": "Or",
+          "first": {
+            "type": "NodeSpecification",
+            "hasAttributes": [
+              "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedBundleId",
+              "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId"
+            ]
+          },
+          "second": {
+            "type": "NodeSpecification",
+            "hasAttributeValues": [
+              {
+                "type": "QualifiedNameAttrSpecification",
+                "attributeNameUri": "http://www.w3.org/ns/prov#type",
+                "uriRegex": ".*forwardConnector"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

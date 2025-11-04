@@ -1,21 +1,23 @@
 package cz.muni.xmichalk.TargetSpecification;
 
+import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.BundleSearch.General.LinearSubgraphFinder;
+import cz.muni.xmichalk.Util.CpmUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-public class LinearSubgraphSpecification implements ICountableInDocument {
+public class CountLinearSubgraphs implements ICountableInDocument {
     public NodeSpecification firstNode;
     public List<EdgeToNodeSpecification> edgesAndNodes;
 
-    public LinearSubgraphSpecification() {
+    public CountLinearSubgraphs() {
     }
 
-    public LinearSubgraphSpecification(NodeSpecification firstNode, List<EdgeToNodeSpecification> edgesAndNodes) {
+    public CountLinearSubgraphs(NodeSpecification firstNode, List<EdgeToNodeSpecification> edgesAndNodes) {
         this.firstNode = firstNode;
         this.edgesAndNodes = edgesAndNodes;
     }
@@ -35,7 +37,9 @@ public class LinearSubgraphSpecification implements ICountableInDocument {
     }
 
     @Override
-    public int countInDocument(final INode startNode) {
+    public int countInDocument(CpmDocument document) {
+        var startNode = CpmUtils.chooseStartNode(document);
+
         var constraints = buildSubgraphConstraints();
 
         var fittingSubgraphs = LinearSubgraphFinder.findAnywhere(startNode, constraints);

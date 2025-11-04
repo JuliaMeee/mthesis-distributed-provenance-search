@@ -41,13 +41,7 @@ public class BundleSearchService {
 
         log.info("Search bundle {} starting from node {} for target type {} with specification {}", document.getBundleId().getUri(), startNodeId.getUri(), targetType, targetSpecification.toString());
 
-        var bundleSearcher = bundleSearcherRegistry.getSearchFunc(targetType);
-
-        if (bundleSearcher == null) {
-            throw new UnsupportedTargetTypeException("No search function registered for target type: " + targetType);
-        }
-
-        Object result = bundleSearcher.apply(document, startNodeId, targetSpecification);
+        Object result = bundleSearcherRegistry.search(document, startNodeId, targetType, targetSpecification);
 
         log.info("Search result: {}", result == null ? "null" : result.toString());
 
