@@ -58,6 +58,8 @@ public class TraverserController {
                     new SearchParams(
                             searchBackwards,
                             searchParams.versionPreference,
+                            searchParams.searchPriority,
+                            searchParams.validityChecks != null ? searchParams.validityChecks : new ArrayList<>(),
                             searchParams.targetType,
                             searchParams.targetSpecification
                     )

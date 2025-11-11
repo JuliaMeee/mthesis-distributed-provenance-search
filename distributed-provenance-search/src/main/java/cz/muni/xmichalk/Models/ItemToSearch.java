@@ -1,20 +1,23 @@
 package cz.muni.xmichalk.Models;
 
+import cz.muni.xmichalk.DocumentValidity.EValiditySpecification;
 import org.openprovenance.prov.model.QualifiedName;
+
+import java.util.Map;
 
 public class ItemToSearch {
     public QualifiedName bundleId;
     public QualifiedName connectorId;
     public String provServiceUri;
-    public boolean hasPathIntegrity;
-    public boolean isPathValid;
+    public boolean pathIntegrity;
+    public Map<EValiditySpecification, Boolean> pathValidityChecks;
 
-    public ItemToSearch(QualifiedName bundleId, QualifiedName connectorId, String provServiceUri, boolean hasPathIntegrity, boolean isPathValid) {
+    public ItemToSearch(QualifiedName bundleId, QualifiedName connectorId, String provServiceUri, boolean pathIntegrity, Map<EValiditySpecification, Boolean> pathValidityChecks) {
         this.bundleId = bundleId;
         this.connectorId = connectorId;
         this.provServiceUri = provServiceUri;
-        this.hasPathIntegrity = hasPathIntegrity;
-        this.isPathValid = isPathValid;
+        this.pathIntegrity = pathIntegrity;
+        this.pathValidityChecks = pathValidityChecks;
     }
 
 }

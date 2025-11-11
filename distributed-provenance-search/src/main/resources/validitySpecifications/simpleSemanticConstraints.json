@@ -1,0 +1,74 @@
+{
+  "type": "BundleSpecification",
+  "specifications": [
+    {
+      "type": "CountSpecification",
+      "countableInDocument": {
+        "type": "CountNodes",
+        "nodePredicate": {
+          "type": "NodeSpecification",
+          "isKind": "PROV_ACTIVITY",
+          "hasAttributeValues": [
+            {
+              "type": "QualifiedNameAttrSpecification",
+              "attributeNameUri": "http://www.w3.org/ns/prov#type",
+              "uriRegex": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+            }
+          ]
+        }
+      },
+      "comparisonResult": "EQUALS",
+      "count": 1
+    },
+    {
+      "type": "AllNodes",
+      "predicate": {
+        "type": "Implication",
+        "premise": {
+          "type": "NodeSpecification",
+          "isKind": "PROV_ACTIVITY",
+          "hasAttributeValues": [
+            {
+              "type": "QualifiedNameAttrSpecification",
+              "attributeNameUri": "http://www.w3.org/ns/prov#type",
+              "uriRegex": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+            }
+          ]
+        },
+        "consequence": {
+          "type": "NodeSpecification",
+          "isKind": "PROV_ACTIVITY",
+          "hasAttributes": [
+            "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId"
+          ]
+        }
+      }
+    },
+    {
+      "type": "AllNodes",
+      "predicate": {
+        "type": "Implication",
+        "premise": {
+          "type": "NodeSpecification",
+          "isKind": "PROV_ENTITY",
+          "hasAttributeValues": [
+            {
+              "type": "QualifiedNameAttrSpecification",
+              "attributeNameUri": "http://www.w3.org/ns/prov#type",
+              "uriRegex": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+            }
+          ]
+        },
+        "consequence": {
+          "type": "NodeSpecification",
+          "hasAttributes": [
+            "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
+            "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedBundleId",
+            "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedBundleHashValue",
+            "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/hashAlg"
+          ]
+        }
+      }
+    }
+  ]
+}

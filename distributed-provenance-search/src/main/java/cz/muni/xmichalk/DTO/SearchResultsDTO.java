@@ -16,6 +16,9 @@ public class SearchResultsDTO implements IDTO<SearchResults> {
 
     @Override
     public SearchResultsDTO from(final SearchResults domainModel) {
+        if (domainModel == null) {
+            return null;
+        }
         this.results = domainModel.results.stream().map(innerNode -> new FoundResultDTO().from(innerNode)).toList();
         return this;
     }

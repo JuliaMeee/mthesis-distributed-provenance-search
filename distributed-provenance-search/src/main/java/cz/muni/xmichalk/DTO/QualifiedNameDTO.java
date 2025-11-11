@@ -20,6 +20,9 @@ public class QualifiedNameDTO implements IDTO<QualifiedName> {
 
     @Override
     public QualifiedNameDTO from(final QualifiedName domainModel) {
+        if (domainModel == null) {
+            return null;
+        }
         this.nameSpaceUri = domainModel.getNamespaceURI();
         this.localPart = domainModel.getLocalPart();
         return this;

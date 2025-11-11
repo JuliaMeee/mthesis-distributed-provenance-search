@@ -1,40 +1,35 @@
 package cz.muni.xmichalk.Traverser;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.DTO.*;
+import cz.muni.xmichalk.DTO.BundleSearchResultDTO;
+import cz.muni.xmichalk.DTO.ConnectorDTO;
+import cz.muni.xmichalk.DocumentValidity.EValiditySpecification;
 import cz.muni.xmichalk.DocumentValidity.StorageDocumentIntegrityVerifier;
+import cz.muni.xmichalk.DocumentValidity.ValidityVerifier.ValidityVerifierRegistry;
 import cz.muni.xmichalk.Models.*;
+import cz.muni.xmichalk.ProvServiceAPI.ProvServiceAPI;
 import cz.muni.xmichalk.ProvServiceTable.IProvServiceTable;
+import cz.muni.xmichalk.SearchPriority.SearchPriorityComparatorResolver;
 import org.openprovenance.prov.model.QualifiedName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Traverser {
     private final IProvServiceTable provServiceTable;
+    private final ValidityVerifierRegistry validityVerifierRegistry;
     private static final Logger log = LoggerFactory.getLogger(Traverser.class);
     private final int concurrencyDegree;
 
-    private static final Comparator<ItemToSearch> toSearchPriorityComparator =
-            Comparator.comparing(e -> !e.hasPathIntegrity);
-
-    public Traverser(IProvServiceTable traverserTable, int concurrencyDegree) {
+    public Traverser(IProvServiceTable traverserTable, int concurrencyDegree, ValidityVerifierRegistry validityVerifierRegistry) {
         this.provServiceTable = traverserTable;
         this.concurrencyDegree = concurrencyDegree;
+        this.validityVerifierRegistry = validityVerifierRegistry;
         log.info("Instantiated traverser with concurrency degree: {}", concurrencyDegree);
     }
 
@@ -47,15 +42,25 @@ public class Traverser {
      * @return - list of found results matching the target
      */
     public List<FoundResult> searchChain(QualifiedName startBundleId, QualifiedName startNodeId, SearchParams searchParams) {
+        Comparator<ItemToSearch> searchPriorityComparator = SearchPriorityComparatorResolver.getSearchPriorityComparator(searchParams);
+
         SearchState searchState = new SearchState(
                 new ConcurrentHashMap<>(),
                 new ConcurrentHashMap<>(),
-                new PriorityBlockingQueue<>(10, toSearchPriorityComparator),
+                new HashMap<>(),
+                new HashMap<>(),
+                new PriorityBlockingQueue<>(10, searchPriorityComparator),
                 ConcurrentHashMap.newKeySet()
         );
 
-        searchState.toSearch.add(new ItemToSearch(startBundleId, startNodeId,
-                provServiceTable.getServiceUri(startBundleId.getUri()), true, true));
+        searchState.toSearchQueue.add(new ItemToSearch(
+                startBundleId,
+                startNodeId,
+                provServiceTable.getServiceUri(startBundleId.getUri()),
+                true,
+                searchParams.validityChecks.stream().collect(Collectors.toMap(
+                        check -> check, check -> true)
+                )));
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -94,31 +99,38 @@ public class Traverser {
     private ItemToSearch pollNextToSearch(SearchState searchState, String versionPreference) {
         log.info("Poll next item to search");
         ItemToSearch itemToSearch;
-        while ((itemToSearch = searchState.toSearch.poll()) != null) {
-            if (!itemToSearch.hasPathIntegrity && searchState.processing.values().stream()
-                    .anyMatch(item -> item.hasPathIntegrity)) {
-                return null; // wait until all valid  bundles are processed before continuing with lower credibility ones
+        while ((itemToSearch = searchState.toSearchQueue.poll()) != null) {
+            final ItemToSearch finalItemToSearch = itemToSearch;
+            if (searchState.processing.values().stream()
+                    .anyMatch(item -> searchState.toSearchQueue.comparator().compare(item, finalItemToSearch) < 0)) {
+                return null; // wait until all bundles with higher priority are processed, because they might add higher priority items to search
             }
 
-            var preferredVersion = fetchPreferredBundleVersion(itemToSearch.provServiceUri, itemToSearch.bundleId, versionPreference);
-            if (preferredVersion != null) {
-
-                log.info("Fetch preferred version for bundle: {} returned {}", itemToSearch.bundleId.getUri(), preferredVersion.getUri());
-                itemToSearch.bundleId = preferredVersion;
-            } else {
-                log.warn("Fetch preferred version for bundle: {} returned null", itemToSearch.bundleId.getUri());
+            try {
+                QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToSearch.provServiceUri, itemToSearch.bundleId, versionPreference);
+                if (preferredVersion != null) {
+                    log.info("Fetch preferred version for bundle: {} returned {}", itemToSearch.bundleId.getUri(), preferredVersion.getUri());
+                    itemToSearch.bundleId = preferredVersion;
+                } else {
+                    log.warn("Fetch preferred version for bundle: {} returned null", itemToSearch.bundleId.getUri());
+                }
+            } catch (Exception e) {
+                log.error("Error while fetching preferred version for bundle {}: {}", itemToSearch.bundleId.getUri(), e);
             }
 
             if (searchState.processing.putIfAbsent(itemToSearch.bundleId, itemToSearch) == null) {
                 if (!searchState.visited.containsKey(itemToSearch.bundleId)) {
-                    log.info("Next to search bundle id: {}, connector id: {}, hasPathIntegrity: {}, isPathValid: {}",
-                            itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri(), itemToSearch.hasPathIntegrity, itemToSearch.isPathValid);
+                    log.info("Next to search bundle id: {}, connector id: {}, pathIntegrity: {}, pathValidityChecks: {}",
+                            itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri(), itemToSearch.pathIntegrity, itemToSearch.pathValidityChecks);
                     return itemToSearch;
                 } else {
                     searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
+                    log.info("Already searched bundle: {}", itemToSearch.bundleId.getUri());
                 }
+            } else {
+                log.info("Already searching bundle: {}", itemToSearch.bundleId.getUri());
             }
-            log.info("Already searched bundle: {}", itemToSearch.bundleId.getUri());
+
 
         }
         return null;
@@ -133,25 +145,34 @@ public class Traverser {
         completionService.submit(() -> {
             log.info("Started processing bundle {} from connector {}", itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri());
 
+            boolean hasIntegrity = false;
+            Map<EValiditySpecification, Boolean> validityChecks = searchParams.validityChecks.stream().collect(Collectors.toMap(
+                    check -> check, check -> false));
+
             try {
-                var findTargetResult = fetchSearchBundleResult(itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId,
+                var findTargetResult = ProvServiceAPI.fetchSearchBundleResult(itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId,
                         searchParams.targetType, searchParams.targetSpecification);
 
-                var findConnectorsResult = fetchSearchBundleResult(
+                var findConnectorsResult = ProvServiceAPI.fetchSearchBundleResult(
                         itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
                         new ObjectMapper().valueToTree(searchParams.searchBackwards ? "backward" : "forward"));
 
-                boolean hasIntegrity = hasIntegrity(itemToSearch.bundleId, findTargetResult, findConnectorsResult);
-                boolean isValid = false;// TODO validity
+                hasIntegrity = hasIntegrity(itemToSearch.bundleId, findTargetResult, findConnectorsResult);
 
-                var newResult = convertToNewResult(itemToSearch, findTargetResult, hasIntegrity, isValid);
+                for (var validityCheck : searchParams.validityChecks) {
+                    boolean validityResult = validityVerifierRegistry.verifyValidity(
+                            itemToSearch, findTargetResult, validityCheck);
+                    validityChecks.put(validityCheck, validityResult);
+                }
+
+                var newResult = convertToNewResult(itemToSearch, findTargetResult, hasIntegrity, validityChecks);
                 if (newResult != null) {
                     searchState.results.add(newResult);
                     log.info("In bundle {} found target(s): {}", itemToSearch.bundleId.getUri(), newResult.result.toString());
                 }
 
-                var newItemsToSearch = convertToNewItemsToSearch(itemToSearch, findConnectorsResult, hasIntegrity, isValid);
-                searchState.toSearch.addAll(newItemsToSearch);
+                var newItemsToSearch = convertToNewItemsToSearch(itemToSearch, findConnectorsResult, hasIntegrity, validityChecks);
+                searchState.toSearchQueue.addAll(newItemsToSearch);
                 log.info("In bundle {} found connections to: {}", itemToSearch.bundleId.getUri(),
                         newItemsToSearch.stream().map(item -> item.bundleId.getUri())
                                 .collect(Collectors.joining(", ")));
@@ -185,16 +206,22 @@ public class Traverser {
                 && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token());
     }
 
-    private FoundResult convertToNewResult(ItemToSearch itemSearched, BundleSearchResultDTO findTargetResult, boolean hasIntegrity, boolean isValid) {
+    private FoundResult convertToNewResult(ItemToSearch itemSearched, BundleSearchResultDTO findTargetResult, boolean integrity, Map<EValiditySpecification, Boolean> validityChecks) {
         if (findTargetResult == null || findTargetResult.found() == null || findTargetResult.found().isNull()) {
             log.warn("Search bundle {} for target returned null", itemSearched.bundleId.getUri());
             return null;
         }
 
-        return new FoundResult(itemSearched.bundleId, findTargetResult.found(), itemSearched.hasPathIntegrity, hasIntegrity, itemSearched.isPathValid, isValid);
+        return new FoundResult(
+                itemSearched.bundleId,
+                findTargetResult.found(),
+                integrity,
+                validityChecks,
+                itemSearched.pathIntegrity,
+                itemSearched.pathValidityChecks);
     }
 
-    private List<ItemToSearch> convertToNewItemsToSearch(ItemToSearch itemSearched, BundleSearchResultDTO findConnectorsResult, boolean hasIntegrity, boolean isValid) {
+    private List<ItemToSearch> convertToNewItemsToSearch(ItemToSearch itemSearched, BundleSearchResultDTO findConnectorsResult, boolean integrity, Map<EValiditySpecification, Boolean> validityChecks) {
         if (findConnectorsResult == null || findConnectorsResult.found() == null || findConnectorsResult.found().isNull()) {
             log.warn("Search bundle {} for connectors returned null", itemSearched.bundleId.getUri());
             return new ArrayList<>();
@@ -225,8 +252,8 @@ public class Traverser {
                             connector.referencedBundleId.toDomainModel(),
                             connector.referencedConnectorId.toDomainModel(),
                             provServiceUri,
-                            itemSearched.hasPathIntegrity && hasIntegrity,
-                            itemSearched.isPathValid && isValid
+                            itemSearched.pathIntegrity && integrity,
+                            combineValidityChecks(itemSearched.pathValidityChecks, validityChecks)
                     )
             );
         }
@@ -234,71 +261,13 @@ public class Traverser {
         return newItemsToSearch;
     }
 
-    public BundleSearchResultDTO fetchSearchBundleResult(String serviceUri,
-                                                         QualifiedName bundleId, QualifiedName connectorId,
-                                                         String targetType, JsonNode targetSpecification) throws IOException {
-        BundleSearchParamsDTO searchParams = new BundleSearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
-
-        if (serviceUri == null) {
-            throw new IOException("No prov service found for bundle: " + bundleId.getUri());
+    private Map<EValiditySpecification, Boolean> combineValidityChecks(Map<EValiditySpecification, Boolean> first, Map<EValiditySpecification, Boolean> second) {
+        Map<EValiditySpecification, Boolean> combined = new HashMap<>();
+        for (EValiditySpecification key : first.keySet()) {
+            boolean firstValue = first.getOrDefault(key, false);
+            boolean secondValue = second.getOrDefault(key, false);
+            combined.put(key, firstValue && secondValue);
         }
-
-        String url = serviceUri + "searchBundle";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<BundleSearchParamsDTO> request = new HttpEntity<>(searchParams, headers);
-
-        ResponseEntity<BundleSearchResultDTO> response = restTemplate.postForEntity(
-                url, request, BundleSearchResultDTO.class);
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new IOException("Search bundle API call failed with status: " + response.getStatusCode());
-        }
-
-        BundleSearchResultDTO searchBundleResultDTO = response.getBody();
-
-        return searchBundleResultDTO;
-    }
-
-    public QualifiedName fetchPreferredBundleVersion(String serviceUri, QualifiedName bundleId, String versionpreference) {
-        PickVersionParamsDTO params = new PickVersionParamsDTO(
-                new QualifiedNameDTO().from(bundleId),
-                versionpreference);
-
-        if (serviceUri == null) {
-            log.error("No prov service found for bundle: {}", bundleId.getUri());
-            return null;
-        }
-
-        String url = serviceUri + "pickVersion";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<PickVersionParamsDTO> request = new HttpEntity<>(params, headers);
-
-        ResponseEntity<QualifiedNameDTO> response = restTemplate.postForEntity(
-                url, request, QualifiedNameDTO.class);
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("Get preferred version API call failed with status: {}", response.getStatusCode());
-            return null;
-        }
-
-        if (response.getBody() == null) {
-            return null;
-        }
-
-        return response.getBody().toDomainModel();
-    }
-
-    private ECredibility mergeCredibility(ECredibility bundleCredibility, ECredibility pathCredibility) {
-        if (bundleCredibility == ECredibility.INVALID) return ECredibility.INVALID;
-        if (bundleCredibility == ECredibility.VALID && pathCredibility == ECredibility.VALID) return ECredibility.VALID;
-        return ECredibility.LOW;
+        return combined;
     }
 }

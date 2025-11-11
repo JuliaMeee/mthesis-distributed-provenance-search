@@ -12,13 +12,16 @@ import cz.muni.xmichalk.TargetSpecification.LogicalConnections.Implication;
 import cz.muni.xmichalk.TargetSpecification.LogicalConnections.Or;
 import cz.muni.xmichalk.TargetSpecification.LogicalConnections.Xor;
 import org.junit.jupiter.api.Test;
+import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.ProvUtilities;
 import org.openprovenance.prov.model.StatementOrBundle;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static cz.muni.xmichalk.Util.AttributeNames.*;
@@ -371,6 +374,100 @@ public class TargetSpecificationTest {
         assert (bundleSpecification.test(cpmDoc));
     }
 
+    public BundleSpecification getSimpleValiditySpecification() {
+        var mainActivityNode = new NodeSpecification(
+                null,
+                StatementOrBundle.Kind.PROV_ACTIVITY,
+                null,
+                null,
+                List.of(
+                        new QualifiedNameAttrSpecification(
+                                ATTR_PROV_TYPE.getUri(),
+                                CPM_URI + "mainActivity"
+                        )
+                ));
+
+        var activityWithMetaRef = new NodeSpecification(
+                null,
+                StatementOrBundle.Kind.PROV_ACTIVITY,
+                null,
+                List.of(
+                        ATTR_REFERENCED_META_BUNDLE_ID.getUri()
+                ),
+                null);
+
+        var backwardCon = new NodeSpecification(
+                null,
+                StatementOrBundle.Kind.PROV_ENTITY,
+                null,
+                null,
+                List.of(
+                        new QualifiedNameAttrSpecification(
+                                ATTR_PROV_TYPE.getUri(),
+                                CPM_URI + "backwardConnector"
+                        )
+                ));
+
+        var hasBackwardConAttributes = new NodeSpecification(
+                null,
+                null,
+                null,
+                List.of(
+                        ATTR_REFERENCED_META_BUNDLE_ID.getUri(),
+                        ATTR_REFERENCED_BUNDLE_ID.getUri(),
+                        ATTR_REFERENCED_BUNDLE_HASH_VALUE.getUri(),
+                        ATTR_HASH_ALG.getUri()
+                ),
+                null);
+
+
+        return new BundleSpecification(
+                List.of(
+                        // Has exactly one main activity
+                        new CountSpecification(
+                                new CountNodes(mainActivityNode),
+                                EComparisonResult.EQUALS,
+                                1
+                        ),
+                        // Main activity has ref to meta bundle
+                        new AllNodes(
+                                new Implication<INode>(
+                                        mainActivityNode,
+                                        activityWithMetaRef
+                                )),
+                        // All backward connectors have necessary attributes specified
+                        new AllNodes(
+                                new Implication<>(
+                                        backwardCon,
+                                        hasBackwardConAttributes
+                                )
+                        )
+                )
+        );
+    }
+
+    @Test
+    public void testSimpleValiditySpecification() throws IOException {
+        var validitySpecs = getSimpleValiditySpecification();
+
+        for (int i : List.of(1, 2, 3, 4)) {
+            var datasetFolder = dataFolder + "dataset" + i + "/";
+            try (var paths = Files.walk(Paths.get(datasetFolder))) {
+                paths.filter(Files::isRegularFile)
+                        .forEach(filePath -> {
+                            Document document = null;
+                            try {
+                                document = deserializeFile(filePath, Formats.ProvFormat.JSON);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+                            assert (validitySpecs.test(cpmDoc));
+                        });
+            }
+        }
+    }
+
     @Test
     public void testFromFiles() throws IOException {
         var docFile = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
@@ -387,13 +484,13 @@ public class TargetSpecificationTest {
     }
 
 
-    public void testFromFile(Path docFile, Path specsFile) throws IOException {
-        var document = deserializeFile(docFile, Formats.ProvFormat.JSON);
+    public void testFromFile(Path docPath, Path specsPath) throws IOException {
+        var document = deserializeFile(docPath, Formats.ProvFormat.JSON);
         var cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         ObjectMapper mapper = new ObjectMapper();
 
-        ITestableSpecification<CpmDocument> specification = mapper.readValue(specsFile.toFile(), ITestableSpecification.class);
+        ITestableSpecification<CpmDocument> specification = mapper.readValue(specsPath.toFile(), ITestableSpecification.class);
         assert (specification.test(cpmDoc));
 
     }
