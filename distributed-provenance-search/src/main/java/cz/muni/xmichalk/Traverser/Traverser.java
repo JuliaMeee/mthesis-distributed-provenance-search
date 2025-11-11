@@ -103,6 +103,7 @@ public class Traverser {
             final ItemToSearch finalItemToSearch = itemToSearch;
             if (searchState.processing.values().stream()
                     .anyMatch(item -> searchState.toSearchQueue.comparator().compare(item, finalItemToSearch) < 0)) {
+                searchState.toSearchQueue.add(finalItemToSearch);
                 return null; // wait until all bundles with higher priority are processed, because they might add higher priority items to search
             }
 
