@@ -21,10 +21,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
                 }
                 """
 )
-public record SearchParams(
-        QualifiedNameData bundleId,
-        QualifiedNameData startNodeId,
-        ETargetType targetType,
-        JsonNode targetSpecification
-) {
+public class SearchParams {
+    public QualifiedNameData bundleId;
+    public QualifiedNameData startNodeId;
+    public ETargetType targetType;
+    public JsonNode targetSpecification;
+
+    public SearchParams() {
+    }
+
+    public SearchParams(QualifiedNameData bundleId, QualifiedNameData startNodeId, ETargetType targetType, JsonNode targetSpecification) {
+        this.bundleId = bundleId;
+        this.startNodeId = startNodeId;
+        this.targetType = targetType;
+        this.targetSpecification = targetSpecification;
+    }
 }

@@ -38,8 +38,8 @@ public class LinearSubgraphFinder {
         if (current == null) return;
         if (foundPart == null) foundPart = new ArrayList<>();
 
-        IEdge edge = current.edge();
-        INode node = current.node();
+        IEdge edge = current.edge;
+        INode node = current.node;
         int index = foundPart.size();
 
         if (node == null) return;

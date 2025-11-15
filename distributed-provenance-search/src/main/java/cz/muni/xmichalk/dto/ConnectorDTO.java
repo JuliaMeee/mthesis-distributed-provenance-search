@@ -11,4 +11,16 @@ public class ConnectorDTO {
 
     public ConnectorDTO() {
     }
+
+    public ConnectorDTO(QualifiedNameDTO id, QualifiedNameDTO referencedConnectorId,
+                        QualifiedNameDTO referencedBundleId, QualifiedNameDTO referencedMetaBundleId,
+                        String referencedBundleHashValue, String hashAlg, String provenanceServiceUri) {
+        this.id = id;
+        this.referencedConnectorId = referencedConnectorId;
+        this.referencedBundleId = referencedBundleId;
+        this.referencedMetaBundleId = referencedMetaBundleId;
+        this.referencedBundleHashValue = referencedBundleHashValue;
+        this.hashAlg = hashAlg;
+        this.provenanceServiceUri = provenanceServiceUri;
+    }
 }

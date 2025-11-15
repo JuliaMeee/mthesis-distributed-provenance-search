@@ -56,7 +56,7 @@ public class CpmUtils {
             if (subgraphs.isEmpty() || subgraphs.getFirst().size() != 2) {
                 return null;
             }
-            return subgraphs.getFirst().getLast().node().getId();
+            return subgraphs.getFirst().getLast().node.getId();
         }
 
         return null;

@@ -47,7 +47,7 @@ public class ProvServiceAPI {
             return null;
         }
 
-        return response.getBody().toDomainModel();
+        return response.getBody().toQN();
     }
 
     public static BundleSearchResultDTO fetchSearchBundleResult(String serviceUri,

@@ -6,7 +6,7 @@ import cz.muni.xmichalk.validity.EValidityCheck;
 
 import java.util.HashMap;
 
-public class FoundResultDTO implements IDTO<FoundResult> {
+public class FoundResultDTO {
     public QualifiedNameDTO bundleId;
     public boolean integrity;
     public HashMap<EValidityCheck, Boolean> validityChecks;
@@ -19,19 +19,15 @@ public class FoundResultDTO implements IDTO<FoundResult> {
 
     }
 
-    @Override
-    public FoundResult toDomainModel() {
-        return new FoundResult(
-                this.bundleId.toDomainModel(),
-                this.result,
-                this.integrity,
-                this.validityChecks,
-                this.pathIntegrity,
-                this.pathValidityChecks
-        );
+    public FoundResultDTO(QualifiedNameDTO bundleId, boolean integrity, HashMap<EValidityCheck, Boolean> validityChecks, boolean pathIntegrity, HashMap<EValidityCheck, Boolean> pathValidityChecks, JsonNode result) {
+        this.bundleId = bundleId;
+        this.integrity = integrity;
+        this.validityChecks = validityChecks;
+        this.pathIntegrity = pathIntegrity;
+        this.pathValidityChecks = pathValidityChecks;
+        this.result = result;
     }
 
-    @Override
     public FoundResultDTO from(FoundResult domainModel) {
         if (domainModel == null) {
             return null;

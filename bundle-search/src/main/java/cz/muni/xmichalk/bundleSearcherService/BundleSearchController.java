@@ -62,19 +62,19 @@ public class BundleSearchController {
         }
 
         try {
-            var versionPicker = versionPickers.get(params.versionPreference());
+            var versionPicker = versionPickers.get(params.versionPreference);
 
             if (versionPicker == null) {
-                var errorMessage = "Unsupported version preference: " + params.versionPreference();
+                var errorMessage = "Unsupported version preference: " + params.versionPreference;
                 log.error(errorMessage);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(errorMessage);
             }
 
-            var pickedBundleVersion = versionPicker.apply(params.bundleId().toQN());
+            var pickedBundleVersion = versionPicker.apply(params.bundleId.toQN());
 
-            return ResponseEntity.ok(new QualifiedNameData(pickedBundleVersion));
+            return ResponseEntity.ok(new QualifiedNameData().from(pickedBundleVersion));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -95,10 +95,10 @@ public class BundleSearchController {
         }
 
         try {
-            QualifiedName bundleId = searchParams.bundleId().toQN();
-            QualifiedName connectorId = searchParams.startNodeId().toQN();
+            QualifiedName bundleId = searchParams.bundleId.toQN();
+            QualifiedName connectorId = searchParams.startNodeId.toQN();
 
-            SearchResult searchBundleResult = bundleSearchService.searchBundle(bundleId, connectorId, searchParams.targetType(), searchParams.targetSpecification());
+            SearchResult searchBundleResult = bundleSearchService.searchBundle(bundleId, connectorId, searchParams.targetType, searchParams.targetSpecification);
             return ResponseEntity.ok(searchBundleResult);
 
         } catch (UnsupportedTargetTypeException e) {
@@ -126,18 +126,18 @@ public class BundleSearchController {
 
     private static List<String> getMissingParams(SearchParams params) {
         List<String> missing = new ArrayList<String>();
-        if (params.bundleId() == null) missing.add("bundleId");
-        if (params.startNodeId() == null) missing.add("startNodeId");
-        if (params.targetType() == null) missing.add("targetType");
-        if (params.targetSpecification() == null) missing.add("targetSpecification");
+        if (params.bundleId == null) missing.add("bundleId");
+        if (params.startNodeId == null) missing.add("startNodeId");
+        if (params.targetType == null) missing.add("targetType");
+        if (params.targetSpecification == null) missing.add("targetSpecification");
 
         return missing;
     }
 
     private static List<String> getMissingParams(PickVersionParams params) {
         List<String> missing = new ArrayList<String>();
-        if (params.bundleId() == null) missing.add("bundleId");
-        if (params.versionPreference() == null) missing.add("versionPreference");
+        if (params.bundleId == null) missing.add("bundleId");
+        if (params.versionPreference == null) missing.add("versionPreference");
 
         return missing;
     }

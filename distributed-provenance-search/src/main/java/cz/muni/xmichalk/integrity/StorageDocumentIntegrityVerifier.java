@@ -30,13 +30,13 @@ public class StorageDocumentIntegrityVerifier {
 
     public static boolean verifySignature(Token token) {
         try {
-            PublicKey publicKey = loadPublicKeyFromCertificate(token.data().additionalData().trustedPartyCertificate());
+            PublicKey publicKey = loadPublicKeyFromCertificate(token.data.additionalData.trustedPartyCertificate);
 
             ObjectMapper mapper = new ObjectMapper();
-            String tokenDataJsonString = mapper.writeValueAsString(token.data());
+            String tokenDataJsonString = mapper.writeValueAsString(token.data);
             byte[] canonized = new JsonCanonicalizer(tokenDataJsonString).getEncodedUTF8();
 
-            byte[] signatureBytes = Base64.getDecoder().decode(token.signature());
+            byte[] signatureBytes = Base64.getDecoder().decode(token.signature);
 
             Signature verifier = Signature.getInstance("SHA256withECDSA");
             verifier.initVerify(publicKey);
@@ -49,8 +49,8 @@ public class StorageDocumentIntegrityVerifier {
     }
 
     public static boolean verifyTokenExists(QualifiedName document, Token token) {
-        String trustedPartyUri = token.data().additionalData().trustedPartyUri();
-        String url = trustedPartyUri + "/api/v1/organizations/" + token.data().originatorId() + "/tokens";
+        String trustedPartyUri = token.data.additionalData.trustedPartyUri;
+        String url = trustedPartyUri + "/api/v1/organizations/" + token.data.originatorId + "/tokens";
         if (!url.startsWith("http")) {
             url = "http://" + url;
         }

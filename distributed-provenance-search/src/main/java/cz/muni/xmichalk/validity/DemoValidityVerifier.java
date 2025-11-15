@@ -28,7 +28,7 @@ public class DemoValidityVerifier implements IValidityVerifier {
 
     @Override
     public boolean verify(ItemToSearch itemToSearch, BundleSearchResultDTO bundleSearchResult) {
-        String bundleUri = bundleSearchResult.token().data().additionalData().bundle();
+        String bundleUri = bundleSearchResult.token.data.additionalData.bundle;
 
         String provServiceUri = provServiceTable.getServiceUri(bundleUri);
 
@@ -44,6 +44,6 @@ public class DemoValidityVerifier implements IValidityVerifier {
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(result.found(), Boolean.class);
+        return objectMapper.convertValue(result.found, Boolean.class);
     }
 }

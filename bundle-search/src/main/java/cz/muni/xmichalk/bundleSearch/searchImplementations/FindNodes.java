@@ -67,7 +67,7 @@ public class FindNodes<T> implements ISearchBundle<T> {
         }
 
         return nodes.stream()
-                .map(node -> new QualifiedNameData(node.getId()))
+                .map(node -> new QualifiedNameData().from(node.getId()))
                 .toList();
     }
 }

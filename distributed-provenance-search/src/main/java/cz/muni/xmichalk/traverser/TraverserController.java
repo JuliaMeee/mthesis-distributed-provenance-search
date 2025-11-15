@@ -70,8 +70,8 @@ public class TraverserController {
 
         try {
 
-            QualifiedName bundleId = searchParams.bundleId.toDomainModel();
-            QualifiedName connectorId = searchParams.startNodeId.toDomainModel();
+            QualifiedName bundleId = searchParams.bundleId.toQN();
+            QualifiedName connectorId = searchParams.startNodeId.toQN();
 
             SearchResults results = traverser.searchChain(
                     bundleId,

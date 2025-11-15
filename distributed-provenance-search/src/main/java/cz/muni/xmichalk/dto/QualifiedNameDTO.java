@@ -2,15 +2,19 @@ package cz.muni.xmichalk.dto;
 
 import org.openprovenance.prov.model.QualifiedName;
 
-public class QualifiedNameDTO implements IDTO<QualifiedName> {
+public class QualifiedNameDTO {
     public String nameSpaceUri;
     public String localPart;
 
     public QualifiedNameDTO() {
     }
 
-    @Override
-    public QualifiedName toDomainModel() {
+    public QualifiedNameDTO(String nameSpaceUri, String localPart) {
+        this.nameSpaceUri = nameSpaceUri;
+        this.localPart = localPart;
+    }
+
+    public QualifiedName toQN() {
         return new org.openprovenance.prov.vanilla.QualifiedName(
                 this.nameSpaceUri,
                 this.localPart,
@@ -18,13 +22,12 @@ public class QualifiedNameDTO implements IDTO<QualifiedName> {
         );
     }
 
-    @Override
-    public QualifiedNameDTO from(QualifiedName domainModel) {
-        if (domainModel == null) {
+    public QualifiedNameDTO from(QualifiedName qn) {
+        if (qn == null) {
             return null;
         }
-        this.nameSpaceUri = domainModel.getNamespaceURI();
-        this.localPart = domainModel.getLocalPart();
+        this.nameSpaceUri = qn.getNamespaceURI();
+        this.localPart = qn.getLocalPart();
         return this;
     }
 }

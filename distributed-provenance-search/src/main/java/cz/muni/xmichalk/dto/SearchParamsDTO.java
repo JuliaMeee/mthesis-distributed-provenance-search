@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.xmichalk.searchPriority.ESearchPriority;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.openprovenance.prov.model.QualifiedName;
 
 import java.util.List;
 
@@ -41,9 +40,9 @@ public class SearchParamsDTO {
 
     }
 
-    public SearchParamsDTO(QualifiedName bundleId, QualifiedName connectorId, String versionPreference, ESearchPriority searchPriority, List<EValidityCheck> validityChecks, String targetType, JsonNode targetSpecification) {
-        this.bundleId = new QualifiedNameDTO().from(bundleId);
-        this.startNodeId = new QualifiedNameDTO().from(connectorId);
+    public SearchParamsDTO(QualifiedNameDTO bundleId, QualifiedNameDTO connectorId, String versionPreference, ESearchPriority searchPriority, List<EValidityCheck> validityChecks, String targetType, JsonNode targetSpecification) {
+        this.bundleId = bundleId;
+        this.startNodeId = connectorId;
         this.versionPreference = versionPreference;
         this.searchPriority = searchPriority;
         this.validityChecks = validityChecks;

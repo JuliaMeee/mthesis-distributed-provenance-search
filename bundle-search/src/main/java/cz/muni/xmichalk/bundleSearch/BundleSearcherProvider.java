@@ -35,7 +35,7 @@ public class BundleSearcherProvider {
                 ETargetType.CONNECTORS, new FindConnectors(),
                 ETargetType.BUNDLE_ID_BY_META_BUNDLE_ID, new FindBundle<QualifiedNameData>(
                         FindBundle::translateMetaBundleIdToPredicate,
-                        (CpmDocument doc) -> doc == null ? null : new QualifiedNameData(doc.getBundleId())
+                        (CpmDocument doc) -> doc == null ? null : new QualifiedNameData().from(doc.getBundleId())
                 ),
                 ETargetType.TEST_FITS, (CpmDocument document, QualifiedName startNodeId, JsonNode targetSpecification) ->
                 {

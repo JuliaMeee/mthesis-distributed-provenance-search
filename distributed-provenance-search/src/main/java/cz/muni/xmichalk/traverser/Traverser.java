@@ -213,13 +213,13 @@ public class Traverser {
             return false;
         }
         if (targetSearchResult == null) {
-            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, connectorsSearchResult.token());
+            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, connectorsSearchResult.token);
         }
         if (connectorsSearchResult == null) {
-            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token());
+            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token);
         }
-        return targetSearchResult.token().equals(connectorsSearchResult.token())
-                && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token());
+        return targetSearchResult.token.equals(connectorsSearchResult.token)
+                && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token);
     }
 
     private LinkedHashMap<EValidityCheck, Boolean> evaluateValidityChecks(List<EValidityCheck> validityChecks, ItemToSearch itemToSearched, BundleSearchResultDTO findTargetResult) {
@@ -239,14 +239,14 @@ public class Traverser {
     }
 
     private FoundResult convertToNewResult(ItemToSearch itemSearched, BundleSearchResultDTO findTargetResult, boolean integrity, Map<EValidityCheck, Boolean> validityChecks) {
-        if (findTargetResult == null || findTargetResult.found() == null || findTargetResult.found().isNull()) {
+        if (findTargetResult == null || findTargetResult.found == null || findTargetResult.found.isNull()) {
             log.warn("Search bundle {} for target returned null", itemSearched.bundleId.getUri());
             return null;
         }
 
         return new FoundResult(
                 itemSearched.bundleId,
-                findTargetResult.found(),
+                findTargetResult.found,
                 integrity,
                 validityChecks,
                 itemSearched.pathIntegrity,
@@ -254,7 +254,7 @@ public class Traverser {
     }
 
     private List<ItemToSearch> convertToNewItemsToSearch(ItemToSearch itemSearched, BundleSearchResultDTO findConnectorsResult, boolean integrity, LinkedHashMap<EValidityCheck, Boolean> validityChecks) {
-        if (findConnectorsResult == null || findConnectorsResult.found() == null || findConnectorsResult.found().isNull()) {
+        if (findConnectorsResult == null || findConnectorsResult.found == null || findConnectorsResult.found.isNull()) {
             log.warn("Search bundle {} for connectors returned null", itemSearched.bundleId.getUri());
             return new ArrayList<>();
         }
@@ -262,7 +262,7 @@ public class Traverser {
         List<ConnectorDTO> connectors;
         try {
             connectors = new ObjectMapper().convertValue(
-                    findConnectorsResult.found(), new TypeReference<List<ConnectorDTO>>() {
+                    findConnectorsResult.found, new TypeReference<List<ConnectorDTO>>() {
                     });
         } catch (Exception e) {
             log.error("While converting connectors from bundle {} got error: {}", itemSearched.bundleId.getUri(), e);
@@ -276,13 +276,13 @@ public class Traverser {
 
             String provServiceUri = connector.provenanceServiceUri;
             if (provServiceUri == null) {
-                provServiceUri = provServiceTable.getServiceUri(connector.referencedBundleId.toDomainModel().getUri());
+                provServiceUri = provServiceTable.getServiceUri(connector.referencedBundleId.toQN().getUri());
             }
 
             newItemsToSearch.add(
                     new ItemToSearch(
-                            connector.referencedBundleId.toDomainModel(),
-                            connector.referencedConnectorId.toDomainModel(),
+                            connector.referencedBundleId.toQN(),
+                            connector.referencedConnectorId.toQN(),
                             provServiceUri,
                             itemSearched.pathIntegrity && integrity,
                             combineValidityChecks(itemSearched.pathValidityChecks, validityChecks)

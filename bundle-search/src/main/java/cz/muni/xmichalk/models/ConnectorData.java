@@ -19,19 +19,19 @@ public class ConnectorData {
     }
 
     public ConnectorData(INode node) {
-        id = new QualifiedNameData(node.getId());
+        id = new QualifiedNameData().from(node.getId());
 
         var referencedConnectorIdValue = CpmUtils.getConnectorIdInReferencedBundle(node);
         referencedConnectorId =
-                new QualifiedNameData(referencedConnectorIdValue == null ? node.getId() : referencedConnectorIdValue);
+                new QualifiedNameData().from(referencedConnectorIdValue == null ? node.getId() : referencedConnectorIdValue);
 
         var referencedBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
         referencedBundleId = referencedBundleIdValue == null ? null :
-                new QualifiedNameData((org.openprovenance.prov.model.QualifiedName) referencedBundleIdValue);
+                new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedBundleIdValue);
 
         var referencedMetaBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
         referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
-                new QualifiedNameData((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
+                new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
 
         var provServiceUriValue = CpmUtils.getAttributeValue(node, ATTR_PROVENANCE_SERVICE_URI);
         provenanceServiceUri = provServiceUriValue == null ? null : ((LangString) provServiceUriValue).getValue();

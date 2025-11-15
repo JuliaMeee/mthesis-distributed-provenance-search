@@ -15,9 +15,15 @@ public class QualifiedNameData {
     }
 
 
-    public QualifiedNameData(QualifiedName domainModel) {
-        this.nameSpaceUri = domainModel.getNamespaceURI();
-        this.localPart = domainModel.getLocalPart();
+    public QualifiedNameData from(QualifiedName qn) {
+        if (qn == null) {
+            return null;
+        }
+
+        this.nameSpaceUri = qn.getNamespaceURI();
+        this.localPart = qn.getLocalPart();
+
+        return this;
     }
 
     public QualifiedName toQN() {
