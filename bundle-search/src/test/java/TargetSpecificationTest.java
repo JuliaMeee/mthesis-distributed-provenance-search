@@ -5,15 +5,14 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.TargetSpecification.*;
-import cz.muni.xmichalk.TargetSpecification.AttributeSpecification.QualifiedNameAttrSpecification;
-import cz.muni.xmichalk.TargetSpecification.LogicalConnections.And;
-import cz.muni.xmichalk.TargetSpecification.LogicalConnections.Implication;
-import cz.muni.xmichalk.TargetSpecification.LogicalConnections.Or;
-import cz.muni.xmichalk.TargetSpecification.LogicalConnections.Xor;
+import cz.muni.xmichalk.targetSpecification.*;
+import cz.muni.xmichalk.targetSpecification.attributeSpecification.QualifiedNameAttrSpecification;
+import cz.muni.xmichalk.targetSpecification.logicalConnections.And;
+import cz.muni.xmichalk.targetSpecification.logicalConnections.Implication;
+import cz.muni.xmichalk.targetSpecification.logicalConnections.Or;
+import cz.muni.xmichalk.targetSpecification.logicalConnections.Xor;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Document;
-import org.openprovenance.prov.model.ProvUtilities;
 import org.openprovenance.prov.model.StatementOrBundle;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
@@ -24,15 +23,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static cz.muni.xmichalk.Util.AttributeNames.*;
-import static cz.muni.xmichalk.Util.NameSpaceConstants.CPM_URI;
-import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
+import static cz.muni.xmichalk.util.AttributeNames.*;
+import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
+import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
 
 public class TargetSpecificationTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
-    ProvUtilities u = new ProvUtilities();
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
     String specificationsFolder = System.getProperty("user.dir") + "/src/test/resources/targetSpecifications/";
 

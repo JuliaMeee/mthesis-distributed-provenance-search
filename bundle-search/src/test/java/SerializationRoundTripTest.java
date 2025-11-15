@@ -3,14 +3,13 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.Util.ProvDocumentUtils;
+import cz.muni.xmichalk.util.ProvDocumentUtils;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -53,7 +52,7 @@ public class SerializationRoundTripTest {
     }
 
     @Test
-    public void testMultipleFormats() throws IOException, DatatypeConfigurationException {
+    public void testMultipleFormats() {
         Document[] documents = {
                 TestDocument.getTestDocument1(pF, cPF, cF),
                 TestDocument.getTestDocument2(pF, cPF, cF),
@@ -72,9 +71,8 @@ public class SerializationRoundTripTest {
                 try {
                     testFormat(document, format);
                 } catch (Exception e) {
-                    System.err.println("Error testing format: " + format +
-                            " for document with bundle ID: " + ProvDocumentUtils.getBundleId(document).getLocalPart());
-                    e.printStackTrace();
+                    System.err.println("Error testing format " + format +
+                            " for document with bundle ID " + ProvDocumentUtils.getBundleId(document).getLocalPart() + ": " + e);
                     allTestsPassed = false;
                 }
             }

@@ -3,10 +3,9 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.BundleVersionPicker.PickerImplementations.LatestVersionPicker;
-import cz.muni.xmichalk.Util.CpmUtils;
+import cz.muni.xmichalk.bundleVersionPicker.pickerImplementations.LatestVersionPicker;
+import cz.muni.xmichalk.util.CpmUtils;
 import org.junit.jupiter.api.Test;
-import org.openprovenance.prov.model.ProvUtilities;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
@@ -15,14 +14,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cz.muni.xmichalk.Util.NameSpaceConstants.BLANK_URI;
-import static cz.muni.xmichalk.Util.ProvDocumentUtils.deserializeFile;
+import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
+import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
 
 public class BundleSearcherTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
-    ProvUtilities u = new ProvUtilities();
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
 
 
@@ -84,7 +82,7 @@ public class BundleSearcherTest {
         cpmDoc.getNodes().forEach(node -> {
             Object value = CpmUtils.getAttributeValue(node, attributeName);
             if (value != null) {
-                if (value instanceof final List<?> listValue) {
+                if (value instanceof List<?> listValue) {
                     if (!listValue.isEmpty()) {
                         foundLocations.add(value);
                     }
