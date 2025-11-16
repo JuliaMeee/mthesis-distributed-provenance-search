@@ -24,24 +24,24 @@ public class TimestampAttrSpecification extends AttrSpecification {
 
     public boolean test(INode node) {
         try {
-            var value = (XMLGregorianCalendar) CpmUtils.getAttributeValue(node, attributeNameUri);
+            XMLGregorianCalendar value = (XMLGregorianCalendar) CpmUtils.getAttributeValue(node, attributeNameUri);
             if (value == null) {
                 return false;
             }
             boolean match = true;
 
             if (isEqual != null) {
-                var toCompareValue = DatatypeFactory.newInstance().newXMLGregorianCalendar(isEqual);
+                XMLGregorianCalendar toCompareValue = DatatypeFactory.newInstance().newXMLGregorianCalendar(isEqual);
                 match = toCompareValue.compare(value) == DatatypeConstants.EQUAL;
             }
 
             if (isBefore != null) {
-                var toCompareValue = DatatypeFactory.newInstance().newXMLGregorianCalendar(isBefore);
+                XMLGregorianCalendar toCompareValue = DatatypeFactory.newInstance().newXMLGregorianCalendar(isBefore);
                 match = match && value.compare(toCompareValue) == DatatypeConstants.LESSER;
             }
 
             if (isAfter != null) {
-                var toCompareValue = DatatypeFactory.newInstance().newXMLGregorianCalendar(isAfter);
+                XMLGregorianCalendar toCompareValue = DatatypeFactory.newInstance().newXMLGregorianCalendar(isAfter);
                 match = match && value.compare(toCompareValue) == DatatypeConstants.GREATER;
             }
 

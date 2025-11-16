@@ -46,7 +46,7 @@ public class NodeSpecification implements ITestableSpecification<INode> {
 
         if (hasAttributes != null) {
             for (String attr : hasAttributes) {
-                var value = CpmUtils.getAttributeValue(node, attr);
+                Object value = CpmUtils.getAttributeValue(node, attr);
                 if (value == null || (value instanceof List<?> && ((List<?>) value).isEmpty())) {
                     return false;
                 }

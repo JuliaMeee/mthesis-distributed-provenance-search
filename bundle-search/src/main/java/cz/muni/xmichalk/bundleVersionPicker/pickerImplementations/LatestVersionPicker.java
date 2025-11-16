@@ -4,10 +4,13 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
+import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
+
+import java.util.List;
 
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_VERSION;
@@ -22,19 +25,19 @@ public class LatestVersionPicker implements IVersionPicker {
 
     @Override
     public QualifiedName apply(QualifiedName bundleId) {
-        var bundle = documentLoader.loadCpmDocument(bundleId.getUri());
+        StorageCpmDocument bundle = documentLoader.loadCpmDocument(bundleId.getUri());
 
         if (bundle == null || bundle.document == null) {
             throw new RuntimeException("Failed to load bundle document for id: " + bundleId);
         }
 
-        var metaBundleId = CpmUtils.getMetaBundleId(bundle.document);
+        QualifiedName metaBundleId = CpmUtils.getMetaBundleId(bundle.document);
 
         if (metaBundleId == null) {
             throw new RuntimeException("Failed to find meta bundle reference in bundle: " + bundleId);
         }
 
-        var metaDocument = documentLoader.loadMetaCpmDocument(metaBundleId.getUri());
+        StorageCpmDocument metaDocument = documentLoader.loadMetaCpmDocument(metaBundleId.getUri());
 
         if (metaDocument == null || metaDocument.document == null) {
             throw new RuntimeException("Failed to load meta bundle: " + metaBundleId);
@@ -44,7 +47,7 @@ public class LatestVersionPicker implements IVersionPicker {
     }
 
     public static QualifiedName pickFrom(QualifiedName bundleId, CpmDocument metaDocument) {
-        var versionNode = pickVersionNode(metaDocument);
+        INode versionNode = pickVersionNode(metaDocument);
 
         if (versionNode == null) {
             return bundleId;
@@ -54,7 +57,7 @@ public class LatestVersionPicker implements IVersionPicker {
     }
 
     private static INode pickVersionNode(CpmDocument metaDocument) {
-        var versionNodes = BundleNodesTraverser.traverseAndFind(
+        List<INode> versionNodes = BundleNodesTraverser.traverseAndFind(
                 metaDocument,
                 metaDocument.getNodes().getFirst().getId(),
                 node -> hasProvTypeBundle(node) && hasVersionAttribute(node)
@@ -68,8 +71,8 @@ public class LatestVersionPicker implements IVersionPicker {
         INode latestVersionNode = null;
 
         for (INode node : versionNodes) {
-            var versionString = ((LangString) CpmUtils.getAttributeValue(node, ATTR_VERSION)).getValue();
-            var version = Double.parseDouble(versionString);
+            String versionString = ((LangString) CpmUtils.getAttributeValue(node, ATTR_VERSION)).getValue();
+            double version = Double.parseDouble(versionString);
 
             if (version > latestVersion) {
                 latestVersion = (int) version;

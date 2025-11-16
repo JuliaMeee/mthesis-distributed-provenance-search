@@ -33,7 +33,7 @@ public class TraverserController {
     @Operation(summary = "List available validity checks", description = "Returns all defined validity checks.")
     @GetMapping(value = "/api/getValidityChecks", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Set<EValidityCheck>> getAvailableValidityChecks() {
-        var checks = traverser.getValidityVerifiers().keySet();
+        Set<EValidityCheck> checks = traverser.getValidityVerifiers().keySet();
 
         return ResponseEntity.ok(checks);
     }
@@ -41,7 +41,7 @@ public class TraverserController {
     @Operation(summary = "List available search priority options", description = "Returns all defined search priority options.")
     @GetMapping(value = "/api/getSearchPriorities", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Set<ESearchPriority>> getAvailableSearchPriorities() {
-        var options = traverser.getSearchPriorityComparators().keySet();
+        Set<ESearchPriority> options = traverser.getSearchPriorityComparators().keySet();
 
         return ResponseEntity.ok(options);
     }

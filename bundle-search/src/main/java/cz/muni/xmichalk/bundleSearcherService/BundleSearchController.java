@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @RestController
@@ -38,7 +39,7 @@ public class BundleSearchController {
     @Operation(summary = "List available target types", description = "Returns all defined target types and their descriptions.")
     @GetMapping(value = "/api/getTargetTypes", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TargetTypeInfo>> getAvailableSearchTypes() {
-        var types = bundleSearchService.getBundleSearchers().keySet().stream().map(t -> new TargetTypeInfo(t, t.description));
+        Stream<TargetTypeInfo> types = bundleSearchService.getBundleSearchers().keySet().stream().map(t -> new TargetTypeInfo(t, t.description));
 
         return ResponseEntity.ok(types.collect(Collectors.toList()));
     }
@@ -46,7 +47,7 @@ public class BundleSearchController {
     @Operation(summary = "List available version preferences", description = "Returns all defined version preferences.")
     @GetMapping(value = "/api/getVersionPreferences", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Set<EVersionPreferrence>> getAvailableVersionPreferences() {
-        var preferences = versionPickers.keySet();
+        Set<EVersionPreferrence> preferences = versionPickers.keySet();
 
         return ResponseEntity.ok(preferences);
     }
@@ -62,17 +63,17 @@ public class BundleSearchController {
         }
 
         try {
-            var versionPicker = versionPickers.get(params.versionPreference);
+            IVersionPicker versionPicker = versionPickers.get(params.versionPreference);
 
             if (versionPicker == null) {
-                var errorMessage = "Unsupported version preference: " + params.versionPreference;
+                String errorMessage = "Unsupported version preference: " + params.versionPreference;
                 log.error(errorMessage);
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(errorMessage);
             }
 
-            var pickedBundleVersion = versionPicker.apply(params.bundleId.toQN());
+            QualifiedName pickedBundleVersion = versionPicker.apply(params.bundleId.toQN());
 
             return ResponseEntity.ok(new QualifiedNameData().from(pickedBundleVersion));
         } catch (Exception e) {

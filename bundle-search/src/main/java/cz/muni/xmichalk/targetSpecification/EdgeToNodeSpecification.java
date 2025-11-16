@@ -34,7 +34,7 @@ public class EdgeToNodeSpecification {
         }
 
         if (nodeIsEffect != null) {
-            var effectNode = edge.getEffect();
+            INode effectNode = edge.getEffect();
             if (nodeIsEffect && !effectNode.equals(node)) return false;
             if (!nodeIsEffect && effectNode.equals(node)) return false;
         }

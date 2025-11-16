@@ -2,10 +2,13 @@ import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
+import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.bundleVersionPicker.pickerImplementations.LatestVersionPicker;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.junit.jupiter.api.Test;
+import org.openprovenance.prov.model.Document;
+import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
@@ -26,13 +29,13 @@ public class BundleSearcherTest {
 
     @Test
     public void testPickNewestVersion() throws IOException {
-        var file = Path.of(dataFolder + "metaDocument.json");
+        Path file = Path.of(dataFolder + "metaDocument.json");
 
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
 
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
-        var bundleId = LatestVersionPicker.pickFrom(
+        QualifiedName bundleId = LatestVersionPicker.pickFrom(
                 new org.openprovenance.prov.vanilla.QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "SamplingBundle_V0", "storage"),
                 cpmDoc
         );
@@ -42,40 +45,41 @@ public class BundleSearcherTest {
 
     @Test
     public void testGetMetaBundleId() throws IOException {
-        var file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
+        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
 
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
 
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
-        var metaId = CpmUtils.getMetaBundleId(cpmDoc);
+        QualifiedName metaId = CpmUtils.getMetaBundleId(cpmDoc);
 
         assert metaId != null;
     }
 
     @Test
     public void testGetReferencedConnectorId() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
 
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
 
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
-        var connectorNode = cpmDoc.getNode(
+        INode connectorNode = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank")
         );
 
-        var referencedConnectorId = CpmUtils.getConnectorIdInReferencedBundle(connectorNode);
+        QualifiedName referencedConnectorId = CpmUtils.getConnectorIdInReferencedBundle(connectorNode);
 
         assert referencedConnectorId.getUri().equals(BLANK_URI + "StoredSampleCon_r1");
     }
 
     @Test
     public void findLocationInNodes() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var doc = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
-        var attributeName = new org.openprovenance.prov.vanilla.QualifiedName("http://www.w3.org/ns/prov#", "location", "prov");
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
+                "http://www.w3.org/ns/prov#", "location", "prov");
 
         List<Object> foundLocations = new ArrayList<Object>();
 
@@ -95,11 +99,11 @@ public class BundleSearcherTest {
 
     @Test
     public void getBundleId() {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
         try {
-            var doc = deserializeFile(file, Formats.ProvFormat.JSON);
-            var cpmDoc = new CpmDocument(doc, pF, cPF, cF);
-            var bundleId = cpmDoc.getBundleId();
+            Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
+            CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+            QualifiedName bundleId = cpmDoc.getBundleId();
 
             assert (bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1"));
         } catch (IOException e) {

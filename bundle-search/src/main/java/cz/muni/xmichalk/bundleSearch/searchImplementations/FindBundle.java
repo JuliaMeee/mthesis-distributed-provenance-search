@@ -23,8 +23,8 @@ public class FindBundle<T> implements ISearchBundle<T> {
 
     @Override
     public T apply(CpmDocument document, QualifiedName startNodeId, JsonNode targetSpecification) {
-        var predicate = translatePredicate.apply(targetSpecification);
-        var results = predicate.test(document) ? document : null;
+        Predicate<CpmDocument> predicate = translatePredicate.apply(targetSpecification);
+        CpmDocument results = predicate.test(document) ? document : null;
         return resultTransformation.apply(results);
     }
 
@@ -32,7 +32,7 @@ public class FindBundle<T> implements ISearchBundle<T> {
         return (CpmDocument doc) -> {
             INode mainActivity = doc.getMainActivity();
             if (mainActivity != null) {
-                var value = CpmUtils.getAttributeValue(mainActivity, ATTR_REFERENCED_META_BUNDLE_ID);
+                Object value = CpmUtils.getAttributeValue(mainActivity, ATTR_REFERENCED_META_BUNDLE_ID);
                 if (value instanceof QualifiedName qnValue) {
                     return targetSpecification.asText().equals(qnValue.getUri());
                 }

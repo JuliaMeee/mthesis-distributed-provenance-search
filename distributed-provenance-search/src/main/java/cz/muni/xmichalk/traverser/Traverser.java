@@ -59,7 +59,7 @@ public class Traverser {
     public SearchResults searchChain(QualifiedName startBundleId, QualifiedName startNodeId, SearchParams searchParams) {
         Comparator<ItemToSearch> searchPriorityComparator = searchPriorityComparators.get(searchParams.searchPriority);
         if (searchPriorityComparator == null) {
-            var errorMessage = "No search priority comparator registered for: " + searchParams.searchPriority;
+            String errorMessage = "No search priority comparator registered for: " + searchParams.searchPriority;
             log.error(errorMessage);
             throw new UnsupportedSearchPriorityException(errorMessage);
         }
@@ -179,13 +179,13 @@ public class Traverser {
                 LinkedHashMap<EValidityCheck, Boolean> validityChecks = evaluateValidityChecks(
                         searchParams.validityChecks, itemToSearch, findTargetResult);
 
-                var newResult = convertToNewResult(itemToSearch, findTargetResult, hasIntegrity, validityChecks);
+                FoundResult newResult = convertToNewResult(itemToSearch, findTargetResult, hasIntegrity, validityChecks);
                 if (newResult != null) {
                     searchState.results.add(newResult);
                     log.info("In bundle {} found target(s): {}", itemToSearch.bundleId.getUri(), newResult.result.toString());
                 }
 
-                var newItemsToSearch = convertToNewItemsToSearch(itemToSearch, findConnectorsResult, hasIntegrity, validityChecks);
+                List<ItemToSearch> newItemsToSearch = convertToNewItemsToSearch(itemToSearch, findConnectorsResult, hasIntegrity, validityChecks);
                 searchState.toSearchQueue.addAll(newItemsToSearch);
                 log.info("In bundle {} found connections to: {}", itemToSearch.bundleId.getUri(),
                         newItemsToSearch.stream().map(item -> item.bundleId.getUri())
@@ -193,7 +193,7 @@ public class Traverser {
 
 
             } catch (Exception e) {
-                var errorMessage = "Error while processing bundle: " + itemToSearch.bundleId.getUri() + ", error: " + e.getMessage();
+                String errorMessage = "Error while processing bundle: " + itemToSearch.bundleId.getUri() + ", error: " + e.getMessage();
                 log.error(errorMessage);
                 searchState.errors.add(errorMessage);
             } finally {
@@ -230,7 +230,7 @@ public class Traverser {
                 boolean result = verifier.verify(itemToSearched, findTargetResult);
                 validityCheckValues.put(validityCheck, result);
             } else {
-                var errorMessage = "No validity checker registered for: " + validityCheck;
+                String errorMessage = "No validity checker registered for: " + validityCheck;
                 log.error(errorMessage);
                 throw new UnsupportedValidityCheckException(errorMessage);
             }

@@ -32,8 +32,8 @@ public class BundleSearchService {
 
     public SearchResult searchBundle(QualifiedName bundleId, QualifiedName startNodeId, ETargetType targetType, JsonNode targetSpecification) throws UnsupportedTargetTypeException {
         StorageCpmDocument retrievedDocument = documentLoader.loadCpmDocument(bundleId.getUri());
-        var document = retrievedDocument.document;
-        var result = searchDocument(document, startNodeId, targetType, targetSpecification);
+        CpmDocument document = retrievedDocument.document;
+        Object result = searchDocument(document, startNodeId, targetType, targetSpecification);
 
         return new SearchResult(
                 retrievedDocument.token,
@@ -46,7 +46,7 @@ public class BundleSearchService {
 
         ISearchBundle<?> searchFunc = bundleSearchers.get(targetType);
         if (searchFunc == null) {
-            var errorMessage = String.format("Unsupported target type: " + targetType);
+            String errorMessage = String.format("Unsupported target type: " + targetType);
             log.error(errorMessage);
             throw new UnsupportedTargetTypeException(errorMessage);
         }

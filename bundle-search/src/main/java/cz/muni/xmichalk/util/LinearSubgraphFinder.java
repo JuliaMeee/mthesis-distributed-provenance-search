@@ -19,7 +19,7 @@ public class LinearSubgraphFinder {
         }
 
         BundleNodesTraverser.traverseAndExecute(startNode, node -> {
-            var subgraphsFromNode = findFrom(node, filters);
+            List<List<EdgeToNode>> subgraphsFromNode = findFrom(node, filters);
             results.addAll(subgraphsFromNode);
         });
 

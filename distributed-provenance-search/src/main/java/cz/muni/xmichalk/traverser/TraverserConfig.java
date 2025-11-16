@@ -34,9 +34,9 @@ public class TraverserConfig {
 
     @Bean
     public IProvServiceTable provServiceTable() {
-        var table = new ProvServiceTable();
+        ProvServiceTable table = new ProvServiceTable();
         try {
-            var resource = new ClassPathResource("provServiceTable.json");
+            ClassPathResource resource = new ClassPathResource("provServiceTable.json");
             table.loadFromJson(resource.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException("Failed to load traverser table", e);
@@ -46,9 +46,12 @@ public class TraverserConfig {
 
     @Bean
     public Map<EValidityCheck, IValidityVerifier> validityVerifiers(IProvServiceTable provServiceTable) throws IOException {
-        var simpleSemanticResource = new ClassPathResource("validitySpecifications" + File.separator + "simpleSemanticConstraints.json");
-        var isSamplingBundleResource = new ClassPathResource("validitySpecifications" + File.separator + "isSamplingBundle.json");
-        var isProcessingBundleResource = new ClassPathResource("validitySpecifications" + File.separator + "isProcessingBundle.json");
+        ClassPathResource simpleSemanticResource =
+                new ClassPathResource("validitySpecifications" + File.separator + "simpleSemanticConstraints.json");
+        ClassPathResource isSamplingBundleResource =
+                new ClassPathResource("validitySpecifications" + File.separator + "isSamplingBundle.json");
+        ClassPathResource isProcessingBundleResource =
+                new ClassPathResource("validitySpecifications" + File.separator + "isProcessingBundle.json");
 
         return Map.of(
                 EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, new DemoValidityVerifier(provServiceTable, simpleSemanticResource.getInputStream()),

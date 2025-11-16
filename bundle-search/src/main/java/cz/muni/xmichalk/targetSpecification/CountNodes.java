@@ -5,6 +5,8 @@ import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
 import cz.muni.xmichalk.util.CpmUtils;
 
+import java.util.List;
+
 public class CountNodes implements ICountableInDocument {
     public ITestableSpecification<INode> nodePredicate;
 
@@ -17,9 +19,9 @@ public class CountNodes implements ICountableInDocument {
 
     @Override
     public int countInDocument(CpmDocument bundle) {
-        var startNode = CpmUtils.chooseStartNode(bundle);
+        INode startNode = CpmUtils.chooseStartNode(bundle);
 
-        var fittingNodes = BundleNodesTraverser.traverseAndFind(startNode, node -> nodePredicate.test(node));
+        List<INode> fittingNodes = BundleNodesTraverser.traverseAndFind(startNode, node -> nodePredicate.test(node));
 
         return fittingNodes.size();
     }

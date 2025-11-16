@@ -3,6 +3,7 @@ package cz.muni.xmichalk.targetSpecification;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.util.CpmUtils;
 import cz.muni.xmichalk.util.LinearSubgraphFinder;
 
@@ -23,11 +24,11 @@ public class CountLinearSubgraphs implements ICountableInDocument {
     }
 
     public List<BiPredicate<IEdge, INode>> buildSubgraphConstraints() {
-        var constraints = new ArrayList<BiPredicate<IEdge, INode>>();
+        ArrayList<BiPredicate<IEdge, INode>> constraints = new ArrayList<BiPredicate<IEdge, INode>>();
         constraints.add((edge, node) -> firstNode == null || firstNode.test(node));
 
         if (edgesAndNodes != null) {
-            for (var edgeAndNode : edgesAndNodes) {
+            for (EdgeToNodeSpecification edgeAndNode : edgesAndNodes) {
                 constraints.add((edge, node) ->
                         edgeAndNode == null || edgeAndNode.test(edge, node));
             }
@@ -38,11 +39,11 @@ public class CountLinearSubgraphs implements ICountableInDocument {
 
     @Override
     public int countInDocument(CpmDocument document) {
-        var startNode = CpmUtils.chooseStartNode(document);
+        INode startNode = CpmUtils.chooseStartNode(document);
 
-        var constraints = buildSubgraphConstraints();
+        List<BiPredicate<IEdge, INode>> constraints = buildSubgraphConstraints();
 
-        var fittingSubgraphs = LinearSubgraphFinder.findAnywhere(startNode, constraints);
+        List<List<EdgeToNode>> fittingSubgraphs = LinearSubgraphFinder.findAnywhere(startNode, constraints);
 
         return fittingSubgraphs.size();
     }

@@ -30,8 +30,8 @@ public class FindNodes<T> implements ISearchBundle<T> {
 
     @Override
     public T apply(CpmDocument document, org.openprovenance.prov.model.QualifiedName startNodeId, JsonNode targetSpecification) {
-        var predicate = translatePredicate.apply(targetSpecification);
-        var results = BundleNodesTraverser.traverseAndFind(document, startNodeId, predicate);
+        Predicate<INode> predicate = translatePredicate.apply(targetSpecification);
+        List<INode> results = BundleNodesTraverser.traverseAndFind(document, startNodeId, predicate);
         return resultTransformation.apply(results);
     }
 
@@ -51,9 +51,9 @@ public class FindNodes<T> implements ISearchBundle<T> {
         }
 
         Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes);
-        var jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
+        String jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
         jsonString = ProvJsonUtils.removeExplicitBundleId(jsonString);
-        var objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readTree(jsonString);
         } catch (IOException e) {

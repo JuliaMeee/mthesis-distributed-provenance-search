@@ -3,6 +3,7 @@ package cz.muni.xmichalk.util;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.EdgeToNode;
 import org.openprovenance.prov.model.*;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class CpmUtils {
     public static QualifiedName getConnectorIdInReferencedBundle(INode connectorNode) {
         // backward connector id matches general forward connector id in the other bundle
         // specific forward connector id is not present in the other bundle as a backward connector, resolve it to general forward connector id
-        var provType = getAttributeValue(connectorNode, ATTR_PROV_TYPE);
+        Object provType = getAttributeValue(connectorNode, ATTR_PROV_TYPE);
         if (provType == null) {
             return null;
         }
@@ -43,7 +44,7 @@ public class CpmUtils {
             return connectorNode.getId();
         }
         if (isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "forwardConnector"))) {
-            var subgraphConstraints = new ArrayList<BiPredicate<IEdge, INode>>();
+            ArrayList<BiPredicate<IEdge, INode>> subgraphConstraints = new ArrayList<BiPredicate<IEdge, INode>>();
             subgraphConstraints.add((edge, node) -> node.equals(connectorNode));
             subgraphConstraints.add((edge, node) -> {
                 boolean isSpecialization = edge.getRelations().stream().anyMatch((relation) -> relation.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION);
@@ -52,7 +53,7 @@ public class CpmUtils {
                         qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
                 return isSpecialization && isGeneralEntity && isForwardConnector;
             });
-            var subgraphs = LinearSubgraphFinder.findFrom(connectorNode, subgraphConstraints);
+            List<List<EdgeToNode>> subgraphs = LinearSubgraphFinder.findFrom(connectorNode, subgraphConstraints);
             if (subgraphs.isEmpty() || subgraphs.getFirst().size() != 2) {
                 return null;
             }
@@ -63,29 +64,29 @@ public class CpmUtils {
     }
 
     public static <T> boolean hasAttributeTargetValue(INode node, QualifiedName attributeName, Class<T> targetClass, Predicate<T> isTargetValue) {
-        var value = getAttributeValue(node, attributeName);
+        Object value = getAttributeValue(node, attributeName);
         return isTargetValue(value, targetClass, isTargetValue);
     }
 
     public static <T> boolean hasAttributeTargetValue(INode node, String attributeNameUri, Class<T> targetClass, Predicate<T> isTargetValue) {
-        var value = getAttributeValue(node, attributeNameUri);
+        Object value = getAttributeValue(node, attributeNameUri);
         return isTargetValue(value, targetClass, isTargetValue);
     }
 
     public static INode chooseStartNode(CpmDocument document) {
-        var forwardConnectors = document.getForwardConnectors();
+        List<INode> forwardConnectors = document.getForwardConnectors();
         if (!forwardConnectors.isEmpty()) {
             return forwardConnectors.getFirst();
         }
-        var backwardConnectors = document.getBackwardConnectors();
+        List<INode> backwardConnectors = document.getBackwardConnectors();
         if (!backwardConnectors.isEmpty()) {
             return backwardConnectors.getFirst();
         }
-        var mainActivity = document.getMainActivity();
+        INode mainActivity = document.getMainActivity();
         if (mainActivity != null) {
             return mainActivity;
         }
-        var nodes = document.getNodes();
+        List<INode> nodes = document.getNodes();
         if (!nodes.isEmpty()) {
             return nodes.getFirst();
         }

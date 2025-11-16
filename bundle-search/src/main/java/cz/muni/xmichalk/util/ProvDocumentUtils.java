@@ -25,20 +25,20 @@ public class ProvDocumentUtils {
     public static final Charset charset = java.nio.charset.StandardCharsets.UTF_8;
 
     public static String serialize(Document document, Formats.ProvFormat format) {
-        var interop = new InteropFramework();
+        InteropFramework interop = new InteropFramework();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         interop.writeDocument(outputStream, document, ProvFormatToIntermediaType(format), false);
         return outputStream.toString(charset);
     }
 
     public static void serializeIntoFile(Path filePath, Document document, Formats.ProvFormat format) throws IOException {
-        var string = serialize(document, format);
+        String string = serialize(document, format);
         Files.writeString(filePath, string, charset);
     }
 
     public static Document deserialize(String serialized, Formats.ProvFormat format) throws IOException {
         serialized = prepareForDeserialization(serialized, format);
-        var interop = new InteropFramework();
+        InteropFramework interop = new InteropFramework();
         InputStream inputStream = new ByteArrayInputStream(serialized.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         return interop.readDocument(inputStream, format);
     }
@@ -62,12 +62,12 @@ public class ProvDocumentUtils {
 
         Namespace ns = pf.newNamespace();
 
-        var bundle = pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
+        Bundle bundle = pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
 
         for (INode node : nodes) {
-            var elements = node.getElements();
+            List<Element> elements = node.getElements();
 
-            for (var element : elements) {
+            for (Element element : elements) {
                 bundle.getStatement().add(element);
             }
         }

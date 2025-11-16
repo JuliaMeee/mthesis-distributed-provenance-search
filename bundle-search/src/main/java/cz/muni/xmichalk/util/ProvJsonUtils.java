@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public class ProvJsonUtils {
 
@@ -14,7 +15,7 @@ public class ProvJsonUtils {
     public static String prepareJsonForDeserialization(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            var root = mapper.readTree(json);
+            JsonNode root = mapper.readTree(json);
 
             root = addExplicitBundleId(root);
             root = stringifyValues(root, mapper);
@@ -34,12 +35,12 @@ public class ProvJsonUtils {
      * @return the modified JSON string in minimized format with proper "@id" added to bundle
      */
     public static JsonNode addExplicitBundleId(JsonNode root) {
-        var bundleNode = root.path("bundle");
+        JsonNode bundleNode = root.path("bundle");
         if (bundleNode.isObject()) {
-            var fieldNames = bundleNode.fieldNames();
+            Iterator<String> fieldNames = bundleNode.fieldNames();
             if (fieldNames.hasNext()) {
                 String bundleId = fieldNames.next();
-                var bundleObj = (ObjectNode) bundleNode.path(bundleId);
+                ObjectNode bundleObj = (ObjectNode) bundleNode.path(bundleId);
                 if (!bundleObj.has("@id")) {
                     bundleObj.put("@id", bundleId);
                 }
@@ -51,14 +52,14 @@ public class ProvJsonUtils {
     public static String removeExplicitBundleId(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            var root = mapper.readTree(json);
+            JsonNode root = mapper.readTree(json);
 
-            var bundleNode = root.path("bundle");
+            JsonNode bundleNode = root.path("bundle");
             if (bundleNode.isObject()) {
-                var fieldNames = bundleNode.fieldNames();
+                Iterator<String> fieldNames = bundleNode.fieldNames();
                 if (fieldNames.hasNext()) {
                     String bundleId = fieldNames.next();
-                    var bundleObj = (ObjectNode) bundleNode.path(bundleId);
+                    ObjectNode bundleObj = (ObjectNode) bundleNode.path(bundleId);
 
                     if (bundleObj.has("@id")) {
                         bundleObj.remove("@id");
@@ -92,7 +93,7 @@ public class ProvJsonUtils {
         JsonNode outerPrefix = root.path("prefix");
         JsonNode bundleNode = root.path("bundle");
         if (outerPrefix.isObject() && bundleNode.isObject()) {
-            for (var it = bundleNode.fieldNames(); it.hasNext(); ) {
+            for (Iterator<String> it = bundleNode.fieldNames(); it.hasNext(); ) {
                 String bundleId = it.next();
                 ObjectNode bundleObj = (ObjectNode) bundleNode.path(bundleId);
 

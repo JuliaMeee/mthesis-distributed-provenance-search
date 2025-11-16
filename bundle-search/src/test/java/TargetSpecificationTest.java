@@ -36,9 +36,9 @@ public class TargetSpecificationTest {
 
     @Test
     public void testAllSatisfyNodeImplication() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         NodeSpecification conWithMetaRef = new NodeSpecification(
                 null,
@@ -76,9 +76,9 @@ public class TargetSpecificationTest {
 
     @Test
     public void testCountNonsenseNodes() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         NodeSpecification nonsense = new NodeSpecification(
                 null,
@@ -101,11 +101,11 @@ public class TargetSpecificationTest {
 
     @Test
     public void testHasSpecificMetaBundleId() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
-        var mainActivityWithMetaRef = new NodeSpecification(
+        NodeSpecification mainActivityWithMetaRef = new NodeSpecification(
                 null,
                 StatementOrBundle.Kind.PROV_ACTIVITY,
                 null,
@@ -136,9 +136,9 @@ public class TargetSpecificationTest {
 
     @Test
     public void testCountSatisfiedAnd() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         NodeSpecification conSpec = new NodeSpecification(
                 "(?i).*spec",
@@ -178,9 +178,9 @@ public class TargetSpecificationTest {
 
     @Test
     public void testAllNodesImplicationOr() throws IOException {
-        var file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         // Test that every connector is either a forward connector or has a referenced bundle id and meta bundle id defined
 
@@ -237,15 +237,15 @@ public class TargetSpecificationTest {
 
     @Test
     public void testXor() throws IOException {
-        var file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
-        var satisfied = new AllNodes(
+        AllNodes satisfied = new AllNodes(
                 new NodeSpecification()
         );
 
-        var unsatisfied = new AllNodes(
+        AllNodes unsatisfied = new AllNodes(
                 new NodeSpecification(
                         null,
                         StatementOrBundle.Kind.PROV_ENTITY,
@@ -295,9 +295,9 @@ public class TargetSpecificationTest {
 
     @Test
     public void testCountNonsenseAnd() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         NodeSpecification activity = new NodeSpecification(
                 null,
@@ -333,11 +333,11 @@ public class TargetSpecificationTest {
 
     @Test
     public void testHasForwardJumpConnectors() throws IOException {
-        var file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var document = deserializeFile(file, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
-        var forwardCon = new NodeSpecification(
+        NodeSpecification forwardCon = new NodeSpecification(
                 null,
                 StatementOrBundle.Kind.PROV_ENTITY,
                 null,
@@ -348,7 +348,7 @@ public class TargetSpecificationTest {
                                 CPM_URI + "forwardConnector"
                         )
                 ));
-        var derivationEdgeToForwardCon = new EdgeToNodeSpecification(
+        EdgeToNodeSpecification derivationEdgeToForwardCon = new EdgeToNodeSpecification(
                 StatementOrBundle.Kind.PROV_DERIVATION,
                 null,
                 null,
@@ -373,7 +373,7 @@ public class TargetSpecificationTest {
     }
 
     public BundleSpecification getSimpleValiditySpecification() {
-        var mainActivityNode = new NodeSpecification(
+        NodeSpecification mainActivityNode = new NodeSpecification(
                 null,
                 StatementOrBundle.Kind.PROV_ACTIVITY,
                 null,
@@ -385,7 +385,7 @@ public class TargetSpecificationTest {
                         )
                 ));
 
-        var activityWithMetaRef = new NodeSpecification(
+        NodeSpecification activityWithMetaRef = new NodeSpecification(
                 null,
                 StatementOrBundle.Kind.PROV_ACTIVITY,
                 null,
@@ -394,7 +394,7 @@ public class TargetSpecificationTest {
                 ),
                 null);
 
-        var backwardCon = new NodeSpecification(
+        NodeSpecification backwardCon = new NodeSpecification(
                 null,
                 StatementOrBundle.Kind.PROV_ENTITY,
                 null,
@@ -406,7 +406,7 @@ public class TargetSpecificationTest {
                         )
                 ));
 
-        var hasBackwardConAttributes = new NodeSpecification(
+        NodeSpecification hasBackwardConAttributes = new NodeSpecification(
                 null,
                 null,
                 null,
@@ -446,10 +446,10 @@ public class TargetSpecificationTest {
 
     @Test
     public void testSimpleValiditySpecification() throws IOException {
-        var validitySpecs = getSimpleValiditySpecification();
+        BundleSpecification validitySpecs = getSimpleValiditySpecification();
 
         for (int i : List.of(1, 2, 3, 4)) {
-            var datasetFolder = dataFolder + "dataset" + i + "/";
+            String datasetFolder = dataFolder + "dataset" + i + "/";
             try (var paths = Files.walk(Paths.get(datasetFolder))) {
                 paths.filter(Files::isRegularFile)
                         .forEach(filePath -> {
@@ -459,7 +459,7 @@ public class TargetSpecificationTest {
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
-                            var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+                            CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
                             assert (validitySpecs.test(cpmDoc));
                         });
             }
@@ -468,8 +468,8 @@ public class TargetSpecificationTest {
 
     @Test
     public void testFromFiles() throws IOException {
-        var docFile = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        var specsFile = Path.of(specificationsFolder + "connectorRules.json");
+        Path docFile = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Path specsFile = Path.of(specificationsFolder + "connectorRules.json");
         testFromFile(docFile, specsFile);
 
         docFile = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
@@ -483,8 +483,8 @@ public class TargetSpecificationTest {
 
 
     public void testFromFile(Path docPath, Path specsPath) throws IOException {
-        var document = deserializeFile(docPath, Formats.ProvFormat.JSON);
-        var cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        Document document = deserializeFile(docPath, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
 
         ObjectMapper mapper = new ObjectMapper();
 
