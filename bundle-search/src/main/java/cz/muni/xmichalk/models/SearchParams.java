@@ -2,25 +2,7 @@ package cz.muni.xmichalk.models;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.xmichalk.bundleSearch.ETargetType;
-import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(
-        description = "Parameters for bundle search",
-        example = """
-                {
-                  "bundleId": {
-                    "nameSpaceUri": "http://example.org/",
-                    "localPart": "bundle1"
-                  },
-                  "startNodeId": {
-                    "nameSpaceUri": "http://example.org/",
-                    "localPart": "connectorA"
-                  },
-                  "targetType": "CONNECTORS",
-                  "targetSpecification": "backward"
-                }
-                """
-)
 public class SearchParams {
     public QualifiedNameData bundleId;
     public QualifiedNameData startNodeId;

@@ -5,6 +5,9 @@ import cz.muni.xmichalk.bundleVersionPicker.EVersionPreferrence;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.models.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.openprovenance.prov.model.QualifiedName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +57,24 @@ public class BundleSearchController {
 
     @Operation(summary = "Chooses bundle version based on set preference", description = "Based on supplied bundle id and version preference returns the preferred bundle version id.")
     @PostMapping(value = "/api/pickVersion", produces = MediaType.APPLICATION_JSON_VALUE)
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Pick Version Params",
+            required = true,
+            content = @Content(
+                    schema = @Schema(implementation = PickVersionParams.class),
+                    examples = @ExampleObject(
+                            value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                        "localPart": "SamplingBundle_V0"
+                                      },
+                                      "versionPreference": "LATEST"
+                                    }
+                                    """
+                    )
+            )
+    )
     public ResponseEntity<?> pickVersion(@RequestBody PickVersionParams params) {
         List<String> missingParams = getMissingParams(params);
         if (!missingParams.isEmpty()) {
@@ -85,6 +106,38 @@ public class BundleSearchController {
 
     @Operation(summary = "Search bundle looking for given target", description = "Search bundle for given target starting from the specified node.")
     @PostMapping(value = "/api/searchBundle", produces = MediaType.APPLICATION_JSON_VALUE)
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Search Params",
+            required = true,
+            content = @Content(
+                    schema = @Schema(implementation = SearchParams.class),
+                    examples = @ExampleObject(
+                            value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                        "localPart": "ProcessingBundle_V1"
+                                      },
+                                      "startNodeId": {
+                                        "nameSpaceUri": "https://openprovenance.org/blank/",
+                                        "localPart": "StoredSampleCon_r1"
+                                      },
+                                      "targetType": "NODES_BY_SPECIFICATION",
+                                      "targetSpecification": {
+                                        "type": "NodeSpecification",
+                                        "hasAttributeValues": [
+                                          {
+                                            "type": "QualifiedNameAttrSpecification",
+                                            "attributeNameUri": "http://www.w3.org/ns/prov#type",
+                                            "uriRegex": "(?i).*person"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                    """
+                    )
+            )
+    )
     public ResponseEntity<?> searchBundle(
             @RequestBody SearchParams searchParams) {
 

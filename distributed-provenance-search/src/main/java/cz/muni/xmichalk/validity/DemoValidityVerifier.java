@@ -28,7 +28,7 @@ public class DemoValidityVerifier implements IValidityVerifier {
 
     @Override
     public boolean verify(ItemToSearch itemToSearch, BundleSearchResultDTO bundleSearchResult) {
-        String bundleUri = bundleSearchResult.token.data.additionalData.bundle;
+        String bundleUri = bundleSearchResult.token.data().additionalData().bundle();
 
         String provServiceUri = provServiceTable.getServiceUri(bundleUri);
 

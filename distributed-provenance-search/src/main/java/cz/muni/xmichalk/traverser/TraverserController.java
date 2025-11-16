@@ -9,6 +9,9 @@ import cz.muni.xmichalk.models.SearchResults;
 import cz.muni.xmichalk.searchPriority.ESearchPriority;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.openprovenance.prov.model.QualifiedName;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,6 +51,50 @@ public class TraverserController {
 
     @Operation(summary = "Search this bundle and its predecessors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and node, and then searches through all its predecessors. Returns all found results.")
     @PostMapping(value = "/api/searchPredecessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Search Params",
+            required = true,
+            content = @Content(
+                    schema = @Schema(implementation = SearchParamsDTO.class),
+                    examples = @ExampleObject(value = """
+                            {
+                              "bundleId": {
+                                "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                "localPart": "SpeciesIdentificationBundle_V0"
+                              },
+                              "startNodeId": {
+                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                "localPart": "IdentifiedSpeciesCon"
+                              },
+                              "versionPreference": "SPECIFIED",
+                              "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                              "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                              "targetType": "TEST_FITS",
+                              "targetSpecification": {
+                                 "type" : "BundleSpecification",
+                                 "specifications" : [ {
+                                   "type" : "CountSpecification",
+                                   "countableInDocument" : {
+                                     "type" : "CountNodes",
+                                     "nodePredicate" : {
+                                       "type" : "NodeSpecification",
+                                       "idUriRegex" : "(?i).*Sampling.*",
+                                       "isKind" : "PROV_ACTIVITY",
+                                       "hasAttributeValues" : [ {
+                                         "type" : "QualifiedNameAttrSpecification",
+                                         "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                         "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                       } ]
+                                     }
+                                   },
+                                   "comparisonResult" : "EQUALS",
+                                   "count" : 1
+                                 } ]
+                               }
+                            }
+                            """)
+            )
+    )
     public ResponseEntity<?> searchPredecessors(
             @RequestBody SearchParamsDTO searchParams) {
         return searchChain(searchParams, true);
@@ -55,6 +102,30 @@ public class TraverserController {
 
     @Operation(summary = "Search this bundle and its successors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and node, and then searches through all its successors. Returns all found results.")
     @PostMapping(value = "/api/searchSuccessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Search Params",
+            required = true,
+            content = @Content(
+                    schema = @Schema(implementation = SearchParamsDTO.class),
+                    examples = @ExampleObject(value = """
+                            {
+                              "bundleId": {
+                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                "localPart": "SamplingBundle_V0"
+                              },
+                              "startNodeId": {
+                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                "localPart": "StoredSampleCon_r1"
+                              },
+                              "versionPreference": "LATEST",
+                              "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                              "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                              "targetType": "CONNECTORS",
+                              "targetSpecification": "backward"
+                            }
+                            """)
+            )
+    )
     public ResponseEntity<?> searchSuccessors(
             @RequestBody SearchParamsDTO searchParams) {
         return searchChain(searchParams, false);

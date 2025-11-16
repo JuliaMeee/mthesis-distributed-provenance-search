@@ -498,4 +498,31 @@ public class TargetSpecificationTest {
         assert (specification.test(cpmDoc));
 
     }
+
+    @Test
+    public void ttt() {
+        var samplingMainActivity = new NodeSpecification();
+        samplingMainActivity.idUriRegex = "(?i).*Sampling.*";
+        samplingMainActivity.isKind = StatementOrBundle.Kind.PROV_ACTIVITY;
+        samplingMainActivity.hasAttributeValues = List.of(
+                new QualifiedNameAttrSpecification(
+                        ATTR_PROV_TYPE.getUri(),
+                        CPM_URI + "mainActivity"
+                )
+        );
+
+        var bundleSpec = new BundleSpecification(
+                List.of(
+                        new CountSpecification(
+                                new CountNodes(samplingMainActivity),
+                                EComparisonResult.EQUALS,
+                                1
+                        )
+                )
+        );
+
+        var objectMapper = new ObjectMapper();
+        var x = objectMapper.valueToTree(bundleSpec);
+        var str = x.toString();
+    }
 }

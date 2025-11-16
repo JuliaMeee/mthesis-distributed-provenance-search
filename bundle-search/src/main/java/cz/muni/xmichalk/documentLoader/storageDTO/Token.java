@@ -1,6 +1,7 @@
 package cz.muni.xmichalk.documentLoader.storageDTO;
 
-public class Token {
-    public TokenData data;
-    public String signature;
+public record Token(
+        TokenData data,
+        String signature
+) {
 }

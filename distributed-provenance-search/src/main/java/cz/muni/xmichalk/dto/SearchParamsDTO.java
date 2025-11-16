@@ -3,30 +3,9 @@ package cz.muni.xmichalk.dto;
 import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.xmichalk.searchPriority.ESearchPriority;
 import cz.muni.xmichalk.validity.EValidityCheck;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(
-        description = "Parameters for bundle search",
-        example = """
-                {
-                  "bundleId": {
-                    "nameSpaceUri": "http://example.org/",
-                    "localPart": "bundle1"
-                  },
-                  "startNodeId": {
-                    "nameSpaceUri": "http://example.org/",
-                    "localPart": "connectorA"
-                  },
-                  "versionPreference": "LATEST",
-                  "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
-                  "validityChecks": {SIMPLE_DEMO},
-                  "targetType": "CONNECTORS",
-                  "targetSpecification": "backward"
-                }
-                """
-)
 public class SearchParamsDTO {
     public QualifiedNameDTO bundleId;
     public QualifiedNameDTO startNodeId;
