@@ -163,13 +163,13 @@ public class CpmUtils {
     public static <T> boolean isTargetValue(Object value, Class<T> targetClass, Predicate<T> predicate) {
 
         if (targetClass.isInstance(value)) {
-            return predicate.test((T) value);
+            return predicate.test(targetClass.cast(value));
         }
 
         if (value instanceof Collection) {
             for (Object item : (Collection<?>) value) {
                 if (targetClass.isInstance(item)) {
-                    if (predicate.test((T) item)) {
+                    if (predicate.test(targetClass.cast(item))) {
                         return true;
                     }
                 }

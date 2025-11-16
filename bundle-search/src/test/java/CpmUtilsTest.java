@@ -4,8 +4,8 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.bundleVersionPicker.pickerImplementations.LatestVersionPicker;
 import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.util.NameSpaceConstants;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.QualifiedName;
@@ -20,28 +20,11 @@ import java.util.List;
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
 
-public class BundleSearcherTest {
+public class CpmUtilsTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
-
-
-    @Test
-    public void testPickNewestVersion() throws IOException {
-        Path file = Path.of(dataFolder + "metaDocument.json");
-
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
-
-        QualifiedName bundleId = LatestVersionPicker.pickFrom(
-                new org.openprovenance.prov.vanilla.QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "SamplingBundle_V0", "storage"),
-                cpmDoc
-        );
-
-        assert bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1");
-    }
 
     @Test
     public void testGetMetaBundleId() throws IOException {
@@ -74,7 +57,7 @@ public class BundleSearcherTest {
     }
 
     @Test
-    public void findLocationInNodes() throws IOException {
+    public void testGetLocation() throws IOException {
         Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
         Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
         CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
@@ -98,16 +81,46 @@ public class BundleSearcherTest {
     }
 
     @Test
-    public void getBundleId() {
+    public void testHasAttributeValue() throws IOException {
         Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        try {
-            Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
-            CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
-            QualifiedName bundleId = cpmDoc.getBundleId();
+        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        INode node = cpmDoc.getNode(
+                new org.openprovenance.prov.vanilla.QualifiedName(
+                        BLANK_URI, "Sampling", "blank")
+        );
+        QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
+                NameSpaceConstants.PROV_URI, "type", "prov");
 
-            assert (bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        boolean hasValue = CpmUtils.hasAttributeTargetValue(
+                node,
+                attributeName,
+                QualifiedName.class,
+                qn -> qn.getUri().equals(NameSpaceConstants.CPM_URI + "mainActivity")
+        );
+
+        assert hasValue;
+    }
+
+    @Test
+    public void testDoesNotHaveAttributeValue() throws IOException {
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        INode node = cpmDoc.getNode(
+                new org.openprovenance.prov.vanilla.QualifiedName(
+                        BLANK_URI, "Sampling", "blank")
+        );
+        QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
+                NameSpaceConstants.PROV_URI, "type", "prov");
+
+        boolean hasValue = CpmUtils.hasAttributeTargetValue(
+                node,
+                attributeName,
+                QualifiedName.class,
+                qn -> qn.getUri().equals(NameSpaceConstants.CPM_URI + "backwardConnector")
+        );
+
+        assert !hasValue;
     }
 }

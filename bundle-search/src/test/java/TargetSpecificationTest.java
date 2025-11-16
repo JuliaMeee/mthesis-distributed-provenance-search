@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
@@ -488,7 +489,12 @@ public class TargetSpecificationTest {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        ITestableSpecification<CpmDocument> specification = mapper.readValue(specsPath.toFile(), ITestableSpecification.class);
+        ITestableSpecification<CpmDocument> specification =
+                mapper.readValue(
+                        specsPath.toFile(),
+                        new TypeReference<ITestableSpecification<CpmDocument>>() {
+                        }
+                );
         assert (specification.test(cpmDoc));
 
     }

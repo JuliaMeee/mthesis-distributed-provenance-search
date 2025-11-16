@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.bundleSearch.searchImplementations;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
@@ -41,7 +42,9 @@ public class FindNodes<T> implements ISearchBundle<T> {
 
     public static Predicate<INode> translateNodeSpecificationToPredicate(JsonNode nodeSpecification) {
         ObjectMapper objectMapper = new ObjectMapper();
-        ITestableSpecification<INode> specification = objectMapper.convertValue(nodeSpecification, ITestableSpecification.class);
+        ITestableSpecification<INode> specification = objectMapper.convertValue(
+                nodeSpecification, new TypeReference<ITestableSpecification<INode>>() {
+                });
         return specification::test;
     }
 

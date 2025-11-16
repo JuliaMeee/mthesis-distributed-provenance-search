@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.bundleSearch;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
@@ -40,7 +41,9 @@ public class BundleSearcherProvider {
                 ETargetType.TEST_FITS, (CpmDocument document, QualifiedName startNodeId, JsonNode targetSpecification) ->
                 {
                     ObjectMapper mapper = new ObjectMapper();
-                    ITestableSpecification<CpmDocument> requirement = mapper.convertValue(targetSpecification, ITestableSpecification.class);
+                    ITestableSpecification<CpmDocument> requirement = mapper.convertValue(targetSpecification,
+                            new TypeReference<ITestableSpecification<CpmDocument>>() {
+                            });
                     return requirement.test(document);
                 }
         );
