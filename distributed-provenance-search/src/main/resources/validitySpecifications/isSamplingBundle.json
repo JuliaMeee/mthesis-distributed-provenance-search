@@ -1,27 +1,26 @@
 {
-  "type": "BundleSpecification",
-  "specifications": [
-    {
-      "type": "CountSpecification",
-      "countableInDocument": {
-        "type": "CountNodes",
-        "nodePredicate": {
-          "type": "NodeSpecification",
-          "idUriRegex": "(?i).*sampling",
-          "isKind": "PROV_ACTIVITY",
-          "isNotKind": null,
-          "hasAttributes": null,
-          "hasAttributeValues": [
-            {
-              "type": "QualifiedNameAttrSpecification",
-              "attributeNameUri": "http://www.w3.org/ns/prov#type",
-              "uriRegex": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
-            }
-          ]
+  "type": "CountCondition",
+  "findableInDocument": {
+    "type": "FindNodes",
+    "nodePredicate": {
+      "type": "AllTrue",
+      "conditions": [
+        {
+          "type": "HasId",
+          "idUriRegex": "(?i).*Sampling.*"
+        },
+        {
+          "type": "IsKind",
+          "kind": "PROV_ACTIVITY"
+        },
+        {
+          "type": "HasAttrQualifiedNameValue",
+          "attributeNameUri": "http://www.w3.org/ns/prov#type",
+          "uriRegex": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
         }
-      },
-      "comparisonResult": "EQUALS",
-      "count": 1
+      ]
     }
-  ]
+  },
+  "comparisonResult": "EQUALS",
+  "count": 1
 }

@@ -1,16 +1,17 @@
-package cz.muni.xmichalk.targetSpecification;
+package cz.muni.xmichalk.targetSpecification.bundleConditions;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.targetSpecification.ICondition;
 
-public class AllNodes implements ITestableSpecification<CpmDocument> {
-    public ITestableSpecification<INode> predicate;
+public class AllNodes implements ICondition<CpmDocument> {
+    public ICondition<INode> predicate;
 
     public AllNodes() {
 
     }
 
-    public AllNodes(ITestableSpecification<INode> predicate) {
+    public AllNodes(ICondition<INode> predicate) {
         this.predicate = predicate;
     }
 

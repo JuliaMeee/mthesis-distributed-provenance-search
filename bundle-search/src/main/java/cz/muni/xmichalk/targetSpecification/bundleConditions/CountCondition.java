@@ -1,27 +1,33 @@
-package cz.muni.xmichalk.targetSpecification;
+package cz.muni.xmichalk.targetSpecification.bundleConditions;
 
 import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.targetSpecification.findable.IFindableInDocument;
+import cz.muni.xmichalk.util.CpmUtils;
 
-public class CountSpecification implements ITestableSpecification<CpmDocument> {
-    public ICountableInDocument countableInDocument;
+public class CountCondition implements ICondition<CpmDocument> {
+    public IFindableInDocument<?> findableInDocument;
     public EComparisonResult comparisonResult;
     public Integer count;
 
-    public CountSpecification() {
+    public CountCondition() {
     }
 
-    public CountSpecification(ICountableInDocument countableInDocument, EComparisonResult comparisonResult, Integer count) {
-        this.countableInDocument = countableInDocument;
+    public CountCondition(IFindableInDocument countableInDocument, EComparisonResult comparisonResult, Integer count) {
+        this.findableInDocument = countableInDocument;
         this.comparisonResult = comparisonResult;
         this.count = count;
     }
 
     public boolean test(CpmDocument document) {
-        if (count == null || comparisonResult == null || countableInDocument == null) {
+        if (count == null || comparisonResult == null || findableInDocument == null) {
             throw new IllegalStateException("Missing values in count specification.");
         }
 
-        int actualCount = countableInDocument.countInDocument(document);
+        INode startNode = CpmUtils.chooseStartNode(document);
+
+        int actualCount = findableInDocument.find(startNode).size();
 
         return switch (comparisonResult) {
             case EComparisonResult.EQUALS -> actualCount == count;

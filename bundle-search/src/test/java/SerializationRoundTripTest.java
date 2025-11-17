@@ -54,8 +54,8 @@ public class SerializationRoundTripTest {
     @Test
     public void testMultipleFormats() {
         Document[] documents = {
-                TestDocument.getTestDocument1(pF, cPF, cF),
-                TestDocument.getTestDocument2(pF, cPF, cF),
+                TestDocument.getTestDocument1(),
+                TestDocument.getTestDocument2(),
         };
 
         Formats.ProvFormat[] formats = {

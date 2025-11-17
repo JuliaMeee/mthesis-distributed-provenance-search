@@ -1,24 +1,24 @@
-package cz.muni.xmichalk.targetSpecification;
+package cz.muni.xmichalk.targetSpecification.findable;
 
-import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.EdgeToNode;
-import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.targetSpecification.subgraphConditions.EdgeToNodeCondition;
 import cz.muni.xmichalk.util.LinearSubgraphFinder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-public class CountLinearSubgraphs implements ICountableInDocument {
-    public NodeSpecification firstNode;
-    public List<EdgeToNodeSpecification> edgesAndNodes;
+public class FindLinearSubgraphs implements IFindableInDocument<List<EdgeToNode>> {
+    public ICondition<INode> firstNode;
+    public List<EdgeToNodeCondition> edgesAndNodes;
 
-    public CountLinearSubgraphs() {
+    public FindLinearSubgraphs() {
     }
 
-    public CountLinearSubgraphs(NodeSpecification firstNode, List<EdgeToNodeSpecification> edgesAndNodes) {
+    public FindLinearSubgraphs(ICondition<INode> firstNode, List<EdgeToNodeCondition> edgesAndNodes) {
         this.firstNode = firstNode;
         this.edgesAndNodes = edgesAndNodes;
     }
@@ -28,7 +28,7 @@ public class CountLinearSubgraphs implements ICountableInDocument {
         constraints.add((edge, node) -> firstNode == null || firstNode.test(node));
 
         if (edgesAndNodes != null) {
-            for (EdgeToNodeSpecification edgeAndNode : edgesAndNodes) {
+            for (EdgeToNodeCondition edgeAndNode : edgesAndNodes) {
                 constraints.add((edge, node) ->
                         edgeAndNode == null || edgeAndNode.test(edge, node));
             }
@@ -38,13 +38,9 @@ public class CountLinearSubgraphs implements ICountableInDocument {
     }
 
     @Override
-    public int countInDocument(CpmDocument document) {
-        INode startNode = CpmUtils.chooseStartNode(document);
-
+    public List<List<EdgeToNode>> find(INode startNode) {
         List<BiPredicate<IEdge, INode>> constraints = buildSubgraphConstraints();
 
-        List<List<EdgeToNode>> fittingSubgraphs = LinearSubgraphFinder.findAnywhere(startNode, constraints);
-
-        return fittingSubgraphs.size();
+        return LinearSubgraphFinder.findAnywhere(startNode, constraints);
     }
 }

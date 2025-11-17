@@ -1,15 +1,15 @@
-package cz.muni.xmichalk.targetSpecification.logicalConnections;
+package cz.muni.xmichalk.targetSpecification.logicalOperations;
 
-import cz.muni.xmichalk.targetSpecification.ITestableSpecification;
+import cz.muni.xmichalk.targetSpecification.ICondition;
 
-public class Implication<T> implements ITestableSpecification<T> {
-    public ITestableSpecification<T> premise;
-    public ITestableSpecification<T> consequence;
+public class Implication<T> implements ICondition<T> {
+    public ICondition<T> premise;
+    public ICondition<T> consequence;
 
     public Implication() {
     }
 
-    public Implication(ITestableSpecification<T> premise, ITestableSpecification<T> consequence) {
+    public Implication(ICondition<T> premise, ICondition<T> consequence) {
         this.premise = premise;
         this.consequence = consequence;
     }

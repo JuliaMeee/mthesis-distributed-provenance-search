@@ -111,31 +111,75 @@ public class BundleSearchController {
             required = true,
             content = @Content(
                     schema = @Schema(implementation = SearchParams.class),
-                    examples = @ExampleObject(
-                            value = """
-                                    {
-                                      "bundleId": {
-                                        "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
-                                        "localPart": "ProcessingBundle_V1"
-                                      },
-                                      "startNodeId": {
-                                        "nameSpaceUri": "https://openprovenance.org/blank/",
-                                        "localPart": "StoredSampleCon_r1"
-                                      },
-                                      "targetType": "NODES_BY_SPECIFICATION",
-                                      "targetSpecification": {
-                                        "type": "NodeSpecification",
-                                        "hasAttributeValues": [
-                                          {
-                                            "type": "QualifiedNameAttrSpecification",
-                                            "attributeNameUri": "http://www.w3.org/ns/prov#type",
-                                            "uriRegex": "(?i).*person"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                    """
-                    )
+                    examples = {
+                            @ExampleObject(
+                                    name = "Find all persons in the bundle",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                                "localPart": "ProcessingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "targetType": "NODES_BY_SPECIFICATION",
+                                              "targetSpecification": {
+                                                "type" : "HasAttrQualifiedNameValue",
+                                                "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                "uriRegex" : "https://schema.org/Person"
+                                              }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Get all forward connectors in the bundle",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                                "localPart": "ProcessingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "targetType": "CONNECTORS",
+                                              "targetSpecification": "forward"
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Test if bundle has exactly one main activity",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                                "localPart": "ProcessingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "targetType": "TEST_FITS",
+                                              "targetSpecification": {
+                                                  "type" : "CountCondition",
+                                                  "findableInDocument" : {
+                                                    "type" : "FindNodes",
+                                                    "nodePredicate" : {
+                                                      "type" : "HasAttrQualifiedNameValue",
+                                                      "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                      "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                                    }
+                                                  },
+                                                  "comparisonResult" : "EQUALS",
+                                                  "count" : 1
+                                                }
+                                            }
+                                            """
+                            )
+                    }
             )
     )
     public ResponseEntity<?> searchBundle(

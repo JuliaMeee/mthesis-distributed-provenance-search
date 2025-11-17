@@ -56,43 +56,47 @@ public class TraverserController {
             required = true,
             content = @Content(
                     schema = @Schema(implementation = SearchParamsDTO.class),
-                    examples = @ExampleObject(value = """
-                            {
-                              "bundleId": {
-                                "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
-                                "localPart": "SpeciesIdentificationBundle_V0"
-                              },
-                              "startNodeId": {
-                                "nameSpaceUri": "https://openprovenance.org/blank/",
-                                "localPart": "IdentifiedSpeciesCon"
-                              },
-                              "versionPreference": "SPECIFIED",
-                              "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
-                              "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                              "targetType": "TEST_FITS",
-                              "targetSpecification": {
-                                 "type" : "BundleSpecification",
-                                 "specifications" : [ {
-                                   "type" : "CountSpecification",
-                                   "countableInDocument" : {
-                                     "type" : "CountNodes",
-                                     "nodePredicate" : {
-                                       "type" : "NodeSpecification",
-                                       "idUriRegex" : "(?i).*Sampling.*",
-                                       "isKind" : "PROV_ACTIVITY",
-                                       "hasAttributeValues" : [ {
-                                         "type" : "QualifiedNameAttrSpecification",
-                                         "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                         "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
-                                       } ]
-                                     }
-                                   },
-                                   "comparisonResult" : "EQUALS",
-                                   "count" : 1
-                                 } ]
-                               }
-                            }
-                            """)
+                    examples = {
+                            @ExampleObject(name = "Find all backward connectors", value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                        "localPart": "SpeciesIdentificationBundle_V0"
+                                      },
+                                      "startNodeId": {
+                                        "nameSpaceUri": "https://openprovenance.org/blank/",
+                                        "localPart": "IdentifiedSpeciesCon"
+                                      },
+                                      "versionPreference": "SPECIFIED",
+                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                      "targetType": "CONNECTORS",
+                                        "targetSpecification": "backward"
+                                    }
+                                    """),
+                            @ExampleObject(name = "Find all person nodes", value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                        "localPart": "SpeciesIdentificationBundle_V0"
+                                      },
+                                      "startNodeId": {
+                                        "nameSpaceUri": "https://openprovenance.org/blank/",
+                                        "localPart": "IdentifiedSpeciesCon"
+                                      },
+                                      "versionPreference": "SPECIFIED",
+                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                      "targetType": "NODES",
+                                      "targetSpecification": {
+                                        "type" : "HasAttrQualifiedNameValue",
+                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                        "uriRegex" : "https://schema.org/Person"
+                                      }
+                                    
+                                    }
+                                    """)
+                    }
             )
     )
     public ResponseEntity<?> searchPredecessors(
@@ -107,23 +111,75 @@ public class TraverserController {
             required = true,
             content = @Content(
                     schema = @Schema(implementation = SearchParamsDTO.class),
-                    examples = @ExampleObject(value = """
-                            {
-                              "bundleId": {
-                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                "localPart": "SamplingBundle_V0"
-                              },
-                              "startNodeId": {
-                                "nameSpaceUri": "https://openprovenance.org/blank/",
-                                "localPart": "StoredSampleCon_r1"
-                              },
-                              "versionPreference": "LATEST",
-                              "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
-                              "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                              "targetType": "CONNECTORS",
-                              "targetSpecification": "backward"
-                            }
-                            """)
+                    examples = {
+                            @ExampleObject(name = "Find main activity ids", value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                        "localPart": "SamplingBundle_V0"
+                                      },
+                                      "startNodeId": {
+                                        "nameSpaceUri": "https://openprovenance.org/blank/",
+                                        "localPart": "StoredSampleCon_r1"
+                                      },
+                                      "versionPreference": "LATEST",
+                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                      "targetType": "NODE_IDS",
+                                      "targetSpecification": {
+                                        "type" : "HasAttrQualifiedNameValue",
+                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                        "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                      }
+                                    }
+                                    """),
+                            @ExampleObject(name = "Check if bundles have a backward jump connector to a bundle with defined meta uri", value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                        "localPart": "SamplingBundle_V0"
+                                      },
+                                      "startNodeId": {
+                                        "nameSpaceUri": "https://openprovenance.org/blank/",
+                                        "localPart": "StoredSampleCon_r1"
+                                      },
+                                      "versionPreference": "LATEST",
+                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                      "targetType": "TEST_FITS",
+                                      "targetSpecification": {
+                                        "type" : "CountCondition",
+                                        "findableInDocument" : {
+                                          "type" : "FindLinearSubgraphs",
+                                          "firstNode" : {
+                                            "type" : "AllTrue",
+                                            "conditions" : [ {
+                                              "type" : "HasAttrQualifiedNameValue",
+                                              "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                              "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                            }, {
+                                              "type" : "HasAttrQualifiedNameValue",
+                                              "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
+                                              "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
+                                            } ]
+                                          },
+                                          "edgesAndNodes" : [ {
+                                            "isKind" : "PROV_DERIVATION",
+                                            "isNotKind" : null,
+                                            "nodeIsEffect" : true,
+                                            "nodeCondition" : {
+                                              "type" : "HasAttrQualifiedNameValue",
+                                              "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                              "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                            }
+                                          } ]
+                                        },
+                                        "comparisonResult" : "GREATER_THAN_OR_EQUALS",
+                                        "count" : 1
+                                      }
+                                    }
+                                    """)
+                    }
             )
     )
     public ResponseEntity<?> searchSuccessors(

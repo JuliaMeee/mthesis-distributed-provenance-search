@@ -1,528 +1,326 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.ICpmFactory;
-import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.targetSpecification.*;
-import cz.muni.xmichalk.targetSpecification.attributeSpecification.QualifiedNameAttrSpecification;
-import cz.muni.xmichalk.targetSpecification.logicalConnections.And;
-import cz.muni.xmichalk.targetSpecification.logicalConnections.Implication;
-import cz.muni.xmichalk.targetSpecification.logicalConnections.Or;
-import cz.muni.xmichalk.targetSpecification.logicalConnections.Xor;
+import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.targetSpecification.bundleConditions.AllNodes;
+import cz.muni.xmichalk.targetSpecification.bundleConditions.CountCondition;
+import cz.muni.xmichalk.targetSpecification.bundleConditions.EComparisonResult;
+import cz.muni.xmichalk.targetSpecification.findable.FindLinearSubgraphs;
+import cz.muni.xmichalk.targetSpecification.findable.FindNodes;
+import cz.muni.xmichalk.targetSpecification.logicalOperations.AllTrue;
+import cz.muni.xmichalk.targetSpecification.logicalOperations.AnyTrue;
+import cz.muni.xmichalk.targetSpecification.logicalOperations.Either;
+import cz.muni.xmichalk.targetSpecification.logicalOperations.Implication;
+import cz.muni.xmichalk.targetSpecification.nodeConditions.*;
+import cz.muni.xmichalk.targetSpecification.subgraphConditions.EdgeToNodeCondition;
 import org.junit.jupiter.api.Test;
-import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.StatementOrBundle;
-import org.openprovenance.prov.model.interop.Formats;
-import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static cz.muni.xmichalk.util.AttributeNames.*;
 import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
-import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
+import static cz.muni.xmichalk.util.NameSpaceConstants.SCHEMA_URI;
 
 public class TargetSpecificationTest {
-    ProvFactory pF = new ProvFactory();
-    ICpmFactory cF = new CpmMergedFactory(pF);
-    ICpmProvFactory cPF = new CpmProvFactory(pF);
-    String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
+
     String specificationsFolder = System.getProperty("user.dir") + "/src/test/resources/targetSpecifications/";
+    CpmDocument samplingBundle_V0 = TestDocument.getSamplingBundle_V0();
+    CpmDocument samplingBundle_V1 = TestDocument.getSamplingBundle_V1();
+    CpmDocument processingBundle_V0 = TestDocument.getProcessingBundle_V0();
+    CpmDocument processingBundle_V1 = TestDocument.getProcessingBundle_V1();
+    CpmDocument speciesIdentificationBundle_V0 = TestDocument.getSpeciesIdentificationBundle_V0();
+    CpmDocument dnaSequencingBundle_V0 = TestDocument.getDnaSequencingBundle_V0();
+
+    public TargetSpecificationTest() throws IOException {
+    }
+
+    ICondition<INode> isMainActivity = new HasAttrQualifiedNameValue(
+            ATTR_PROV_TYPE.getUri(),
+            CPM_URI + "mainActivity"
+    );
+
+    ICondition<INode> isConnector = new HasAttrQualifiedNameValue(
+            ATTR_PROV_TYPE.getUri(),
+            CPM_URI + "(backward|forward)Connector"
+    );
+
+    ICondition<INode> isBackwardConn = new HasAttrQualifiedNameValue(
+            ATTR_PROV_TYPE.getUri(),
+            CPM_URI + "backwardConnector"
+    );
+
+    ICondition<INode> isForwardConn = new HasAttrQualifiedNameValue(
+            ATTR_PROV_TYPE.getUri(),
+            CPM_URI + "forwardConnector"
+    );
+
+    ICondition<INode> nonsenseNodeCondition = new AllTrue<INode>(List.of(
+            new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY),
+            new IsNotKind(StatementOrBundle.Kind.PROV_ACTIVITY)
+    ));
+
+    ICondition<INode> isActivityWithMetaRef = new AllTrue<>(List.of(
+            new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY),
+            new HasAttr(ATTR_REFERENCED_META_BUNDLE_ID.getUri())
+    ));
+
+    ICondition<INode> hasBundleRefAndMetaRef = new AllTrue<>(List.of(
+            new HasAttr(ATTR_REFERENCED_BUNDLE_ID.getUri()),
+            new HasAttr(ATTR_REFERENCED_META_BUNDLE_ID.getUri())
+    ));
+
+    ICondition<INode> hasBackwardConAttributes = new AllTrue<>(List.of(
+            new HasAttr(ATTR_REFERENCED_META_BUNDLE_ID.getUri()),
+            new HasAttr(ATTR_REFERENCED_BUNDLE_ID.getUri()),
+            new HasAttr(ATTR_REFERENCED_BUNDLE_HASH_VALUE.getUri()),
+            new HasAttr(ATTR_HASH_ALG.getUri())
+    ));
+
+    ICondition<CpmDocument> simpleValidityCondition = new AllTrue<CpmDocument>(
+            List.of(
+                    // Has exactly one main activity
+                    new CountCondition(
+                            new FindNodes(isMainActivity),
+                            EComparisonResult.EQUALS,
+                            1
+                    ),
+                    // Main activity has ref to meta bundle
+                    new AllNodes(
+                            new Implication<INode>(
+                                    isMainActivity,
+                                    isActivityWithMetaRef
+                            )),
+                    // All backward connectors have necessary attributes specified
+                    new AllNodes(
+                            new Implication<>(
+                                    isBackwardConn,
+                                    hasBackwardConAttributes
+                            )
+                    )
+            )
+    );
+
+    ICondition<INode> isPerson = new HasAttrQualifiedNameValue(
+            ATTR_PROV_TYPE.getUri(),
+            SCHEMA_URI + "Person");
+
 
     @Test
     public void testAllSatisfyNodeImplication() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        ICondition<INode> conWithRefs = new AllTrue<INode>(List.of(
+                isConnector,
+                hasBundleRefAndMetaRef
+        ));
 
-        NodeSpecification conWithMetaRef = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ENTITY,
-                null,
-                List.of(ATTR_REFERENCED_META_BUNDLE_ID.getUri()),
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                ".*Connector"
-                        )
-                ));
-
-        NodeSpecification nodeWithBundleRef = new NodeSpecification(
-                null,
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                List.of(ATTR_REFERENCED_BUNDLE_ID.getUri()),
-                null
-        );
+        ICondition<INode> nonActivityWithBundleRef = new AllTrue<INode>(List.of(
+                new IsNotKind(StatementOrBundle.Kind.PROV_ACTIVITY),
+                new HasAttr(ATTR_REFERENCED_BUNDLE_ID.getUri())
+        ));
 
         Implication<INode> connectorImplication = new Implication<INode>(
-                conWithMetaRef,
-                nodeWithBundleRef
+                conWithRefs,
+                nonActivityWithBundleRef
         );
 
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(
-                        new CountSpecification(new CountNodes(conWithMetaRef), EComparisonResult.GREATER_THAN_OR_EQUALS, 1),
-                        new AllNodes(connectorImplication)
-                ));
+        ICondition<CpmDocument> bundleSpecification = new AllTrue<CpmDocument>(List.of(
+                new CountCondition(new FindNodes(conWithRefs), EComparisonResult.GREATER_THAN_OR_EQUALS, 1),
+                new AllNodes(connectorImplication)
+        ));
 
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(samplingBundle_V1));
     }
 
     @Test
     public void testCountNonsenseNodes() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
-
-        NodeSpecification nonsense = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                null,
-                null
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                new FindNodes(nonsenseNodeCondition),
+                EComparisonResult.EQUALS,
+                0
         );
 
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(new CountSpecification(
-                                new CountNodes(nonsense),
-                                EComparisonResult.EQUALS,
-                                0
-                        )
-                ));
-
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(samplingBundle_V1));
     }
 
     @Test
     public void testHasSpecificMetaBundleId() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        ICondition<INode> mainActivityWithMetaRef = new AllTrue<>(List.of(
+                isMainActivity,
+                isActivityWithMetaRef
+        ));
 
-        NodeSpecification mainActivityWithMetaRef = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                CPM_URI + "mainActivity"
-                        ),
-                        new QualifiedNameAttrSpecification(
-                                ATTR_REFERENCED_META_BUNDLE_ID.getUri(),
-                                ".*SamplingBundle_V0_meta"
-                        )
-                ));
-
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(
-                        new CountSpecification(
-                                new CountNodes(mainActivityWithMetaRef),
-                                EComparisonResult.EQUALS,
-                                1
-                        )
-                )
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                new FindNodes(mainActivityWithMetaRef),
+                EComparisonResult.EQUALS,
+                1
         );
 
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(samplingBundle_V1));
     }
 
     @Test
-    public void testCountSatisfiedAnd() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+    public void testCountSatisfiedAllTrue() throws IOException {
+        ICondition<INode> conSpec = new AllTrue<>(List.of(
+                new HasId("(?i).*spec"),
+                isConnector
+        ));
 
-        NodeSpecification conSpec = new NodeSpecification(
-                "(?i).*spec",
-                StatementOrBundle.Kind.PROV_ENTITY,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                ".*(forward|backward)Connector"
-                        )
-                ));
-
-        NodeSpecification nodeWithBundleRefAndMetaRef = new NodeSpecification(
-                null,
-                null,
-                null,
-                List.of(ATTR_REFERENCED_BUNDLE_ID.getUri(), ATTR_REFERENCED_META_BUNDLE_ID.getUri()),
-                null
-        );
-
-        And<INode> conjunction = new And<INode>(
+        AllTrue<INode> joinedConditions = new AllTrue<INode>(List.of(
                 conSpec,
-                nodeWithBundleRefAndMetaRef
+                hasBundleRefAndMetaRef
+        ));
+
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                new FindNodes(joinedConditions),
+                EComparisonResult.EQUALS,
+                3
         );
 
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(new CountSpecification(
-                                new CountNodes(conjunction),
-                                EComparisonResult.EQUALS,
-                                3
-                        )
-                ));
-
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(samplingBundle_V1));
     }
 
     @Test
-    public void testAllNodesImplicationOr() throws IOException {
-        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
-
+    public void testAllNodesImplicationAnyTrue() throws IOException {
         // Test that every connector is either a forward connector or has a referenced bundle id and meta bundle id defined
 
-        NodeSpecification con = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ENTITY,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                ".*commonprovenancemodel.*Connector"
-                        )
-                ));
-
-        NodeSpecification nodeWithBundleRefAndMetaRef = new NodeSpecification(
-                null,
-                null,
-                null,
-                List.of(ATTR_REFERENCED_BUNDLE_ID.getUri(), ATTR_REFERENCED_META_BUNDLE_ID.getUri()),
-                null
-        );
-
-        NodeSpecification forwardCon = new NodeSpecification(
-                null,
-                null,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                ".*forwardConnector"
-                        )
-                ));
-
-
-        Or<INode> backwardOrForwardCon = new Or<INode>(
-                nodeWithBundleRefAndMetaRef,
-                forwardCon
+        AnyTrue<INode> backwardOrForwardCon = new AnyTrue<INode>(List.of(
+                hasBundleRefAndMetaRef,
+                isForwardConn)
         );
 
         Implication<INode> conImplication = new Implication<INode>(
-                con,
+                isConnector,
                 backwardOrForwardCon
         );
 
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(
-                        new AllNodes(conImplication)
-                ));
+        ICondition<CpmDocument> bundleSpecification = new AllNodes(conImplication);
 
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(processingBundle_V0));
     }
 
     @Test
-    public void testXor() throws IOException {
-        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
-
+    public void testEither() throws IOException {
         AllNodes satisfied = new AllNodes(
-                new NodeSpecification()
+                new HasId(".*")
         );
 
         AllNodes unsatisfied = new AllNodes(
-                new NodeSpecification(
-                        null,
-                        StatementOrBundle.Kind.PROV_ENTITY,
-                        StatementOrBundle.Kind.PROV_ENTITY,
-                        null,
-                        null
-                )
+                nonsenseNodeCondition
         );
 
-        BundleSpecification bundleSpecificationSatisfied1 = new BundleSpecification(
-                List.of(
-                        new Xor<CpmDocument>(
-                                satisfied,
-                                unsatisfied
-                        )
-                ));
+        ICondition<CpmDocument> bundleSpecificationSatisfied1 = new Either<CpmDocument>(
+                satisfied,
+                unsatisfied
+        );
 
-        BundleSpecification bundleSpecificationSatisfied2 = new BundleSpecification(
-                List.of(
-                        new Xor<CpmDocument>(
-                                unsatisfied,
-                                satisfied
-                        )
-                ));
+        ICondition<CpmDocument> bundleSpecificationSatisfied2 = new Either<CpmDocument>(
+                unsatisfied,
+                satisfied
+        );
 
-        BundleSpecification bundleSpecificationUnsatisfied1 = new BundleSpecification(
-                List.of(
-                        new Xor<CpmDocument>(
-                                unsatisfied,
-                                unsatisfied
-                        )
-                ));
+        ICondition<CpmDocument> bundleSpecificationUnsatisfied1 = new Either<CpmDocument>(
+                unsatisfied,
+                unsatisfied
+        );
 
-        BundleSpecification bundleSpecificationUnsatisfied2 = new BundleSpecification(
-                List.of(
-                        new Xor<CpmDocument>(
-                                satisfied,
-                                satisfied
-                        )
-                ));
+        ICondition<CpmDocument> bundleSpecificationUnsatisfied2 = new Either<CpmDocument>(
+                satisfied,
+                satisfied
+        );
 
-        assert (bundleSpecificationSatisfied1.test(cpmDoc));
-        assert (bundleSpecificationSatisfied2.test(cpmDoc));
-        assert (!bundleSpecificationUnsatisfied1.test(cpmDoc));
-        assert (!bundleSpecificationUnsatisfied2.test(cpmDoc));
+        assert (bundleSpecificationSatisfied1.test(processingBundle_V0));
+        assert (bundleSpecificationSatisfied2.test(processingBundle_V0));
+        assert (!bundleSpecificationUnsatisfied1.test(processingBundle_V0));
+        assert (!bundleSpecificationUnsatisfied2.test(processingBundle_V0));
     }
 
     @Test
-    public void testCountNonsenseAnd() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+    public void testCountNonsenseConjunction() throws IOException {
+        ICondition<INode> activity = new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY);
 
-        NodeSpecification activity = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                null,
-                null,
-                null
-        );
+        ICondition<INode> notActivity = new IsNotKind(StatementOrBundle.Kind.PROV_ACTIVITY);
 
-        NodeSpecification notActivity = new NodeSpecification(
-                null,
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                null,
-                null
-        );
-
-        And<INode> conjunction = new And<INode>(
+        AllTrue<INode> conjunction = new AllTrue<INode>(List.of(
                 activity,
                 notActivity
+        ));
+
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                new FindNodes(conjunction),
+                EComparisonResult.EQUALS,
+                0
         );
 
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(new CountSpecification(
-                                new CountNodes(conjunction),
-                                EComparisonResult.EQUALS,
-                                0
-                        )
-                ));
-
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(samplingBundle_V1));
     }
 
     @Test
     public void testHasForwardJumpConnectors() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
-
-        NodeSpecification forwardCon = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ENTITY,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                CPM_URI + "forwardConnector"
-                        )
-                ));
-        EdgeToNodeSpecification derivationEdgeToForwardCon = new EdgeToNodeSpecification(
+        EdgeToNodeCondition derivationEdgeToForwardCon = new EdgeToNodeCondition(
                 StatementOrBundle.Kind.PROV_DERIVATION,
                 null,
                 null,
-                forwardCon
+                isForwardConn
         );
-        CountLinearSubgraphs forwardJumpChain = new CountLinearSubgraphs(
-                forwardCon,
+        FindLinearSubgraphs forwardJumpChain = new FindLinearSubgraphs(
+                isForwardConn,
                 List.of(derivationEdgeToForwardCon)
         );
 
-        BundleSpecification bundleSpecification = new BundleSpecification(
-                List.of(
-                        new CountSpecification(
-                                forwardJumpChain,
-                                EComparisonResult.GREATER_THAN_OR_EQUALS,
-                                1
-                        )
-                )
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                forwardJumpChain,
+                EComparisonResult.GREATER_THAN_OR_EQUALS,
+                1
         );
 
-        assert (bundleSpecification.test(cpmDoc));
+        assert (bundleSpecification.test(samplingBundle_V1));
     }
 
-    public BundleSpecification getSimpleValiditySpecification() {
-        NodeSpecification mainActivityNode = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                CPM_URI + "mainActivity"
-                        )
-                ));
-
-        NodeSpecification activityWithMetaRef = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ACTIVITY,
-                null,
-                List.of(
-                        ATTR_REFERENCED_META_BUNDLE_ID.getUri()
-                ),
-                null);
-
-        NodeSpecification backwardCon = new NodeSpecification(
-                null,
-                StatementOrBundle.Kind.PROV_ENTITY,
-                null,
-                null,
-                List.of(
-                        new QualifiedNameAttrSpecification(
-                                ATTR_PROV_TYPE.getUri(),
-                                CPM_URI + "backwardConnector"
-                        )
-                ));
-
-        NodeSpecification hasBackwardConAttributes = new NodeSpecification(
-                null,
-                null,
-                null,
-                List.of(
-                        ATTR_REFERENCED_META_BUNDLE_ID.getUri(),
-                        ATTR_REFERENCED_BUNDLE_ID.getUri(),
-                        ATTR_REFERENCED_BUNDLE_HASH_VALUE.getUri(),
-                        ATTR_HASH_ALG.getUri()
-                ),
-                null);
-
-
-        return new BundleSpecification(
-                List.of(
-                        // Has exactly one main activity
-                        new CountSpecification(
-                                new CountNodes(mainActivityNode),
-                                EComparisonResult.EQUALS,
-                                1
-                        ),
-                        // Main activity has ref to meta bundle
-                        new AllNodes(
-                                new Implication<INode>(
-                                        mainActivityNode,
-                                        activityWithMetaRef
-                                )),
-                        // All backward connectors have necessary attributes specified
-                        new AllNodes(
-                                new Implication<>(
-                                        backwardCon,
-                                        hasBackwardConAttributes
-                                )
-                        )
-                )
-        );
-    }
 
     @Test
     public void testSimpleValiditySpecification() throws IOException {
-        BundleSpecification validitySpecs = getSimpleValiditySpecification();
+        List<CpmDocument> cpmDocs = List.of(
+                samplingBundle_V0,
+                samplingBundle_V1,
+                processingBundle_V0,
+                processingBundle_V1,
+                speciesIdentificationBundle_V0,
+                dnaSequencingBundle_V0
+        );
 
-        for (int i : List.of(1, 2, 3, 4)) {
-            String datasetFolder = dataFolder + "dataset" + i + "/";
-            try (var paths = Files.walk(Paths.get(datasetFolder))) {
-                paths.filter(Files::isRegularFile)
-                        .forEach(filePath -> {
-                            Document document = null;
-                            try {
-                                document = deserializeFile(filePath, Formats.ProvFormat.JSON);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                            CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
-                            assert (validitySpecs.test(cpmDoc));
-                        });
-            }
+        for (CpmDocument cpmDoc : cpmDocs) {
+            assert (simpleValidityCondition.test(cpmDoc));
         }
     }
 
     @Test
-    public void testFromFiles() throws IOException {
-        Path docFile = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Path specsFile = Path.of(specificationsFolder + "connectorRules.json");
-        testFromFile(docFile, specsFile);
+    public void testSerializationRoundTrip() throws IOException {
+        CpmDocument cpmDoc = samplingBundle_V1;
 
-        docFile = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-        specsFile = Path.of(specificationsFolder + "has1MainActivity.json");
-        testFromFile(docFile, specsFile);
+        assert (simpleValidityCondition.test(cpmDoc));
 
-        docFile = Path.of(dataFolder + "dataset3/SpeciesIdentificationBundle_V0.json");
-        specsFile = Path.of(specificationsFolder + "hasBackwardJumpConnectors.json");
-        testFromFile(docFile, specsFile);
-    }
+        Path filePath = Path.of(specificationsFolder, "simpleValidityCondition.json");
 
-
-    public void testFromFile(Path docPath, Path specsPath) throws IOException {
-        Document document = deserializeFile(docPath, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        serializeToJson(filePath, simpleValidityCondition);
 
         ObjectMapper mapper = new ObjectMapper();
-
-        ITestableSpecification<CpmDocument> specification =
+        ICondition<CpmDocument> deserialized =
                 mapper.readValue(
-                        specsPath.toFile(),
-                        new TypeReference<ITestableSpecification<CpmDocument>>() {
+                        filePath.toFile(),
+                        new TypeReference<ICondition<CpmDocument>>() {
                         }
                 );
-        assert (specification.test(cpmDoc));
+        assert (deserialized.test(cpmDoc));
 
     }
 
-    @Test
-    public void ttt() {
-        var samplingMainActivity = new NodeSpecification();
-        samplingMainActivity.idUriRegex = "(?i).*Sampling.*";
-        samplingMainActivity.isKind = StatementOrBundle.Kind.PROV_ACTIVITY;
-        samplingMainActivity.hasAttributeValues = List.of(
-                new QualifiedNameAttrSpecification(
-                        ATTR_PROV_TYPE.getUri(),
-                        CPM_URI + "mainActivity"
-                )
-        );
-
-        var bundleSpec = new BundleSpecification(
-                List.of(
-                        new CountSpecification(
-                                new CountNodes(samplingMainActivity),
-                                EComparisonResult.EQUALS,
-                                1
-                        )
-                )
-        );
-
-        var objectMapper = new ObjectMapper();
-        var x = objectMapper.valueToTree(bundleSpec);
-        var str = x.toString();
+    public void serializeToJson(Path filePath, Object object) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        Files.writeString(filePath, json);
     }
 }

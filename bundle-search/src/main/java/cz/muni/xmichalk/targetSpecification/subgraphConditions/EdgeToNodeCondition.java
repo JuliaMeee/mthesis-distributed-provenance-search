@@ -1,23 +1,24 @@
-package cz.muni.xmichalk.targetSpecification;
+package cz.muni.xmichalk.targetSpecification.subgraphConditions;
 
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.targetSpecification.ICondition;
 import org.openprovenance.prov.model.StatementOrBundle;
 
-public class EdgeToNodeSpecification {
+public class EdgeToNodeCondition {
     public StatementOrBundle.Kind isKind;
     public StatementOrBundle.Kind isNotKind;
     public Boolean nodeIsEffect;
-    public NodeSpecification nodeSpecification;
+    public ICondition<INode> nodeCondition;
 
-    public EdgeToNodeSpecification() {
+    public EdgeToNodeCondition() {
     }
 
-    public EdgeToNodeSpecification(StatementOrBundle.Kind isKind, StatementOrBundle.Kind isNotKind, Boolean nodeIsEffect, NodeSpecification nodeSpecification) {
+    public EdgeToNodeCondition(StatementOrBundle.Kind isKind, StatementOrBundle.Kind isNotKind, Boolean nodeIsEffect, ICondition<INode> nodeCondition) {
         this.isKind = isKind;
         this.isNotKind = isNotKind;
         this.nodeIsEffect = nodeIsEffect;
-        this.nodeSpecification = nodeSpecification;
+        this.nodeCondition = nodeCondition;
     }
 
     public boolean test(IEdge edge, INode node) {
@@ -39,8 +40,8 @@ public class EdgeToNodeSpecification {
             if (!nodeIsEffect && effectNode.equals(node)) return false;
         }
 
-        if (nodeSpecification != null) {
-            return nodeSpecification.test(node);
+        if (nodeCondition != null) {
+            return nodeCondition.test(node);
         }
 
         return true;

@@ -7,7 +7,7 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.bundleSearch.ISearchBundle;
 import cz.muni.xmichalk.models.QualifiedNameData;
-import cz.muni.xmichalk.targetSpecification.ITestableSpecification;
+import cz.muni.xmichalk.targetSpecification.ICondition;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import cz.muni.xmichalk.util.ProvJsonUtils;
@@ -16,34 +16,27 @@ import org.openprovenance.prov.model.interop.Formats;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class FindNodes<T> implements ISearchBundle<T> {
-    private final Function<JsonNode, Predicate<INode>> translatePredicate;
     private final Function<List<INode>, T> resultTransformation;
 
-    public FindNodes(Function<JsonNode, Predicate<INode>> getPredicate, Function<List<INode>, T> resultTransformation) {
-        this.translatePredicate = getPredicate;
+    public FindNodes(Function<List<INode>, T> resultTransformation) {
         this.resultTransformation = resultTransformation;
     }
 
     @Override
     public T apply(CpmDocument document, org.openprovenance.prov.model.QualifiedName startNodeId, JsonNode targetSpecification) {
-        Predicate<INode> predicate = translatePredicate.apply(targetSpecification);
+        Predicate<INode> predicate = translateToPredicate(targetSpecification);
         List<INode> results = BundleNodesTraverser.traverseAndFind(document, startNodeId, predicate);
         return resultTransformation.apply(results);
     }
 
-    public static Predicate<INode> translateNodeIdToPredicate(JsonNode targetSpecification) {
-        return (node) -> Objects.equals(node.getId().getUri(), targetSpecification.asText());
-    }
-
-    public static Predicate<INode> translateNodeSpecificationToPredicate(JsonNode nodeSpecification) {
+    public static Predicate<INode> translateToPredicate(JsonNode nodeSpecification) {
         ObjectMapper objectMapper = new ObjectMapper();
-        ITestableSpecification<INode> specification = objectMapper.convertValue(
-                nodeSpecification, new TypeReference<ITestableSpecification<INode>>() {
+        ICondition<INode> specification = objectMapper.convertValue(
+                nodeSpecification, new TypeReference<ICondition<INode>>() {
                 });
         return specification::test;
     }

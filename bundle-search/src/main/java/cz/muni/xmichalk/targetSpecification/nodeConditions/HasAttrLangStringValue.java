@@ -1,22 +1,25 @@
-package cz.muni.xmichalk.targetSpecification.attributeSpecification;
+package cz.muni.xmichalk.targetSpecification.nodeConditions;
 
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.targetSpecification.ICondition;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
 
-public class LangStringAttrSpecification extends AttrSpecification {
+public class HasAttrLangStringValue implements ICondition<INode> {
+    public String attributeNameUri;
     public String langRegex;
     public String valueRegex;
 
-    public LangStringAttrSpecification() {
+    public HasAttrLangStringValue() {
     }
 
-    public LangStringAttrSpecification(String attributeNameUri, String langRegex, String valueRegex) {
+    public HasAttrLangStringValue(String attributeNameUri, String langRegex, String valueRegex) {
         this.attributeNameUri = attributeNameUri;
         this.langRegex = langRegex;
         this.valueRegex = valueRegex;
     }
 
+    @Override
     public boolean test(INode node) {
         try {
             return CpmUtils.hasAttributeTargetValue(node, attributeNameUri, LangString.class, (langString)

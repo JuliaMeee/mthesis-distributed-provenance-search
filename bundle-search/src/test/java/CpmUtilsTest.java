@@ -7,18 +7,14 @@ import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.util.CpmUtils;
 import cz.muni.xmichalk.util.NameSpaceConstants;
 import org.junit.jupiter.api.Test;
-import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.QualifiedName;
-import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
-import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
 
 public class CpmUtilsTest {
     ProvFactory pF = new ProvFactory();
@@ -28,11 +24,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testGetMetaBundleId() throws IOException {
-        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        CpmDocument cpmDoc = TestDocument.getProcessingBundle_V0();
 
         QualifiedName metaId = CpmUtils.getMetaBundleId(cpmDoc);
 
@@ -41,11 +33,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testGetReferencedConnectorId() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
         INode connectorNode = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank")
@@ -58,9 +46,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testGetLocation() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
         QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
                 "http://www.w3.org/ns/prov#", "location", "prov");
 
@@ -82,9 +68,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testHasAttributeValue() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
         INode node = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(
                         BLANK_URI, "Sampling", "blank")
@@ -104,9 +88,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testDoesNotHaveAttributeValue() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
         INode node = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(
                         BLANK_URI, "Sampling", "blank")

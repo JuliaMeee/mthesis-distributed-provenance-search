@@ -1,22 +1,25 @@
-package cz.muni.xmichalk.targetSpecification.attributeSpecification;
+package cz.muni.xmichalk.targetSpecification.nodeConditions;
 
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.targetSpecification.ICondition;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.QualifiedName;
 
-public class QualifiedNameAttrSpecification extends AttrSpecification {
+public class HasAttrQualifiedNameValue implements ICondition<INode> {
+    public String attributeNameUri;
     public String uriRegex;
 
-    public QualifiedNameAttrSpecification() {
+    public HasAttrQualifiedNameValue() {
     }
 
-    public QualifiedNameAttrSpecification(String attributeNameUri, String regex) {
+    public HasAttrQualifiedNameValue(String attributeNameUri, String regex) {
         this.attributeNameUri = attributeNameUri;
         this.uriRegex = regex;
     }
 
+    @Override
     public boolean test(INode node) {
-        if (uriRegex == null) return true;
+        if (attributeNameUri == null || uriRegex == null) return true;
 
         try {
             return CpmUtils.hasAttributeTargetValue(node, attributeNameUri, QualifiedName.class, (qn) ->

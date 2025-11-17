@@ -1,3 +1,4 @@
+import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
@@ -6,14 +7,24 @@ import cz.muni.fi.cpm.template.mapper.TemplateProvMapper;
 import cz.muni.fi.cpm.template.schema.*;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import org.openprovenance.prov.model.*;
+import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import javax.xml.datatype.DatatypeFactory;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
+
 public class TestDocument {
-    public static Document getTestDocument1(ProvFactory pF, ICpmProvFactory cPF, ICpmFactory cF) {
+    static ProvFactory pF = new ProvFactory();
+    static ICpmFactory cF = new CpmMergedFactory(pF);
+    static ICpmProvFactory cPF = new CpmProvFactory(pF);
+    static String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
+
+    public static Document getTestDocument1() {
         QualifiedName entityId = cPF.newCpmQualifiedName("entity1");
         Entity entity = cPF.getProvFactory().newEntity(entityId);
 
@@ -35,7 +46,7 @@ public class TestDocument {
         return cpmDocument.toDocument();
     }
 
-    public static Document getTestDocument2(ProvFactory pF, ICpmProvFactory cPF, ICpmFactory cF) {
+    public static Document getTestDocument2() {
         try {
             DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
             TraversalInformation ti = new TraversalInformation();
@@ -67,5 +78,41 @@ public class TestDocument {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static CpmDocument getSamplingBundle_V0() throws IOException {
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V0.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        return new CpmDocument(document, pF, cPF, cF);
+    }
+
+    public static CpmDocument getSamplingBundle_V1() throws IOException {
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        return new CpmDocument(document, pF, cPF, cF);
+    }
+
+    public static CpmDocument getProcessingBundle_V0() throws IOException {
+        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        return new CpmDocument(document, pF, cPF, cF);
+    }
+
+    public static CpmDocument getProcessingBundle_V1() throws IOException {
+        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V1.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        return new CpmDocument(document, pF, cPF, cF);
+    }
+
+    public static CpmDocument getSpeciesIdentificationBundle_V0() throws IOException {
+        Path file = Path.of(dataFolder + "dataset3/SpeciesIdentificationBundle_V0.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        return new CpmDocument(document, pF, cPF, cF);
+    }
+
+    public static CpmDocument getDnaSequencingBundle_V0() throws IOException {
+        Path file = Path.of(dataFolder + "dataset4/DnaSequencingBundle_V0.json");
+        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        return new CpmDocument(document, pF, cPF, cF);
     }
 }
