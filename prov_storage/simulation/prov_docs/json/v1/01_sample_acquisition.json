@@ -1,0 +1,155 @@
+{
+  "prefix" : {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "prov" : "http://www.w3.org/ns/prov#",
+    "ns_surgery" : "http://127.0.1.1:8000/api/v1/organizations/UniGraz/documents/"
+  },
+  "bundle" : {
+    "ns_surgery:01_sample_acquisition" : {
+      "prefix" : {
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "dct" : "http://purl.org/dc/terms/",
+        "self_connector" : "http://127.0.1.1:8000/api/v1/connectors/",
+        "meta" : "http://127.0.1.1:8000/api/v1/documents/meta/",
+        "xsd" : "http://www.w3.org/2001/XMLSchema#",
+        "prov" : "http://www.w3.org/ns/prov#",
+        "ns_surgery" : "http://127.0.1.1.com:8000/api/v1/organizations/UniGraz/documents/"
+      },
+      "entity" : {
+        "ns_surgery:patient" : {
+          "ns_surgery:bioptic-app-id" : [ "app-id-0" ],
+          "cpm:externalId" : [ "patient-id-0" ]
+        },
+        "self_connector:sampleConnector" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "ns_surgery:Sample" : {
+          "cpm:externalId" : [ "tissue-id-0" ]
+        },
+        "ns_surgery:tissueSample" : {
+          "cpm:externalId" : [ "sample-id-0" ]
+        },
+        "ns_surgery:preparedSample" : {
+          "cpm:externalId" : [ "sample-id-0" ]
+        }
+      },
+      "activity" : {
+        "ns_surgery:samplePreparation" : { },
+        "ns_surgery:sampleTransport" : { },
+        "ns_surgery:biomaterialCollection" : { },
+        "ns_surgery:sampleAcquisition" : {
+          "cpm:metabundle" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "meta:meta1"
+          } ],
+          "dct:hasPart" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_surgery:sampleTransport"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_surgery:biomaterialCollection"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_surgery:samplePreparation"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:mainActivity"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:sampleAcquisition"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:sampleHandling"
+          } ]
+        }
+      },
+      "agent" : {
+        "ns_surgery:pathologyDepartment" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:receiverAgent"
+          } ]
+        },
+        "ns_surgery:surgicalDepartment" : { }
+      },
+      "used" : {
+        "_:n8" : {
+          "prov:activity" : "ns_surgery:samplePreparation",
+          "prov:entity" : "ns_surgery:tissueSample"
+        },
+        "_:n5" : {
+          "prov:activity" : "ns_surgery:biomaterialCollection",
+          "prov:entity" : "ns_surgery:patient"
+        },
+        "_:n12" : {
+          "prov:activity" : "ns_surgery:sampleTransport",
+          "prov:entity" : "ns_surgery:preparedSample"
+        }
+      },
+      "wasAssociatedWith" : {
+        "_:n2" : {
+          "prov:activity" : "ns_surgery:biomaterialCollection",
+          "prov:agent" : "ns_surgery:surgicalDepartment"
+        },
+        "_:n3" : {
+          "prov:activity" : "ns_surgery:samplePreparation",
+          "prov:agent" : "ns_surgery:surgicalDepartment"
+        },
+        "_:n4" : {
+          "prov:activity" : "ns_surgery:sampleTransport",
+          "prov:agent" : "ns_surgery:surgicalDepartment"
+        }
+      },
+      "wasAttributedTo" : {
+        "_:n1" : {
+          "prov:entity" : "self_connector:sampleConnector",
+          "prov:agent" : "ns_surgery:pathologyDepartment"
+        }
+      },
+      "specializationOf" : {
+        "_:n11" : {
+          "prov:specificEntity" : "ns_surgery:Sample",
+          "prov:generalEntity" : "self_connector:sampleConnector"
+        }
+      },
+      "wasDerivedFrom" : {
+        "_:n14" : {
+          "prov:generatedEntity" : "ns_surgery:Sample",
+          "prov:usedEntity" : "ns_surgery:preparedSample"
+        },
+        "_:n10" : {
+          "prov:generatedEntity" : "ns_surgery:preparedSample",
+          "prov:usedEntity" : "ns_surgery:tissueSample"
+        },
+        "_:n7" : {
+          "prov:generatedEntity" : "ns_surgery:tissueSample",
+          "prov:usedEntity" : "ns_surgery:patient"
+        }
+      },
+      "wasGeneratedBy" : {
+        "_:n13" : {
+          "prov:entity" : "ns_surgery:Sample",
+          "prov:activity" : "ns_surgery:sampleTransport"
+        },
+        "_:n6" : {
+          "prov:entity" : "ns_surgery:tissueSample",
+          "prov:activity" : "ns_surgery:biomaterialCollection"
+        },
+        "_:n9" : {
+          "prov:entity" : "ns_surgery:preparedSample",
+          "prov:activity" : "ns_surgery:samplePreparation"
+        },
+        "_:n0" : {
+          "prov:entity" : "self_connector:sampleConnector",
+          "prov:activity" : "ns_surgery:sampleAcquisition"
+        }
+      }
+    }
+  }
+}

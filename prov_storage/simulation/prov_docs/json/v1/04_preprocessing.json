@@ -1,0 +1,183 @@
+{
+  "prefix" : {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "ns_RDC" : "http://munich-prov-storage-provider.de:8000/api/v1/organizations/CVUT/documents/",
+    "prov" : "http://www.w3.org/ns/prov#"
+  },
+  "bundle" : {
+    "ns_RDC:04_preprocessing" : {
+      "prefix" : {
+        "ns_RDC" : "http://munich-prov-storage-provider.de:8000/api/v1/organizations/CVUT/documents/",
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "dct" : "http://purl.org/dc/terms/",
+        "connector" : "http://provenance-storage-provider.com:8000/api/v1/connectors/",
+        "self_connector" : "http://munich-prov-storage-provider.de:8000/api/v1/connectors/",
+        "meta" : "http://munich-prov-storage-provider.de:8000/api/v1/documents/meta/",
+        "xsd" : "http://www.w3.org/2001/XMLSchema#",
+        "ns_pathology" : "http://provenance-storage-provider.com:8000/api/v1/organizations/UniParis/",
+        "prov" : "http://www.w3.org/ns/prov#"
+      },
+      "entity" : {
+        "ns_RDC:tilesBatch1" : {
+          "cpm:externalId" : [ "batch-id-1" ]
+        },
+        "ns_RDC:testDataset" : {
+          "cpm:externalId" : [ "datasetId2" ]
+        },
+        "ns_RDC:trainDataset" : {
+          "cpm:externalId" : [ "datasetId1" ]
+        },
+        "self_connector:trainDatasetConnector" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "ns_pathology:WSIDataConnector2-b" : {
+          "cpm:externalId" : [ "wsi-id-1" ]
+        },
+        "self_connector:testDatasetConnector" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "connector:WSIDataConnector2" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:02_scanning"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        }
+      },
+      "activity" : {
+        "ns_RDC:preprocessing" : {
+          "cpm:metabundle" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "meta:meta2"
+          } ],
+          "dct:hasPart" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC:tilesGeneration"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC:datasetSplit"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:mainActivity"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:dataHandling"
+          } ]
+        },
+        "ns_RDC:tilesGeneration" : { },
+        "ns_RDC:datasetSplit" : { }
+      },
+      "agent" : {
+        "ns_RDC:pathologyDepartment" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:senderAgent"
+          } ]
+        },
+        "ns_RDC:researchDataCenter" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:receiverAgent"
+          } ]
+        }
+      },
+      "used" : {
+        "_:n4" : {
+          "prov:activity" : "ns_RDC:datasetSplit",
+          "prov:entity" : "ns_RDC:tilesBatch1"
+        },
+        "_:n10" : {
+          "prov:activity" : "ns_RDC:preprocessing",
+          "prov:entity" : "connector:WSIDataConnector2"
+        },
+        "_:n1" : {
+          "prov:activity" : "ns_RDC:tilesGeneration",
+          "prov:entity" : "ns_pathology:WSIDataConnector2-b"
+        }
+      },
+      "wasAttributedTo" : {
+        "_:n8" : {
+          "prov:entity" : "self_connector:testDatasetConnector",
+          "prov:agent" : "ns_RDC:researchDataCenter"
+        },
+        "_:n9" : {
+          "prov:entity" : "self_connector:trainDatasetConnector",
+          "prov:agent" : "ns_RDC:researchDataCenter"
+        },
+        "_:n7" : {
+          "prov:entity" : "connector:WSIDataConnector2",
+          "prov:agent" : "ns_RDC:pathologyDepartment"
+        }
+      },
+      "specializationOf" : {
+        "_:n16" : {
+          "prov:specificEntity" : "ns_RDC:trainDataset",
+          "prov:generalEntity" : "self_connector:trainDatasetConnector"
+        },
+        "_:n15" : {
+          "prov:specificEntity" : "ns_RDC:testDataset",
+          "prov:generalEntity" : "self_connector:testDatasetConnector"
+        },
+        "_:n17" : {
+          "prov:specificEntity" : "ns_pathology:WSIDataConnector2-b",
+          "prov:generalEntity" : "connector:WSIDataConnector2"
+        }
+      },
+      "wasDerivedFrom" : {
+        "_:n2" : {
+          "prov:generatedEntity" : "ns_RDC:testDataset",
+          "prov:usedEntity" : "ns_RDC:tilesBatch1"
+        },
+        "_:n13" : {
+          "prov:generatedEntity" : "self_connector:trainDatasetConnector",
+          "prov:usedEntity" : "connector:WSIDataConnector2"
+        },
+        "_:n3" : {
+          "prov:generatedEntity" : "ns_RDC:trainDataset",
+          "prov:usedEntity" : "ns_RDC:tilesBatch1"
+        },
+        "_:n11" : {
+          "prov:generatedEntity" : "self_connector:testDatasetConnector",
+          "prov:usedEntity" : "connector:WSIDataConnector2"
+        }
+      },
+      "wasGeneratedBy" : {
+        "_:n5" : {
+          "prov:entity" : "ns_RDC:trainDataset",
+          "prov:activity" : "ns_RDC:datasetSplit"
+        },
+        "_:n6" : {
+          "prov:entity" : "ns_RDC:testDataset",
+          "prov:activity" : "ns_RDC:datasetSplit"
+        },
+        "_:n12" : {
+          "prov:entity" : "self_connector:testDatasetConnector",
+          "prov:activity" : "ns_RDC:preprocessing"
+        },
+        "_:n0" : {
+          "prov:entity" : "ns_RDC:tilesBatch1",
+          "prov:activity" : "ns_RDC:tilesGeneration"
+        },
+        "_:n14" : {
+          "prov:entity" : "self_connector:trainDatasetConnector",
+          "prov:activity" : "ns_RDC:preprocessing"
+        }
+      }
+    }
+  }
+}

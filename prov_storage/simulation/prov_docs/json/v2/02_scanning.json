@@ -1,0 +1,337 @@
+{
+  "prefix" : {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "ns_pathology" : "http://provenance-storage-provider.com:8000/api/v1/organizations/UniParis/",
+    "prov" : "http://www.w3.org/ns/prov#"
+  },
+  "bundle" : {
+    "ns_pathology:02_scanning_v2" : {
+      "prefix" : {
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "dct" : "http://purl.org/dc/terms/",
+        "self_connector" : "http://provenance-storage-provider.com:8000/api/v1/connectors/",
+        "meta" : "http://provenance-storage-provider.com:8000/api/v1/documents/meta/",
+        "xsd" : "http://www.w3.org/2001/XMLSchema#",
+        "ns_pathology" : "http://provenance-storage-provider.com:8000/api/v1/organizations/UniParis/",
+        "remote_connector" : "http://provenance-storage-provider.com:8000/api/v1/connectors/",
+        "ns_surgery" : "http://provenance-storage-provider.com:8000/api/v1/organizations/UniGraz/documents/",
+        "prov" : "http://www.w3.org/ns/prov#"
+      },
+      "entity" : {
+        "remote_connector:sampleConnector" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_surgery:01_sample_acquisition"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        },
+        "ns_pathology:scan" : { },
+        "self_connector:pathologicalDiagnosisConnector" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "ns_pathology:sample-b" : { },
+        "ns_pathology:block" : { },
+        "self_connector:slidesCollectionConnector" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "ns_pathology:stainedSlide" : { },
+        "ns_pathology:stainedSlidesCollection" : { },
+        "self_connector:WSIDataConnector1" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        },
+        "ns_pathology:annotatedWSI" : { },
+        "ns_pathology:pathologicalDiagnosis" : { },
+        "ns_pathology:clinicalData-b" : { },
+        "ns_pathology:slide" : { },
+        "self_connector:WSIDataConnector2" : {
+          "cpm:receiverServiceUri" : [ "#URI#" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:forwardConnector"
+          } ]
+        }
+      },
+      "activity" : {
+        "ns_pathology:scanning" : { },
+        "ns_pathology:macroscopy" : { },
+        "ns_pathology:slidesPackaging" : { },
+        "ns_pathology:slicing" : { },
+        "ns_pathology:staining" : { },
+        "ns_pathology:examination" : { },
+        "ns_pathology:dataGeneration" : {
+          "cpm:metabundle" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "meta:meta1"
+          } ],
+          "dct:hasPart" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:scanning"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:staining"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:slicing"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:examination"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_pathology:macroscopy"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:dataGeneration"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:mainActivity"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:sampleHandling"
+          } ]
+        }
+      },
+      "agent" : {
+        "ns_pathology:researchDataCenter" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:receiverAgent"
+          } ]
+        },
+        "ns_pathology:pathologist" : { },
+        "ns_pathology:biobank" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:receiverAgent"
+          } ]
+        },
+        "ns_pathology:surgicalDepartment" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:senderAgent"
+          } ]
+        },
+        "ns_pathology:laboratoryTechnician" : { }
+      },
+      "used" : {
+        "_:n2" : {
+          "prov:activity" : "ns_pathology:dataGeneration",
+          "prov:entity" : "remote_connector:sampleConnector"
+        },
+        "_:n35" : {
+          "prov:activity" : "ns_pathology:scan",
+          "prov:entity" : "ns_pathology:examination"
+        },
+        "_:n29" : {
+          "prov:activity" : "ns_pathology:slide",
+          "prov:entity" : "ns_pathology:staining"
+        },
+        "_:n20" : {
+          "prov:activity" : "ns_pathology:sample-b",
+          "prov:entity" : "ns_pathology:macroscopy"
+        },
+        "_:n25" : {
+          "prov:activity" : "ns_pathology:block",
+          "prov:entity" : "ns_pathology:slicing"
+        },
+        "_:n21" : {
+          "prov:activity" : "ns_pathology:clinicalData-b",
+          "prov:entity" : "ns_pathology:macroscopy"
+        },
+        "_:n32" : {
+          "prov:activity" : "ns_pathology:stainedSlide",
+          "prov:entity" : "ns_pathology:scanning"
+        },
+        "_:n43" : {
+          "prov:activity" : "ns_pathology:stainedSlide",
+          "prov:entity" : "ns_pathology:slidesPackaging"
+        }
+      },
+      "wasAssociatedWith" : {
+        "_:n16" : {
+          "prov:activity" : "ns_pathology:scanning",
+          "prov:agent" : "ns_pathology:laboratoryTechnician"
+        },
+        "_:n18" : {
+          "prov:activity" : "ns_pathology:slidesPackaging",
+          "prov:agent" : "ns_pathology:laboratoryTechnician"
+        },
+        "_:n15" : {
+          "prov:activity" : "ns_pathology:slicing",
+          "prov:agent" : "ns_pathology:laboratoryTechnician"
+        },
+        "_:n14" : {
+          "prov:activity" : "ns_pathology:macroscopy",
+          "prov:agent" : "ns_pathology:pathologist"
+        },
+        "_:n17" : {
+          "prov:activity" : "ns_pathology:examination",
+          "prov:agent" : "ns_pathology:pathologist"
+        },
+        "_:n28" : {
+          "prov:activity" : "ns_pathology:staining",
+          "prov:agent" : "ns_pathology:laboratoryTechnician"
+        }
+      },
+      "wasAttributedTo" : {
+        "_:n6" : {
+          "prov:entity" : "self_connector:slidesCollectionConnector",
+          "prov:agent" : "ns_pathology:biobank"
+        },
+        "_:n12" : {
+          "prov:entity" : "self_connector:WSIDataConnector2",
+          "prov:agent" : "ns_pathology:researchDataCenter"
+        },
+        "_:n9" : {
+          "prov:entity" : "self_connector:WSIDataConnector1",
+          "prov:agent" : "ns_pathology:biobank"
+        },
+        "_:n0" : {
+          "prov:entity" : "remote_connector:sampleConnector",
+          "prov:agent" : "ns_pathology:surgicalDepartment"
+        },
+        "_:n3" : {
+          "prov:entity" : "self_connector:pathologicalDiagnosisConnector",
+          "prov:agent" : "ns_pathology:biobank"
+        }
+      },
+      "specializationOf" : {
+        "_:n19" : {
+          "prov:specificEntity" : "ns_pathology:sample-b",
+          "prov:generalEntity" : "remote_connector:sampleConnector"
+        },
+        "_:n37" : {
+          "prov:specificEntity" : "ns_pathology:annotatedWSI",
+          "prov:generalEntity" : "self_connector:WSIDataConnector2"
+        },
+        "_:n36" : {
+          "prov:specificEntity" : "ns_pathology:annotatedWSI",
+          "prov:generalEntity" : "self_connector:WSIDataConnector1"
+        },
+        "_:n44" : {
+          "prov:specificEntity" : "ns_pathology:stainedSlidesCollection",
+          "prov:generalEntity" : "self_connector:slidesCollectionConnector"
+        },
+        "_:n40" : {
+          "prov:specificEntity" : "ns_pathology:pathologicalDiagnosis",
+          "prov:generalEntity" : "self_connector:pathologicalDiagnosisConnector"
+        }
+      },
+      "wasDerivedFrom" : {
+        "_:n27" : {
+          "prov:generatedEntity" : "ns_pathology:slide",
+          "prov:usedEntity" : "ns_pathology:block"
+        },
+        "_:n13" : {
+          "prov:generatedEntity" : "self_connector:WSIDataConnector2",
+          "prov:usedEntity" : "remote_connector:sampleConnector"
+        },
+        "_:n24" : {
+          "prov:generatedEntity" : "ns_pathology:block",
+          "prov:usedEntity" : "ns_pathology:clinicalData-b"
+        },
+        "_:n46" : {
+          "prov:generatedEntity" : "ns_pathology:stainedSlidesCollection",
+          "prov:usedEntity" : "ns_pathology:stainedSlide"
+        },
+        "_:n23" : {
+          "prov:generatedEntity" : "ns_pathology:block",
+          "prov:usedEntity" : "ns_pathology:sample-b"
+        },
+        "_:n34" : {
+          "prov:generatedEntity" : "ns_pathology:scan",
+          "prov:usedEntity" : "ns_pathology:stainedSlide"
+        },
+        "_:n31" : {
+          "prov:generatedEntity" : "ns_pathology:stainedSlide",
+          "prov:usedEntity" : "ns_pathology:slide"
+        },
+        "_:n42" : {
+          "prov:generatedEntity" : "ns_pathology:pathologicalDiagnosis",
+          "prov:usedEntity" : "ns_pathology:scan"
+        },
+        "_:n4" : {
+          "prov:generatedEntity" : "self_connector:pathologicalDiagnosisConnector",
+          "prov:usedEntity" : "remote_connector:sampleConnector"
+        },
+        "_:n10" : {
+          "prov:generatedEntity" : "self_connector:WSIDataConnector1",
+          "prov:usedEntity" : "remote_connector:sampleConnector"
+        },
+        "_:n7" : {
+          "prov:generatedEntity" : "self_connector:slidesCollectionConnector",
+          "prov:usedEntity" : "remote_connector:sampleConnector"
+        },
+        "_:n39" : {
+          "prov:generatedEntity" : "ns_pathology:annotatedWSI",
+          "prov:usedEntity" : "ns_pathology:scan"
+        }
+      },
+      "wasGeneratedBy" : {
+        "_:n8" : {
+          "prov:entity" : "self_connector:WSIDataConnector1",
+          "prov:activity" : "ns_pathology:dataGeneration"
+        },
+        "_:n38" : {
+          "prov:entity" : "ns_pathology:annotatedWSI",
+          "prov:activity" : "ns_pathology:examination"
+        },
+        "_:n5" : {
+          "prov:entity" : "self_connector:slidesCollectionConnector",
+          "prov:activity" : "ns_pathology:dataGeneration"
+        },
+        "_:n26" : {
+          "prov:entity" : "ns_pathology:slide",
+          "prov:activity" : "ns_pathology:slicing"
+        },
+        "_:n45" : {
+          "prov:entity" : "ns_pathology:stainedSlidesCollection",
+          "prov:activity" : "ns_pathology:slidesPackaging"
+        },
+        "_:n11" : {
+          "prov:entity" : "self_connector:WSIDataConnector2",
+          "prov:activity" : "ns_pathology:dataGeneration"
+        },
+        "_:n22" : {
+          "prov:entity" : "ns_pathology:block",
+          "prov:activity" : "ns_pathology:macroscopy"
+        },
+        "_:n33" : {
+          "prov:entity" : "ns_pathology:scan",
+          "prov:activity" : "ns_pathology:scanning"
+        },
+        "_:n30" : {
+          "prov:entity" : "ns_pathology:stainedSlide",
+          "prov:activity" : "ns_pathology:staining"
+        },
+        "_:n41" : {
+          "prov:entity" : "ns_pathology:pathologicalDiagnosis",
+          "prov:activity" : "ns_pathology:examination"
+        },
+        "_:n1" : {
+          "prov:entity" : "self_connector:pathologicalDiagnosisConnector",
+          "prov:activity" : "ns_pathology:dataGeneration"
+        }
+      }
+    }
+  }
+}

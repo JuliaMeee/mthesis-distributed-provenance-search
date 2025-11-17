@@ -1,0 +1,140 @@
+{
+  "prefix" : {
+    "xsd" : "http://www.w3.org/2001/XMLSchema#",
+    "ns_RDC" : "http://munich-prov-storage-provider.de:8000/api/v1/organizations/UniMunchen/documents/",
+    "prov" : "http://www.w3.org/ns/prov#"
+  },
+  "bundle" : {
+    "ns_RDC:06_evaluation_v2" : {
+      "prefix" : {
+        "ns_RDC2" : "http://warsaw-prov-storage.pl:8000/api/v1/organizations/UniMunchen/documents/",
+        "ns_RDC" : "http://munich-prov-storage-provider.de:8000/api/v1/organizations/UniMunchen/documents/",
+        "cpm" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+        "dct" : "http://purl.org/dc/terms/",
+        "meta" : "http://munich-prov-storage-provider.de:8000/api/v1/documents/meta/",
+        "ns_RDC3" : "http://munich-prov-storage-provider.de:8000/api/v1/organizations/UniMunchen/documents/",
+        "xsd" : "http://www.w3.org/2001/XMLSchema#",
+        "remote_connector" : "http://warsaw-prov-storage.pl:8000/api/v1/connectors/",
+        "prov" : "http://www.w3.org/ns/prov#",
+        "remote_connector2" : "http://munich-prov-storage-provider.de:8000/api/v1/connectors/"
+      },
+      "entity" : {
+        "ns_RDC:testDataset-b" : {
+          "cpm:externalId" : [ "datasetId2" ]
+        },
+        "ns_RDC:testRunResults" : { },
+        "remote_connector2:testDatasetConnector" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC3:04_preprocessing"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        },
+        "remote_connector:trainedModelConnector" : {
+          "cpm:senderServiceUri" : [ "#URI#" ],
+          "cpm:senderBundleId" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC2:05_training"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:backwardConnector"
+          } ]
+        },
+        "ns_RDC:trainedModel-b" : {
+          "cpm:externalId" : [ "modelId1" ]
+        }
+      },
+      "activity" : {
+        "ns_RDC:testRun" : { },
+        "ns_RDC:testingMain" : {
+          "cpm:metabundle" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "meta:meta1"
+          } ],
+          "dct:hasPart" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC:resultsCompare"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "ns_RDC:testRun"
+          } ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:mainActivity"
+          }, {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:dataHandling"
+          } ]
+        }
+      },
+      "agent" : {
+        "ns_RDC:researchDataCenter" : {
+          "cpm:contactIdPid" : [ "" ],
+          "prov:type" : [ {
+            "type" : "prov:QUALIFIED_NAME",
+            "$" : "cpm:senderAgent"
+          } ]
+        }
+      },
+      "used" : {
+        "_:n6" : {
+          "prov:activity" : "ns_RDC:testRun",
+          "prov:entity" : "ns_RDC:testDataset-b"
+        },
+        "_:n0" : {
+          "prov:activity" : "ns_RDC:testingMain",
+          "prov:entity" : "remote_connector2:testDatasetConnector"
+        },
+        "_:n10" : {
+          "prov:activity" : "ns_RDC:testRun",
+          "prov:entity" : "ns_RDC:trainedModel-b"
+        },
+        "_:n1" : {
+          "prov:activity" : "ns_RDC:testingMain",
+          "prov:entity" : "remote_connector:trainedModelConnector"
+        }
+      },
+      "wasAttributedTo" : {
+        "_:n2" : {
+          "prov:entity" : "remote_connector:trainedModelConnector",
+          "prov:agent" : "ns_RDC:researchDataCenter"
+        },
+        "_:n3" : {
+          "prov:entity" : "remote_connector2:testDatasetConnector",
+          "prov:agent" : "ns_RDC:researchDataCenter"
+        }
+      },
+      "specializationOf" : {
+        "_:n5" : {
+          "prov:specificEntity" : "ns_RDC:testDataset-b",
+          "prov:generalEntity" : "remote_connector2:testDatasetConnector"
+        },
+        "_:n4" : {
+          "prov:specificEntity" : "ns_RDC:trainedModel-b",
+          "prov:generalEntity" : "remote_connector:trainedModelConnector"
+        }
+      },
+      "wasDerivedFrom" : {
+        "_:n8" : {
+          "prov:generatedEntity" : "ns_RDC:testRunResults",
+          "prov:usedEntity" : "ns_RDC:trainedModel-b"
+        },
+        "_:n9" : {
+          "prov:generatedEntity" : "ns_RDC:testRunResults",
+          "prov:usedEntity" : "ns_RDC:testDataset-b"
+        }
+      },
+      "wasGeneratedBy" : {
+        "_:n7" : {
+          "prov:entity" : "ns_RDC:testRunResults",
+          "prov:activity" : "ns_RDC:testRun"
+        }
+      }
+    }
+  }
+}

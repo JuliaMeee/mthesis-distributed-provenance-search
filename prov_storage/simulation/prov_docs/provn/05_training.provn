@@ -1,0 +1,44 @@
+document
+  prefix ns_RDC <http://warsaw-prov-storage.pl:8000/api/v1/organizations/UniWarsaw/documents>
+
+  bundle ns_RDC:05_training
+    prefix ns_RDC2 <http://munich-prov-storage-provider.de:8000/api/v1/organizations/CVUT/documents/>
+    prefix ns_RDC <http://warsaw-prov-storage.pl:8000/api/v1/organizations/UniWarsaw/documents>
+    prefix cpm <https://www.commonprovenancemodel.org/cpm-namespace-v1-0/>
+    prefix dct <http://purl.org/dc/terms/>
+    prefix meta <http://warsaw-prov-storage.pl:8000/api/v1/documents/meta/>
+    prefix self_connector <http://warsaw-prov-storage.pl:8000/api/v1/connectors/>
+    prefix remote_connector <http://munich-prov-storage-provider.de:8000/api/v1/connectors/>
+
+    entity(remote_connector:trainDatasetConnector, [prov:type='cpm:backwardConnector', cpm:senderBundleId='ns_RDC2:04_preprocessing', cpm:senderServiceUri="#URI#"])
+    agent(ns_RDC:researchDataCenter, [prov:type='cpm:senderAgent', cpm:contactIdPid=""])
+    activity(ns_RDC:trainingMain, -, -, [cpm:metabundle='meta:meta1', dct:hasPart='ns_RDC:training', prov:type='cpm:dataHandling', dct:hasPart='ns_RDC:validation', prov:type='cpm:mainActivity'])
+    entity(self_connector:trainedModelConnector, [prov:type='cpm:forwardConnector', cpm:receiverServiceUri="#URI#"])
+    agent(ns_RDC:researchDataCenter, [prov:type='cpm:receiverAgent', cpm:contactIdPid=""])
+    wasAttributedTo(self_connector:trainDatasetConnector, ns_RDC:researchDataCenter)
+    wasAttributedTo(self_connector:trainedModelConnector, ns_RDC:researchDataCenter)
+    used(ns_RDC:trainingMain, self_connector:trainDatasetConnector, -)
+    wasGeneratedBy(self_connector:trainedModelConnector, ns_RDC:trainingMain, -)
+    wasDerivedFrom(self_connector:trainedModelConnector, self_connector:trainDatasetConnector, -, -, -)
+    entity(ns_RDC:trainDataset-b)
+    entity(ns_RDC:validationDataset-b)
+    entity(ns_RDC:summaries)
+    entity(ns_RDC:untrainedModel)
+    entity(ns_RDC:trainedModel)
+    activity(ns_RDC:training, -, -)
+    activity(ns_RDC:validation, -, -)
+    specializationOf(ns_RDC:trainDataset-b, self_connector:trainDatasetConnector)
+    specializationOf(ns_RDC:validationDataset-b, self_connector:trainDatasetConnector)
+    specializationOf(ns_RDC:trainedModel, self_connector:trainedModelConnector)
+    wasDerivedFrom(ns_RDC:trainedModel, ns_RDC:untrainedModel, -, -, -)
+    wasDerivedFrom(ns_RDC:trainedModel, ns_RDC:trainDataset-b, -, -, -)
+    used(ns_RDC:training, ns_RDC:trainDataset-b, -)
+    used(ns_RDC:training, ns_RDC:untrainedModel, -)
+    wasGeneratedBy(ns_RDC:trainedModel, ns_RDC:training, -)
+    used(ns_RDC:validation, ns_RDC:validationDataset-b, -)
+    used(ns_RDC:validation, ns_RDC:trainedModel, -)
+    wasGeneratedBy(ns_RDC:summaries, ns_RDC:validation, -)
+    wasDerivedFrom(ns_RDC:summaries, ns_RDC:trainedModel, -, -, -)
+    wasDerivedFrom(ns_RDC:summaries, ns_RDC:validationDataset-b, -, -, -)
+  endBundle
+endDocument

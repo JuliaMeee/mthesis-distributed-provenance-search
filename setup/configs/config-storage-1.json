@@ -1,0 +1,6 @@
+{
+  "id": "Provenance_Storage_1",
+  "fqdn": "prov-storage-1:8000",
+  "trustedPartyFqdn": "trusted-party:8020",
+  "disableTrustedParty": false
+}
