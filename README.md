@@ -2,12 +2,14 @@
 
 <h2>Project structure:</h2>
 
-`/bundle-search`: implementation of <b>bundle-searcher</b> service that should represent a provenance controller and can answer search queries about individual bundles in storage of this provenance controller.  
+`/bundle-search`: implementation of <b>bundle-searcher</b>.   
 `/distributed-provenance-search`: implementation of <b>prov-traverser</b>.   
 `/prov_storage`: implementation of provenance storage and trusted party from https://gitlab.fi.muni.cz/xmojzis1/provenance-system-tests.  
 `/setup`: has sripts and data for demo setup.  
 
 <h2>Demo setup:</h2>
+
+Download the repo files or clone the repo.
 
 Build the docker images from working directory `/prov_storage/distributed-provenance-system/` with  
 ```sh
@@ -40,17 +42,28 @@ Run the following command from directory `./setup` to register organizations and
 
 <h2>Services</h2>
 
-With all the containers running, you can check the OpenAPI specification for <b>prov-traverser</b> service that does search of distributed provenance at:  
-`http://localhost:8090/swagger-ui/index.html#`.  
-The <b>prov-traverser</b> service searches the provenance chain in the given direction looking for the specified target. It fetches results for individual bundles from their respective provenance controllers (bundle-searcher-x containers). It also has endpoints to list the available validity checks and priority search options. For info about supported target types and version preferences, check out  the OpenAPI specification for <b>bundle-searcher-x</b> services at:  
-`http://localhost:8081/swagger-ui/index.html#`.  
+<h3>prov-traverser</h3> 
+
+- Service that traverses the provenance chain in the given direction. It fetches results of a given query for individual bundles in the chain from their respective provenance controllers (bundle-searcher containers).
+- OpenAPI specification\*: 
+`http://localhost:8090/swagger-ui/index.html#`
+
+<h3>bundle-searcher</h3>  
+
+- Service that represents a provenance controller and can answer queries about individual bundles in storage of this provenance controller.  
+- OpenAPI specification\*: `http://localhost:8081/swagger-ui/index.html#` 
+
+Checkout the <b>prov-traverser</b> API to list available <i>validity checks</i> and <i>search priorities</i>.  
+Checkout the <b>bundle-searcher</b> API to list  available <i>version preferences</i> and <i>target types</i>.  
+
 Both OpenAPI specifications contains executable examples to test the demo.
 
-You can also run requests to the prov-traverser and bundle-searcher-x containers from the <b>debug-shell</b> container running in docker.
+You can also run requests to the prov-traverser and bundle-searcher containers from the <b>debug-shell</b> container running in docker.
 
- It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers. If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.
+<i>-- Note that the service containers must be running for the OpenAPI specification to load.  
+-- It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers. If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.</i>
 
- <h2>Storage compatibility issues and java serialization issues</h2>
+ <h2>Technical issues with storage service and java serialization</h2>
 This is a list of issues encountered when working with the storage service and java prov toolbox library.
 
 - Issue: In meta document, id of entity representing a version did not match represented bundle id.  
