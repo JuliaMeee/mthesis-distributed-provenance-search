@@ -11,9 +11,7 @@ COPY ./src ./src
 RUN chmod +x ./gradlew
 RUN ./gradlew :publishToMavenLocal
 
-RUN mkdir /libs && \
-    cp /root/.m2/repository/cz/muni/fi/cpm/cpm-core/1.0.0/cpm-core-1.0.0.jar /libs/ && \
-    cp /root/.m2/repository/cz/muni/fi/cpm/cpm-template/1.0.0/cpm-template-1.0.0.jar /libs/
+RUN mkdir /libs
 
 FROM eclipse-temurin:23-jdk
 
