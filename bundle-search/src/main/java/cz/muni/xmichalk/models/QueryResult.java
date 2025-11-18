@@ -3,15 +3,15 @@ package cz.muni.xmichalk.models;
 import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.xmichalk.documentLoader.storageDTO.Token;
 
-public class SearchResult {
+public class QueryResult {
     public Token token;
-    public JsonNode found;
+    public JsonNode result;
 
-    public SearchResult() {
+    public QueryResult() {
     }
 
-    public SearchResult(Token token, JsonNode found) {
+    public QueryResult(Token token, JsonNode result) {
         this.token = token;
-        this.found = found;
+        this.result = result;
     }
 }

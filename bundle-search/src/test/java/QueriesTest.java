@@ -6,11 +6,11 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.bundleSearch.BundleSearcherProvider;
-import cz.muni.xmichalk.bundleSearch.ETargetType;
-import cz.muni.xmichalk.bundleSearch.ISearchBundle;
 import cz.muni.xmichalk.models.ConnectorData;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.queries.EQueryType;
+import cz.muni.xmichalk.queries.IQueryEvaluator;
+import cz.muni.xmichalk.queries.QueryEvaluatorsProvider;
 import cz.muni.xmichalk.targetSpecification.ICondition;
 import cz.muni.xmichalk.targetSpecification.bundleConditions.CountCondition;
 import cz.muni.xmichalk.targetSpecification.bundleConditions.EComparisonResult;
@@ -33,24 +33,24 @@ import java.util.Map;
 
 import static cz.muni.xmichalk.util.ProvDocumentUtils.deserialize;
 
-public class SearchBundleTest {
+public class QueriesTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
-    Map<ETargetType, ISearchBundle<?>> bundleSearchers = BundleSearcherProvider.getBundleSearchers();
+    Map<EQueryType, IQueryEvaluator<?>> queryEvaluators = QueryEvaluatorsProvider.getQueryEvaluators();
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void findNodeIdsById() throws IOException {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.NODE_IDS);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODE_IDS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "ProcessedSampleConSpec", "blank");
         QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "NiceMarineStation", "blank");
         ICondition<INode> nodeSpecification = new HasId(nodeIdToFind.getUri());
-        JsonNode targetSpecification = objectMapper.valueToTree(nodeSpecification);
+        JsonNode querySpecification = objectMapper.valueToTree(nodeSpecification);
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -66,13 +66,13 @@ public class SearchBundleTest {
     public void findNodesById() throws IOException {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.NODES);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODES);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "ProcessedSampleConSpec", "blank");
         QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "NiceMarineStation", "blank");
         ICondition<INode> nodeSpecification = new HasId(nodeIdToFind.getUri());
-        JsonNode targetSpecification = objectMapper.valueToTree(nodeSpecification);
+        JsonNode querySpecification = objectMapper.valueToTree(nodeSpecification);
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
 
         assert result != null;
         assert result instanceof JsonNode;
@@ -89,7 +89,7 @@ public class SearchBundleTest {
     public void findNodeIdsByType() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.NODE_IDS);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODE_IDS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         String attributeName = NameSpaceConstants.PROV_URI + "type";
         String attributeValue = NameSpaceConstants.SCHEMA_URI + "Person";
@@ -98,9 +98,9 @@ public class SearchBundleTest {
                 attributeValue
         );
 
-        JsonNode targetSpecification = objectMapper.valueToTree(nodeSpecification);
+        JsonNode querySpecification = objectMapper.valueToTree(nodeSpecification);
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -120,14 +120,14 @@ public class SearchBundleTest {
     public void findNodesByHasAttr() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.NODES);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODES);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         String attributeName = NameSpaceConstants.SCHEMA_URI + "url";
         ICondition<INode> nodeSpecification = new HasAttr(attributeName);
 
-        JsonNode targetSpecification = objectMapper.valueToTree(nodeSpecification);
+        JsonNode querySpecification = objectMapper.valueToTree(nodeSpecification);
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
 
         assert result != null;
         assert result instanceof JsonNode;
@@ -146,7 +146,7 @@ public class SearchBundleTest {
     public void testFits() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.TEST_FITS);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.TEST_FITS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         ICondition<INode> samplingNodeSpecification = new HasId(".*Sampling");
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
@@ -156,9 +156,9 @@ public class SearchBundleTest {
                 EComparisonResult.EQUALS,
                 1
         );
-        JsonNode targetSpecification = objectMapper.valueToTree(bundleSpecification);
+        JsonNode querySpecification = objectMapper.valueToTree(bundleSpecification);
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
         assert result != null;
         assert result instanceof Boolean;
         Boolean fits = (Boolean) result;
@@ -169,7 +169,7 @@ public class SearchBundleTest {
     public void testDoesNotFit() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.TEST_FITS);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.TEST_FITS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         ICondition<INode> backwardConnectorSpecification = new HasAttrQualifiedNameValue(
                 NameSpaceConstants.PROV_URI + "type",
@@ -183,9 +183,9 @@ public class SearchBundleTest {
                 1
         );
 
-        JsonNode targetSpecification = objectMapper.valueToTree(bundleSpecification);
+        JsonNode querySpecification = objectMapper.valueToTree(bundleSpecification);
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
         assert result != null;
         assert result instanceof Boolean;
         Boolean fits = (Boolean) result;
@@ -196,11 +196,11 @@ public class SearchBundleTest {
     public void findBackwardConnectors() throws IOException {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.CONNECTORS);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.CONNECTORS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "ProcessedSampleConSpec", "blank");
-        JsonNode targetSpecification = objectMapper.valueToTree("backward");
+        JsonNode querySpecification = objectMapper.valueToTree("backward");
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
 
         assert result != null;
         assert result instanceof List;
@@ -215,11 +215,11 @@ public class SearchBundleTest {
     public void findForwardConnectors() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        ISearchBundle<?> bundleSearcher = bundleSearchers.get(ETargetType.CONNECTORS);
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.CONNECTORS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        JsonNode targetSpecification = objectMapper.valueToTree("forward");
+        JsonNode querySpecification = objectMapper.valueToTree("forward");
 
-        Object result = bundleSearcher.apply(cpmDoc, startNodeId, targetSpecification);
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
 
         assert result != null;
         assert result instanceof List;

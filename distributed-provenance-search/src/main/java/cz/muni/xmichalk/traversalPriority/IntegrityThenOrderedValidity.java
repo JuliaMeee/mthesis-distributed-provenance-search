@@ -1,16 +1,16 @@
-package cz.muni.xmichalk.searchPriority;
+package cz.muni.xmichalk.traversalPriority;
 
-import cz.muni.xmichalk.models.ItemToSearch;
+import cz.muni.xmichalk.models.ItemToTraverse;
 import cz.muni.xmichalk.validity.EValidityCheck;
 
 import java.util.Comparator;
 
-public class IntegrityThenOrderedValidity implements Comparator<ItemToSearch> {
+public class IntegrityThenOrderedValidity implements Comparator<ItemToTraverse> {
     public IntegrityThenOrderedValidity() {
     }
 
     @Override
-    public int compare(ItemToSearch first, ItemToSearch second) {
+    public int compare(ItemToTraverse first, ItemToTraverse second) {
         if (first.pathIntegrity && !second.pathIntegrity) {
             return -1;
         }

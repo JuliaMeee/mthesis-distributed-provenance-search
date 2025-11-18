@@ -1,17 +1,17 @@
-package cz.muni.xmichalk.bundleSearch.searchImplementations;
+package cz.muni.xmichalk.queries.queryEvaluators;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.xmichalk.bundleSearch.ISearchBundle;
+import cz.muni.xmichalk.queries.IQueryEvaluator;
 import cz.muni.xmichalk.targetSpecification.ICondition;
 
-public class TestFits implements ISearchBundle<Boolean> {
+public class TestFits implements IQueryEvaluator<Boolean> {
     @Override
-    public Boolean apply(CpmDocument document, org.openprovenance.prov.model.QualifiedName startNodeId, JsonNode targetSpecification) {
+    public Boolean apply(CpmDocument document, org.openprovenance.prov.model.QualifiedName startNodeId, JsonNode querySpecification) {
         ObjectMapper mapper = new ObjectMapper();
-        ICondition<CpmDocument> requirement = mapper.convertValue(targetSpecification,
+        ICondition<CpmDocument> requirement = mapper.convertValue(querySpecification,
                 new TypeReference<ICondition<CpmDocument>>() {
                 });
         return requirement.test(document);

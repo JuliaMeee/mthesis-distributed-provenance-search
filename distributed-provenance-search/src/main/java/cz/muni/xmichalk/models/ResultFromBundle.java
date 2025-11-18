@@ -6,7 +6,7 @@ import org.openprovenance.prov.model.QualifiedName;
 
 import java.util.Map;
 
-public class FoundResult {
+public class ResultFromBundle {
     public QualifiedName bundleId;
     public JsonNode result;
     public boolean integrity;
@@ -15,16 +15,16 @@ public class FoundResult {
     public Map<EValidityCheck, Boolean> pathValidityChecks;
 
 
-    public FoundResult() {
+    public ResultFromBundle() {
 
     }
 
-    public FoundResult(QualifiedName bundleId,
-                       JsonNode result,
-                       boolean integrity,
-                       Map<EValidityCheck, Boolean> validityChecks,
-                       boolean pathIntegrity,
-                       Map<EValidityCheck, Boolean> pathValidityChecks) {
+    public ResultFromBundle(QualifiedName bundleId,
+                            JsonNode result,
+                            boolean integrity,
+                            Map<EValidityCheck, Boolean> validityChecks,
+                            boolean pathIntegrity,
+                            Map<EValidityCheck, Boolean> pathValidityChecks) {
         this.bundleId = bundleId;
         this.result = result;
         this.integrity = integrity;

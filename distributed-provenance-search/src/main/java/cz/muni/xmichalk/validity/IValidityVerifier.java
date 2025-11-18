@@ -1,8 +1,8 @@
 package cz.muni.xmichalk.validity;
 
-import cz.muni.xmichalk.dto.BundleSearchResultDTO;
-import cz.muni.xmichalk.models.ItemToSearch;
+import cz.muni.xmichalk.dto.BundleQueryResultDTO;
+import cz.muni.xmichalk.models.ItemToTraverse;
 
 public interface IValidityVerifier {
-    boolean verify(ItemToSearch itemToSearch, BundleSearchResultDTO bundleSearchResult);
+    boolean verify(ItemToTraverse itemToTraverse, BundleQueryResultDTO bundleSearchResult);
 }

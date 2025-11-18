@@ -1,12 +1,12 @@
-package cz.muni.xmichalk.bundleSearch.searchImplementations;
+package cz.muni.xmichalk.queries.queryEvaluators;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.bundleSearch.ISearchBundle;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.queries.IQueryEvaluator;
 import cz.muni.xmichalk.targetSpecification.ICondition;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class FindNodes<T> implements ISearchBundle<T> {
+public class FindNodes<T> implements IQueryEvaluator<T> {
     private final Function<List<INode>, T> resultTransformation;
 
     public FindNodes(Function<List<INode>, T> resultTransformation) {
@@ -27,8 +27,8 @@ public class FindNodes<T> implements ISearchBundle<T> {
     }
 
     @Override
-    public T apply(CpmDocument document, org.openprovenance.prov.model.QualifiedName startNodeId, JsonNode targetSpecification) {
-        Predicate<INode> predicate = translateToPredicate(targetSpecification);
+    public T apply(CpmDocument document, org.openprovenance.prov.model.QualifiedName startNodeId, JsonNode querySpecification) {
+        Predicate<INode> predicate = translateToPredicate(querySpecification);
         List<INode> results = BundleNodesTraverser.traverseAndFind(document, startNodeId, predicate);
         return resultTransformation.apply(results);
     }

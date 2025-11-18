@@ -2,14 +2,14 @@ package cz.muni.xmichalk.traverser;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.dto.BundleSearchResultDTO;
+import cz.muni.xmichalk.dto.BundleQueryResultDTO;
 import cz.muni.xmichalk.dto.ConnectorDTO;
 import cz.muni.xmichalk.integrity.StorageDocumentIntegrityVerifier;
 import cz.muni.xmichalk.models.*;
 import cz.muni.xmichalk.provServiceAPI.ProvServiceAPI;
 import cz.muni.xmichalk.provServiceTable.IProvServiceTable;
-import cz.muni.xmichalk.searchPriority.ESearchPriority;
-import cz.muni.xmichalk.searchPriority.UnsupportedSearchPriorityException;
+import cz.muni.xmichalk.traversalPriority.ETraversalPriority;
+import cz.muni.xmichalk.traversalPriority.UnsupportedTraversalPriorityException;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import cz.muni.xmichalk.validity.IValidityVerifier;
 import cz.muni.xmichalk.validity.UnsupportedValidityCheckException;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class Traverser {
     private final IProvServiceTable provServiceTable;
     private final Map<EValidityCheck, IValidityVerifier> validityVerifiers;
-    private final Map<ESearchPriority, Comparator<ItemToSearch>> searchPriorityComparators;
+    private final Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators;
     private static final Logger log = LoggerFactory.getLogger(Traverser.class);
     private final int concurrencyDegree;
 
@@ -33,11 +33,11 @@ public class Traverser {
             IProvServiceTable traverserTable,
             int concurrencyDegree,
             Map<EValidityCheck, IValidityVerifier> validityCheckers,
-            Map<ESearchPriority, Comparator<ItemToSearch>> searchPriorityComparators) {
+            Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
         this.provServiceTable = traverserTable;
         this.concurrencyDegree = concurrencyDegree;
         this.validityVerifiers = validityCheckers;
-        this.searchPriorityComparators = searchPriorityComparators;
+        this.traversalPriorityComparators = traversalPriorityComparators;
         log.info("Instantiated traverser with concurrency degree: {}", concurrencyDegree);
     }
 
@@ -45,39 +45,32 @@ public class Traverser {
         return validityVerifiers;
     }
 
-    public Map<ESearchPriority, Comparator<ItemToSearch>> getSearchPriorityComparators() {
-        return searchPriorityComparators;
+    public Map<ETraversalPriority, Comparator<ItemToTraverse>> getTraversalPriorityComparators() {
+        return traversalPriorityComparators;
     }
 
-    /***
-     * Traverses the chain in given direction, searching each bundle for given target. Returns all found results matching the target.
-     * @param startBundleId - identifier of the bundle
-     * @param startNodeId - identifier of the starting node in the bundle
-     * @param searchParams - direction of search and characterization of the target we are searching for
-     * @return - list of found results matching the target
-     */
-    public SearchResults searchChain(QualifiedName startBundleId, QualifiedName startNodeId, SearchParams searchParams) {
-        Comparator<ItemToSearch> searchPriorityComparator = searchPriorityComparators.get(searchParams.searchPriority);
-        if (searchPriorityComparator == null) {
-            String errorMessage = "No search priority comparator registered for: " + searchParams.searchPriority;
+    public TraversalResults traverseChain(QualifiedName startBundleId, QualifiedName startNodeId, TraversalParams traversalParams) {
+        Comparator<ItemToTraverse> traversalPriorityComparator = traversalPriorityComparators.get(traversalParams.traversalPriority);
+        if (traversalPriorityComparator == null) {
+            String errorMessage = "No traversal priority comparator registered for: " + traversalParams.traversalPriority;
             log.error(errorMessage);
-            throw new UnsupportedSearchPriorityException(errorMessage);
+            throw new UnsupportedTraversalPriorityException(errorMessage);
         }
 
-        SearchState searchState = new SearchState(
+        TraversalState traversalState = new TraversalState(
                 new ConcurrentHashMap<>(),
                 new ConcurrentHashMap<>(),
-                new PriorityBlockingQueue<>(10, searchPriorityComparator),
+                new PriorityBlockingQueue<>(10, traversalPriorityComparator),
                 new ConcurrentLinkedQueue<>(),
                 new ConcurrentLinkedQueue<>()
         );
 
-        searchState.toSearchQueue.add(new ItemToSearch(
+        traversalState.toTraverseQueue.add(new ItemToTraverse(
                 startBundleId,
                 startNodeId,
                 provServiceTable.getServiceUri(startBundleId.getUri()),
                 true,
-                new LinkedHashMap<>(searchParams.validityChecks.stream().collect(Collectors.toMap(
+                new LinkedHashMap<>(traversalParams.validityChecks.stream().collect(Collectors.toMap(
                         check -> check, check -> true))
                 )));
 
@@ -87,9 +80,9 @@ public class Traverser {
         AtomicInteger runningTasks = new AtomicInteger(0);
 
         for (int i = 0; i < concurrencyDegree; i++) {
-            ItemToSearch itemToSearch = pollNextToSearch(searchState, searchParams.versionPreference);
-            if (itemToSearch != null) {
-                submitSearchTask(itemToSearch, searchState, searchParams,
+            ItemToTraverse itemToTraverse = pollNextToTraverse(traversalState, traversalParams.versionPreference);
+            if (itemToTraverse != null) {
+                submitTraverseTask(itemToTraverse, traversalState, traversalParams,
                         completionService, runningTasks);
             }
         }
@@ -99,10 +92,10 @@ public class Traverser {
                 completionService.take(); // wait for a task to finish
                 runningTasks.decrementAndGet();
 
-                ItemToSearch next;
+                ItemToTraverse next;
                 while (runningTasks.get() < concurrencyDegree
-                        && (next = pollNextToSearch(searchState, searchParams.versionPreference)) != null) {
-                    submitSearchTask(next, searchState, searchParams,
+                        && (next = pollNextToTraverse(traversalState, traversalParams.versionPreference)) != null) {
+                    submitTraverseTask(next, traversalState, traversalParams,
                             completionService, runningTasks);
                 }
             }
@@ -112,43 +105,43 @@ public class Traverser {
             executor.shutdown();
         }
 
-        return new SearchResults(searchState.results.stream().toList(), searchState.errors);
+        return new TraversalResults(traversalState.results.stream().toList(), traversalState.errors);
     }
 
-    private ItemToSearch pollNextToSearch(SearchState searchState, String versionPreference) {
-        log.info("Poll next item to search");
-        ItemToSearch itemToSearch;
-        while ((itemToSearch = searchState.toSearchQueue.poll()) != null) {
-            final ItemToSearch finalItemToSearch = itemToSearch;
-            if (searchState.processing.values().stream()
-                    .anyMatch(item -> searchState.toSearchQueue.comparator().compare(item, finalItemToSearch) < 0)) {
-                searchState.toSearchQueue.add(finalItemToSearch);
-                return null; // wait until all bundles with higher priority are processed, because they might add higher priority items to search
+    private ItemToTraverse pollNextToTraverse(TraversalState traversalState, String versionPreference) {
+        log.info("Poll next item to traverse.");
+        ItemToTraverse itemToTraverse;
+        while ((itemToTraverse = traversalState.toTraverseQueue.poll()) != null) {
+            final ItemToTraverse finalItemToTraverse = itemToTraverse;
+            if (traversalState.processing.values().stream()
+                    .anyMatch(item -> traversalState.toTraverseQueue.comparator().compare(item, finalItemToTraverse) < 0)) {
+                traversalState.toTraverseQueue.add(finalItemToTraverse);
+                return null; // wait until all bundles with higher priority are processed, because they might add more higher priority items to traverse
             }
 
             try {
-                QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToSearch.provServiceUri, itemToSearch.bundleId, versionPreference);
+                QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId, versionPreference);
                 if (preferredVersion != null) {
-                    log.info("Fetch preferred version for bundle: {} returned {}", itemToSearch.bundleId.getUri(), preferredVersion.getUri());
-                    itemToSearch.bundleId = preferredVersion;
+                    log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(), preferredVersion.getUri());
+                    itemToTraverse.bundleId = preferredVersion;
                 } else {
-                    log.warn("Fetch preferred version for bundle: {} returned null", itemToSearch.bundleId.getUri());
+                    log.warn("Fetch preferred version for bundle: {} returned null", itemToTraverse.bundleId.getUri());
                 }
             } catch (Exception e) {
-                log.error("Error while fetching preferred version for bundle {}: {}", itemToSearch.bundleId.getUri(), e);
+                log.error("Error while fetching preferred version for bundle {}: {}", itemToTraverse.bundleId.getUri(), e);
             }
 
-            if (searchState.processing.putIfAbsent(itemToSearch.bundleId, itemToSearch) == null) {
-                if (!searchState.visited.containsKey(itemToSearch.bundleId)) {
-                    log.info("Next to search bundle id: {}, connector id: {}, pathIntegrity: {}, pathValidityChecks: {}",
-                            itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri(), itemToSearch.pathIntegrity, itemToSearch.pathValidityChecks);
-                    return itemToSearch;
+            if (traversalState.processing.putIfAbsent(itemToTraverse.bundleId, itemToTraverse) == null) {
+                if (!traversalState.visited.containsKey(itemToTraverse.bundleId)) {
+                    log.info("Next to traverse bundle id: {}, connector id: {}, pathIntegrity: {}, pathValidityChecks: {}",
+                            itemToTraverse.bundleId.getUri(), itemToTraverse.connectorId.getUri(), itemToTraverse.pathIntegrity, itemToTraverse.pathValidityChecks);
+                    return itemToTraverse;
                 } else {
-                    searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
-                    log.info("Already searched bundle: {}", itemToSearch.bundleId.getUri());
+                    traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
+                    log.info("Already traversed bundle: {}", itemToTraverse.bundleId.getUri());
                 }
             } else {
-                log.info("Already searching bundle: {}", itemToSearch.bundleId.getUri());
+                log.info("Already traversing bundle: {}", itemToTraverse.bundleId.getUri());
             }
 
 
@@ -156,78 +149,78 @@ public class Traverser {
         return null;
     }
 
-    private void submitSearchTask(ItemToSearch itemToSearch,
-                                  SearchState searchState,
-                                  SearchParams searchParams,
-                                  CompletionService<Void> completionService,
-                                  AtomicInteger runningTasks) {
+    private void submitTraverseTask(ItemToTraverse itemToTraverse,
+                                    TraversalState traversalState,
+                                    TraversalParams traversalParams,
+                                    CompletionService<Void> completionService,
+                                    AtomicInteger runningTasks) {
         runningTasks.incrementAndGet();
         completionService.submit(() -> {
-            log.info("Started processing bundle {} from connector {}", itemToSearch.bundleId.getUri(), itemToSearch.connectorId.getUri());
+            log.info("Started processing bundle {} from connector {}", itemToTraverse.bundleId.getUri(), itemToTraverse.connectorId.getUri());
 
             try {
-                BundleSearchResultDTO findTargetResult = ProvServiceAPI.fetchSearchBundleResult(
-                        itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId,
-                        searchParams.targetType, searchParams.targetSpecification);
+                BundleQueryResultDTO queryResult = ProvServiceAPI.fetchBundleQueryResult(
+                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
+                        traversalParams.queryType, traversalParams.querySpecification);
 
-                BundleSearchResultDTO findConnectorsResult = ProvServiceAPI.fetchSearchBundleResult(
-                        itemToSearch.provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId, "connectors",
-                        new ObjectMapper().valueToTree(searchParams.searchBackwards ? "backward" : "forward"));
+                BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleQueryResult(
+                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, "connectors",
+                        new ObjectMapper().valueToTree(traversalParams.traverseBackwards ? "backward" : "forward"));
 
-                boolean hasIntegrity = hasIntegrity(itemToSearch.bundleId, findTargetResult, findConnectorsResult);
+                boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
 
                 LinkedHashMap<EValidityCheck, Boolean> validityChecks = evaluateValidityChecks(
-                        searchParams.validityChecks, itemToSearch, findTargetResult);
+                        traversalParams.validityChecks, itemToTraverse, queryResult);
 
-                FoundResult newResult = convertToNewResult(itemToSearch, findTargetResult, hasIntegrity, validityChecks);
+                ResultFromBundle newResult = convertToNewResult(itemToTraverse, queryResult, hasIntegrity, validityChecks);
                 if (newResult != null) {
-                    searchState.results.add(newResult);
-                    log.info("In bundle {} found target(s): {}", itemToSearch.bundleId.getUri(), newResult.result.toString());
+                    traversalState.results.add(newResult);
+                    log.info("In bundle {} found query result: {}", itemToTraverse.bundleId.getUri(), newResult.result.toString());
                 }
 
-                List<ItemToSearch> newItemsToSearch = convertToNewItemsToSearch(itemToSearch, findConnectorsResult, hasIntegrity, validityChecks);
-                searchState.toSearchQueue.addAll(newItemsToSearch);
-                log.info("In bundle {} found connections to: {}", itemToSearch.bundleId.getUri(),
-                        newItemsToSearch.stream().map(item -> item.bundleId.getUri())
+                List<ItemToTraverse> newItemsToTraverse = convertToNewItemsToTraverse(itemToTraverse, findConnectorsResult, hasIntegrity, validityChecks);
+                traversalState.toTraverseQueue.addAll(newItemsToTraverse);
+                log.info("In bundle {} found connections to: {}", itemToTraverse.bundleId.getUri(),
+                        newItemsToTraverse.stream().map(item -> item.bundleId.getUri())
                                 .collect(Collectors.joining(", ")));
 
 
             } catch (Exception e) {
-                String errorMessage = "Error while processing bundle: " + itemToSearch.bundleId.getUri() + ", error: " + e.getMessage();
+                String errorMessage = "Error while processing bundle: " + itemToTraverse.bundleId.getUri() + ", error: " + e.getMessage();
                 log.error(errorMessage);
-                searchState.errors.add(errorMessage);
+                traversalState.errors.add(errorMessage);
             } finally {
-                searchState.visited.put(itemToSearch.bundleId, new VisitedItem(itemToSearch.bundleId));
-                searchState.processing.remove(itemToSearch.bundleId, itemToSearch);
+                traversalState.visited.put(itemToTraverse.bundleId, new VisitedItem(itemToTraverse.bundleId));
+                traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
 
             }
 
-            log.info("Finished processing bundle: {}", itemToSearch.bundleId.getUri());
+            log.info("Finished processing bundle: {}", itemToTraverse.bundleId.getUri());
 
             return null;
         });
     }
 
-    private boolean hasIntegrity(QualifiedName bundleId, BundleSearchResultDTO targetSearchResult, BundleSearchResultDTO connectorsSearchResult) {
-        if (targetSearchResult == null && connectorsSearchResult == null) {
+    private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult, BundleQueryResultDTO findConnectorsResult) {
+        if (queryResult == null && findConnectorsResult == null) {
             return false;
         }
-        if (targetSearchResult == null) {
-            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, connectorsSearchResult.token);
+        if (queryResult == null) {
+            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, findConnectorsResult.token);
         }
-        if (connectorsSearchResult == null) {
-            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token);
+        if (findConnectorsResult == null) {
+            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, queryResult.token);
         }
-        return targetSearchResult.token.equals(connectorsSearchResult.token)
-                && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, targetSearchResult.token);
+        return queryResult.token.equals(findConnectorsResult.token)
+                && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, queryResult.token);
     }
 
-    private LinkedHashMap<EValidityCheck, Boolean> evaluateValidityChecks(List<EValidityCheck> validityChecks, ItemToSearch itemToSearched, BundleSearchResultDTO findTargetResult) {
+    private LinkedHashMap<EValidityCheck, Boolean> evaluateValidityChecks(List<EValidityCheck> validityChecks, ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult) {
         LinkedHashMap<EValidityCheck, Boolean> validityCheckValues = new LinkedHashMap<>();
         for (EValidityCheck validityCheck : validityChecks) {
             IValidityVerifier verifier = validityVerifiers.get(validityCheck);
             if (verifier != null) {
-                boolean result = verifier.verify(itemToSearched, findTargetResult);
+                boolean result = verifier.verify(itemTraversed, queryResult);
                 validityCheckValues.put(validityCheck, result);
             } else {
                 String errorMessage = "No validity checker registered for: " + validityCheck;
@@ -238,38 +231,38 @@ public class Traverser {
         return validityCheckValues;
     }
 
-    private FoundResult convertToNewResult(ItemToSearch itemSearched, BundleSearchResultDTO findTargetResult, boolean integrity, Map<EValidityCheck, Boolean> validityChecks) {
-        if (findTargetResult == null || findTargetResult.found == null || findTargetResult.found.isNull()) {
-            log.warn("Search bundle {} for target returned null", itemSearched.bundleId.getUri());
+    private ResultFromBundle convertToNewResult(ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult, boolean integrity, Map<EValidityCheck, Boolean> validityChecks) {
+        if (queryResult == null || queryResult.result == null || queryResult.result.isNull()) {
+            log.warn("Query result for bundle {} is null", itemTraversed.bundleId.getUri());
             return null;
         }
 
-        return new FoundResult(
-                itemSearched.bundleId,
-                findTargetResult.found,
+        return new ResultFromBundle(
+                itemTraversed.bundleId,
+                queryResult.result,
                 integrity,
                 validityChecks,
-                itemSearched.pathIntegrity,
-                itemSearched.pathValidityChecks);
+                itemTraversed.pathIntegrity,
+                itemTraversed.pathValidityChecks);
     }
 
-    private List<ItemToSearch> convertToNewItemsToSearch(ItemToSearch itemSearched, BundleSearchResultDTO findConnectorsResult, boolean integrity, LinkedHashMap<EValidityCheck, Boolean> validityChecks) {
-        if (findConnectorsResult == null || findConnectorsResult.found == null || findConnectorsResult.found.isNull()) {
-            log.warn("Search bundle {} for connectors returned null", itemSearched.bundleId.getUri());
+    private List<ItemToTraverse> convertToNewItemsToTraverse(ItemToTraverse itemTraversed, BundleQueryResultDTO findConnectorsResult, boolean integrity, LinkedHashMap<EValidityCheck, Boolean> validityChecks) {
+        if (findConnectorsResult == null || findConnectorsResult.result == null || findConnectorsResult.result.isNull()) {
+            log.warn("Find connectors in bundle {} returned null", itemTraversed.bundleId.getUri());
             return new ArrayList<>();
         }
 
         List<ConnectorDTO> connectors;
         try {
             connectors = new ObjectMapper().convertValue(
-                    findConnectorsResult.found, new TypeReference<List<ConnectorDTO>>() {
+                    findConnectorsResult.result, new TypeReference<List<ConnectorDTO>>() {
                     });
         } catch (Exception e) {
-            log.error("While converting connectors from bundle {} got error: {}", itemSearched.bundleId.getUri(), e);
+            log.error("While converting connectors from bundle {} got error: {}", itemTraversed.bundleId.getUri(), e);
             return new ArrayList<>();
         }
 
-        List<ItemToSearch> newItemsToSearch = new ArrayList<>();
+        List<ItemToTraverse> newItemsToTraverse = new ArrayList<>();
 
         for (ConnectorDTO connector : connectors) {
             if (connector == null || connector.referencedBundleId == null) continue;
@@ -279,18 +272,18 @@ public class Traverser {
                 provServiceUri = provServiceTable.getServiceUri(connector.referencedBundleId.toQN().getUri());
             }
 
-            newItemsToSearch.add(
-                    new ItemToSearch(
+            newItemsToTraverse.add(
+                    new ItemToTraverse(
                             connector.referencedBundleId.toQN(),
                             connector.referencedConnectorId.toQN(),
                             provServiceUri,
-                            itemSearched.pathIntegrity && integrity,
-                            combineValidityChecks(itemSearched.pathValidityChecks, validityChecks)
+                            itemTraversed.pathIntegrity && integrity,
+                            combineValidityChecks(itemTraversed.pathValidityChecks, validityChecks)
                     )
             );
         }
 
-        return newItemsToSearch;
+        return newItemsToTraverse;
     }
 
     private LinkedHashMap<EValidityCheck, Boolean> combineValidityChecks(LinkedHashMap<EValidityCheck, Boolean> first, LinkedHashMap<EValidityCheck, Boolean> second) {

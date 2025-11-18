@@ -1,9 +1,9 @@
-package cz.muni.xmichalk.bundleSearcherService;
+package cz.muni.xmichalk.queryService;
 
-import cz.muni.xmichalk.bundleSearch.UnsupportedTargetTypeException;
 import cz.muni.xmichalk.bundleVersionPicker.EVersionPreferrence;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.models.*;
+import cz.muni.xmichalk.queries.UnsupportedQueryTypeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -28,21 +28,21 @@ import java.util.stream.Stream;
 
 
 @RestController
-public class BundleSearchController {
+public class BundleQueryController {
 
-    private static final Logger log = LoggerFactory.getLogger(BundleSearchController.class);
-    private final BundleSearchService bundleSearchService;
+    private static final Logger log = LoggerFactory.getLogger(BundleQueryController.class);
+    private final BundleQueryService bundleQueryService;
     private final Map<EVersionPreferrence, IVersionPicker> versionPickers;
 
-    public BundleSearchController(BundleSearchService bundleSearchService, Map<EVersionPreferrence, IVersionPicker> versionPickers) {
-        this.bundleSearchService = bundleSearchService;
+    public BundleQueryController(BundleQueryService bundleQueryService, Map<EVersionPreferrence, IVersionPicker> versionPickers) {
+        this.bundleQueryService = bundleQueryService;
         this.versionPickers = versionPickers;
     }
 
-    @Operation(summary = "List available target types", description = "Returns all defined target types and their descriptions.")
-    @GetMapping(value = "/api/getTargetTypes", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TargetTypeInfo>> getAvailableSearchTypes() {
-        Stream<TargetTypeInfo> types = bundleSearchService.getBundleSearchers().keySet().stream().map(t -> new TargetTypeInfo(t, t.description));
+    @Operation(summary = "List available query types", description = "Returns all defined query types and their descriptions.")
+    @GetMapping(value = "/api/getQueryTypes", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<QueryTypeInfo>> getAvailableQueryTypes() {
+        Stream<QueryTypeInfo> types = bundleQueryService.getQueryEvaluators().keySet().stream().map(t -> new QueryTypeInfo(t, t.description));
 
         return ResponseEntity.ok(types.collect(Collectors.toList()));
     }
@@ -104,13 +104,13 @@ public class BundleSearchController {
         }
     }
 
-    @Operation(summary = "Search bundle looking for given target", description = "Search bundle for given target starting from the specified node.")
-    @PostMapping(value = "/api/searchBundle", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Answer a given query about a given bundle", description = "Traverse the bundle from the specified node to answer the query. Can also use the metadata of the bundle to answer the query.")
+    @PostMapping(value = "/api/bundleQuery", produces = MediaType.APPLICATION_JSON_VALUE)
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Search Params",
+            description = "Query Params",
             required = true,
             content = @Content(
-                    schema = @Schema(implementation = SearchParams.class),
+                    schema = @Schema(implementation = QueryParams.class),
                     examples = {
                             @ExampleObject(
                                     name = "Find all persons in the bundle",
@@ -124,8 +124,8 @@ public class BundleSearchController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "targetType": "NODES_BY_SPECIFICATION",
-                                              "targetSpecification": {
+                                              "queryType": "NODES",
+                                              "querySpecification": {
                                                 "type" : "HasAttrQualifiedNameValue",
                                                 "attributeNameUri" : "http://www.w3.org/ns/prov#type",
                                                 "uriRegex" : "https://schema.org/Person"
@@ -145,8 +145,8 @@ public class BundleSearchController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "targetType": "CONNECTORS",
-                                              "targetSpecification": "forward"
+                                              "queryType": "CONNECTORS",
+                                              "querySpecification": "forward"
                                             }
                                             """
                             ),
@@ -162,8 +162,8 @@ public class BundleSearchController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "targetType": "TEST_FITS",
-                                              "targetSpecification": {
+                                              "queryType": "TEST_FITS",
+                                              "querySpecification": {
                                                   "type" : "CountCondition",
                                                   "findableInDocument" : {
                                                     "type" : "FindNodes",
@@ -182,10 +182,10 @@ public class BundleSearchController {
                     }
             )
     )
-    public ResponseEntity<?> searchBundle(
-            @RequestBody SearchParams searchParams) {
+    public ResponseEntity<?> bundleQuery(
+            @RequestBody QueryParams queryParams) {
 
-        List<String> missingParams = getMissingParams(searchParams);
+        List<String> missingParams = getMissingParams(queryParams);
         if (!missingParams.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -193,13 +193,13 @@ public class BundleSearchController {
         }
 
         try {
-            QualifiedName bundleId = searchParams.bundleId.toQN();
-            QualifiedName connectorId = searchParams.startNodeId.toQN();
+            QualifiedName bundleId = queryParams.bundleId.toQN();
+            QualifiedName connectorId = queryParams.startNodeId.toQN();
 
-            SearchResult searchBundleResult = bundleSearchService.searchBundle(bundleId, connectorId, searchParams.targetType, searchParams.targetSpecification);
-            return ResponseEntity.ok(searchBundleResult);
+            QueryResult queryResult = bundleQueryService.evaluateBundleQuery(bundleId, connectorId, queryParams.queryType, queryParams.querySpecification);
+            return ResponseEntity.ok(queryResult);
 
-        } catch (UnsupportedTargetTypeException e) {
+        } catch (UnsupportedQueryTypeException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
@@ -222,12 +222,12 @@ public class BundleSearchController {
         return builder.toString();
     }
 
-    private static List<String> getMissingParams(SearchParams params) {
+    private static List<String> getMissingParams(QueryParams params) {
         List<String> missing = new ArrayList<String>();
         if (params.bundleId == null) missing.add("bundleId");
         if (params.startNodeId == null) missing.add("startNodeId");
-        if (params.targetType == null) missing.add("targetType");
-        if (params.targetSpecification == null) missing.add("targetSpecification");
+        if (params.queryType == null) missing.add("queryType");
+        if (params.querySpecification == null) missing.add("querySpecification");
 
         return missing;
     }

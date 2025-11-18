@@ -29,12 +29,12 @@ public class LinearSubgraphFinder {
     public static List<List<EdgeToNode>> findFrom(INode startNode, List<BiPredicate<IEdge, INode>> filter) {
         List<List<EdgeToNode>> results = new ArrayList<>();
 
-        recursiveSearch(new EdgeToNode(null, startNode), new ArrayList<>(), filter, new HashSet<>(), results);
+        recursiveFind(new EdgeToNode(null, startNode), new ArrayList<>(), filter, new HashSet<>(), results);
 
         return results;
     }
 
-    private static void recursiveSearch(EdgeToNode current, List<EdgeToNode> foundPart, List<BiPredicate<IEdge, INode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
+    private static void recursiveFind(EdgeToNode current, List<EdgeToNode> foundPart, List<BiPredicate<IEdge, INode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
         if (current == null) return;
         if (foundPart == null) foundPart = new ArrayList<>();
 
@@ -59,13 +59,13 @@ public class LinearSubgraphFinder {
         }
 
         for (IEdge e : node.getCauseEdges()) {
-            recursiveSearch(
+            recursiveFind(
                     new EdgeToNode(e, e.getEffect()),
                     new ArrayList<>(foundPart),
                     specification, new HashSet<>(visited), results);
         }
         for (IEdge e : node.getEffectEdges()) {
-            recursiveSearch(
+            recursiveFind(
                     new EdgeToNode(e, e.getCause()),
                     new ArrayList<>(foundPart),
                     specification, new HashSet<>(visited), results);

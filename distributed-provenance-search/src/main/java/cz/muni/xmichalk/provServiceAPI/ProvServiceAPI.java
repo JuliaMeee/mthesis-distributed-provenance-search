@@ -1,8 +1,8 @@
 package cz.muni.xmichalk.provServiceAPI;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.dto.BundleSearchParamsDTO;
-import cz.muni.xmichalk.dto.BundleSearchResultDTO;
+import cz.muni.xmichalk.dto.BundleQueryDTO;
+import cz.muni.xmichalk.dto.BundleQueryResultDTO;
 import cz.muni.xmichalk.dto.PickVersionParamsDTO;
 import cz.muni.xmichalk.dto.QualifiedNameDTO;
 import org.openprovenance.prov.model.QualifiedName;
@@ -50,28 +50,28 @@ public class ProvServiceAPI {
         return response.getBody().toQN();
     }
 
-    public static BundleSearchResultDTO fetchSearchBundleResult(String serviceUri,
-                                                                QualifiedName bundleId, QualifiedName connectorId,
-                                                                String targetType, JsonNode targetSpecification) throws IOException {
-        BundleSearchParamsDTO searchParams = new BundleSearchParamsDTO(bundleId, connectorId, targetType, targetSpecification);
+    public static BundleQueryResultDTO fetchBundleQueryResult(String serviceUri,
+                                                              QualifiedName bundleId, QualifiedName connectorId,
+                                                              String queryType, JsonNode querySpecification) throws IOException {
+        BundleQueryDTO queryParams = new BundleQueryDTO(bundleId, connectorId, queryType, querySpecification);
 
         if (serviceUri == null) {
             throw new IllegalArgumentException("Prov service cannot be null.");
         }
 
-        String url = serviceUri + "searchBundle";
+        String url = serviceUri + "bundleQuery";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<BundleSearchParamsDTO> request = new HttpEntity<>(searchParams, headers);
+        HttpEntity<BundleQueryDTO> request = new HttpEntity<>(queryParams, headers);
 
-        ResponseEntity<BundleSearchResultDTO> response = restTemplate.postForEntity(
-                url, request, BundleSearchResultDTO.class);
+        ResponseEntity<BundleQueryResultDTO> response = restTemplate.postForEntity(
+                url, request, BundleQueryResultDTO.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new IOException("Search bundle API call failed with status: " + response.getStatusCode());
+            throw new IOException("Bundle query API call failed with status: " + response.getStatusCode());
         }
 
         return response.getBody();
