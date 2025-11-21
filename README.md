@@ -63,6 +63,12 @@ You can also run requests to the prov-traverser and bundle-searcher containers f
 <i>-- Note that the service containers must be running for the OpenAPI specification to load.  
 -- It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers. If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.</i>
 
+<h2>Demo data</h2>
+
+The demo data can be found in `./setup/data/` folder. Below is a schema of traversal information of the bundles, excluding sender and reciever agent nodes (to save space). Main activies are depicted as rectangles, and connectors are depicted as ovals. connectors to the left of the main activity are backwad connectors. Connectors to the right of the main acitivyt are forward connectors.
+
+![Demo bundles TI scheme](./setup/data/demo-data-backbone.drawio.svg)
+
  <h2>Technical issues with storage service and java serialization</h2>
 This is a list of issues encountered when working with the storage service and java prov toolbox library.
 
