@@ -149,35 +149,40 @@ public class TraverserController {
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                       "queryType": "TEST_FITS",
                                       "querySpecification": {
-                                        "type" : "CountCondition",
-                                        "findableInDocument" : {
-                                          "type" : "FindLinearSubgraphs",
-                                          "firstNode" : {
-                                            "type" : "AllTrue",
-                                            "conditions" : [ {
-                                              "type" : "HasAttrQualifiedNameValue",
-                                              "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                              "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                            }, {
-                                              "type" : "HasAttrQualifiedNameValue",
-                                              "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
-                                              "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
-                                            } ]
-                                          },
-                                          "edgesAndNodes" : [ {
-                                            "isKind" : "PROV_DERIVATION",
-                                            "isNotKind" : null,
-                                            "nodeIsEffect" : true,
-                                            "nodeCondition" : {
-                                              "type" : "HasAttrQualifiedNameValue",
-                                              "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                              "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                            }
-                                          } ]
-                                        },
-                                        "comparisonResult" : "GREATER_THAN_OR_EQUALS",
-                                        "count" : 1
-                                      }
+                                       "type" : "CountCondition",
+                                       "findableInDocument" : {
+                                         "type" : "FindLinearSubgraphs",
+                                         "graphParts" : [ {
+                                           "type" : "EdgeToNodeCondition",
+                                           "nodeCondition" : {
+                                             "type" : "AllTrue",
+                                             "conditions" : [ {
+                                               "type" : "HasAttrQualifiedNameValue",
+                                               "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                               "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                             }, {
+                                               "type" : "HasAttrQualifiedNameValue",
+                                               "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
+                                               "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
+                                             } ]
+                                           }
+                                         }, {
+                                           "type" : "EdgeToNodeCondition",
+                                           "edgeCondition" : {
+                                             "type" : "IsRelation",
+                                             "relation" : "PROV_DERIVATION"
+                                           },
+                                           "nodeCondition" : {
+                                             "type" : "HasAttrQualifiedNameValue",
+                                             "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                             "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                           },
+                                           "nodeIsEffect" : true
+                                         } ]
+                                       },
+                                       "comparisonResult" : "GREATER_THAN_OR_EQUALS",
+                                       "count" : 1
+                                     }
                                     }
                                     """)
                     }

@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.targetSpecification.ICondition;
 import cz.muni.xmichalk.targetSpecification.bundleConditions.AllNodes;
@@ -14,6 +15,8 @@ import cz.muni.xmichalk.targetSpecification.logicalOperations.Either;
 import cz.muni.xmichalk.targetSpecification.logicalOperations.Implication;
 import cz.muni.xmichalk.targetSpecification.nodeConditions.*;
 import cz.muni.xmichalk.targetSpecification.subgraphConditions.EdgeToNodeCondition;
+import cz.muni.xmichalk.targetSpecification.subgraphConditions.edgeConditions.IsNotRelation;
+import cz.muni.xmichalk.targetSpecification.subgraphConditions.edgeConditions.IsRelation;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.StatementOrBundle;
 
@@ -259,16 +262,34 @@ public class TargetSpecificationTest {
     }
 
     @Test
+    void testIsRelation() {
+        ICondition<IEdge> isDerivation = new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION);
+
+        assert (samplingBundle_V1.getEdges().stream().anyMatch(edge -> isDerivation.test(edge)));
+    }
+
+    @Test
+    void testIsNotRelation() {
+        ICondition<IEdge> isNotDerivation = new IsNotRelation(StatementOrBundle.Kind.PROV_DERIVATION);
+
+        assert (samplingBundle_V1.getEdges().stream().anyMatch(edge -> isNotDerivation.test(edge)));
+    }
+
+    @Test
     public void testHasForwardJumpConnectors() throws IOException {
-        EdgeToNodeCondition derivationEdgeToForwardCon = new EdgeToNodeCondition(
-                StatementOrBundle.Kind.PROV_DERIVATION,
-                null,
-                null,
-                isForwardConn
-        );
         FindLinearSubgraphs forwardJumpChain = new FindLinearSubgraphs(
-                isForwardConn,
-                List.of(derivationEdgeToForwardCon)
+                List.of(
+                        new EdgeToNodeCondition(
+                                null,
+                                isForwardConn,
+                                null
+                        ),
+                        new EdgeToNodeCondition(
+                                new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION),
+                                isForwardConn,
+                                true
+                        )
+                )
         );
 
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
@@ -278,6 +299,64 @@ public class TargetSpecificationTest {
         );
 
         assert (bundleSpecification.test(samplingBundle_V1));
+    }
+
+    @Test
+    public void hasBackwardJumpConnectorTo() throws IOException {
+        FindLinearSubgraphs backwardJumpChain = new FindLinearSubgraphs(
+                List.of(
+                        new EdgeToNodeCondition(
+                                null,
+                                new AllTrue<>(List.of(
+                                        isBackwardConn,
+                                        new HasAttrQualifiedNameValue(
+                                                ATTR_REFERENCED_META_BUNDLE_ID.getUri(),
+                                                "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
+                                        )
+                                )),
+                                null
+                        ),
+                        new EdgeToNodeCondition(
+                                new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION),
+                                isBackwardConn,
+                                true
+                        )
+                )
+        );
+
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                backwardJumpChain,
+                EComparisonResult.GREATER_THAN_OR_EQUALS,
+                1
+        );
+
+        assert (bundleSpecification.test(speciesIdentificationBundle_V0));
+    }
+
+    @Test
+    public void testDoesNotHaveForwardJumpConnectors() throws IOException {
+        FindLinearSubgraphs forwardJumpChain = new FindLinearSubgraphs(
+                List.of(
+                        new EdgeToNodeCondition(
+                                null,
+                                isForwardConn,
+                                null
+                        ),
+                        new EdgeToNodeCondition(
+                                new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION),
+                                isForwardConn,
+                                null
+                        )
+                )
+        );
+
+        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+                forwardJumpChain,
+                EComparisonResult.EQUALS,
+                0
+        );
+
+        assert (bundleSpecification.test(processingBundle_V1));
     }
 
 

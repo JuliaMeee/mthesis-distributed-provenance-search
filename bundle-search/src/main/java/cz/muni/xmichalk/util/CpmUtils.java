@@ -1,7 +1,6 @@
 package cz.muni.xmichalk.util;
 
 import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.EdgeToNode;
 import org.openprovenance.prov.model.*;
@@ -9,7 +8,6 @@ import org.openprovenance.prov.model.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static cz.muni.xmichalk.util.AttributeNames.*;
@@ -44,12 +42,12 @@ public class CpmUtils {
             return connectorNode.getId();
         }
         if (isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "forwardConnector"))) {
-            ArrayList<BiPredicate<IEdge, INode>> subgraphConstraints = new ArrayList<BiPredicate<IEdge, INode>>();
-            subgraphConstraints.add((edge, node) -> node.equals(connectorNode));
-            subgraphConstraints.add((edge, node) -> {
-                boolean isSpecialization = edge.getRelations().stream().anyMatch((relation) -> relation.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION);
-                boolean isGeneralEntity = edge.getCause() == node;
-                boolean isForwardConnector = hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
+            ArrayList<Predicate<EdgeToNode>> subgraphConstraints = new ArrayList<Predicate<EdgeToNode>>();
+            subgraphConstraints.add(edgeToNode -> edgeToNode.node.equals(connectorNode));
+            subgraphConstraints.add(edgeToNode -> {
+                boolean isSpecialization = edgeToNode.edge.getRelations().stream().anyMatch((relation) -> relation.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION);
+                boolean isGeneralEntity = edgeToNode.edge.getCause() == edgeToNode.node;
+                boolean isForwardConnector = hasAttributeTargetValue(edgeToNode.node, ATTR_PROV_TYPE, QualifiedName.class,
                         qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
                 return isSpecialization && isGeneralEntity && isForwardConnector;
             });

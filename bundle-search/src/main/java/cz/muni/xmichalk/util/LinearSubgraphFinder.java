@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 public class LinearSubgraphFinder {
-    public static List<List<EdgeToNode>> findAnywhere(INode startNode, List<BiPredicate<IEdge, INode>> filters) {
+    public static List<List<EdgeToNode>> findAnywhere(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification) {
         List<List<EdgeToNode>> results = new ArrayList<>();
 
         if (startNode == null) {
@@ -19,22 +19,22 @@ public class LinearSubgraphFinder {
         }
 
         BundleNodesTraverser.traverseAndExecute(startNode, node -> {
-            List<List<EdgeToNode>> subgraphsFromNode = findFrom(node, filters);
+            List<List<EdgeToNode>> subgraphsFromNode = findFrom(node, subgraphSpecification);
             results.addAll(subgraphsFromNode);
         });
 
         return results;
     }
 
-    public static List<List<EdgeToNode>> findFrom(INode startNode, List<BiPredicate<IEdge, INode>> filter) {
+    public static List<List<EdgeToNode>> findFrom(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification) {
         List<List<EdgeToNode>> results = new ArrayList<>();
 
-        recursiveFind(new EdgeToNode(null, startNode), new ArrayList<>(), filter, new HashSet<>(), results);
+        recursiveFind(new EdgeToNode(null, startNode), new ArrayList<>(), subgraphSpecification, new HashSet<>(), results);
 
         return results;
     }
 
-    private static void recursiveFind(EdgeToNode current, List<EdgeToNode> foundPart, List<BiPredicate<IEdge, INode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
+    private static void recursiveFind(EdgeToNode current, List<EdgeToNode> foundPart, List<Predicate<EdgeToNode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
         if (current == null) return;
         if (foundPart == null) foundPart = new ArrayList<>();
 
@@ -49,9 +49,9 @@ public class LinearSubgraphFinder {
 
         if (specification.size() <= index) return;
 
-        if (!specification.get(index).test(edge, node)) return;
+        if (!specification.get(index).test(current)) return;
 
-        foundPart.add(new EdgeToNode(edge, node));
+        foundPart.add(current);
 
         if (foundPart.size() == specification.size()) {
             results.add(foundPart);

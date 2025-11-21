@@ -1,0 +1,23 @@
+package cz.muni.xmichalk.targetSpecification.subgraphConditions.edgeConditions;
+
+import cz.muni.fi.cpm.model.IEdge;
+import cz.muni.xmichalk.targetSpecification.ICondition;
+import org.openprovenance.prov.model.StatementOrBundle;
+
+public class IsRelation implements ICondition<IEdge> {
+    public StatementOrBundle.Kind relation;
+
+    public IsRelation() {
+    }
+
+    public IsRelation(StatementOrBundle.Kind relation) {
+        this.relation = relation;
+    }
+
+    public boolean test(IEdge edge) {
+        if (relation == null) return true;
+
+        return edge.getRelations().stream().anyMatch((relation) -> relation.getKind().equals(this.relation));
+    }
+
+}
