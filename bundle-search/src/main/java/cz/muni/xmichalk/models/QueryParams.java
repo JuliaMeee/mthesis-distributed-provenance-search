@@ -1,21 +1,18 @@
 package cz.muni.xmichalk.models;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.queries.EQueryType;
+import cz.muni.xmichalk.queries.IQuery;
 
 public class QueryParams {
     public QualifiedNameData bundleId;
     public QualifiedNameData startNodeId;
-    public EQueryType queryType;
-    public JsonNode querySpecification;
+    public IQuery<?> querySpecification;
 
     public QueryParams() {
     }
 
-    public QueryParams(QualifiedNameData bundleId, QualifiedNameData startNodeId, EQueryType queryType, JsonNode querySpecification) {
+    public QueryParams(QualifiedNameData bundleId, QualifiedNameData startNodeId, IQuery<?> querySpecification) {
         this.bundleId = bundleId;
         this.startNodeId = startNodeId;
-        this.queryType = queryType;
         this.querySpecification = querySpecification;
     }
 }

@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.querySpecification.findable;
 
+import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
@@ -17,7 +18,7 @@ public class FindFittingNodes implements IFindableInDocument<INode> {
     }
 
     @Override
-    public List<INode> find(INode startNode) {
+    public List<INode> find(CpmDocument document, INode startNode) {
         return BundleNodesTraverser.traverseAndFind(startNode, node -> nodePredicate.test(node));
     }
 }

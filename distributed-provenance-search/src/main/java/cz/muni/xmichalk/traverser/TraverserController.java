@@ -57,7 +57,7 @@ public class TraverserController {
             content = @Content(
                     schema = @Schema(implementation = TraversalParamsDTO.class),
                     examples = {
-                            @ExampleObject(name = "Find all person nodes", value = """
+                            @ExampleObject(name = "Get all person nodes", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
@@ -70,18 +70,20 @@ public class TraverserController {
                                       "versionPreference": "SPECIFIED",
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "queryType": "NODES",
                                       "querySpecification": {
-                                        "type" : "FindFittingNodes",
-                                        "nodePredicate" : {
-                                          "type" : "HasAttrQualifiedNameValue",
-                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                          "uriRegex" : "https://schema.org/Person"
+                                        "type": "GetNodes",
+                                        "nodeFinder": {
+                                          "type" : "FindFittingNodes",
+                                          "nodePredicate" : {
+                                            "type" : "HasAttrQualifiedNameValue",
+                                            "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                            "uriRegex" : "https://schema.org/Person"
+                                          }
                                         }
                                       }
                                     }
                                     """),
-                            @ExampleObject(name = "Find all backward connectors", value = """
+                            @ExampleObject(name = "Get all backward connectors", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
@@ -94,8 +96,10 @@ public class TraverserController {
                                       "versionPreference": "SPECIFIED",
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "queryType": "CONNECTORS",
-                                      "querySpecification": "backward"
+                                      "querySpecification": {
+                                        "type": "GetConnectors",
+                                        "backward": "true"
+                                      }
                                     }
                                     """)
 
@@ -115,7 +119,7 @@ public class TraverserController {
             content = @Content(
                     schema = @Schema(implementation = TraversalParamsDTO.class),
                     examples = {
-                            @ExampleObject(name = "Find main activity ids", value = """
+                            @ExampleObject(name = "Get main activity ids", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
@@ -128,13 +132,15 @@ public class TraverserController {
                                       "versionPreference": "LATEST",
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "queryType": "NODE_IDS",
                                       "querySpecification": {
-                                        "type" : "FindFittingNodes",
-                                        "nodePredicate" : {
-                                          "type" : "HasAttrQualifiedNameValue",
-                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                          "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                        "type": "GetNodeIds",
+                                        "nodeFinder": {
+                                          "type" : "FindFittingNodes",
+                                          "nodePredicate" : {
+                                            "type" : "HasAttrQualifiedNameValue",
+                                            "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                            "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                          }
                                         }
                                       }
                                     }
@@ -152,42 +158,44 @@ public class TraverserController {
                                       "versionPreference": "LATEST",
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "queryType": "TEST_FITS",
                                       "querySpecification": {
-                                       "type" : "CountCondition",
-                                       "findableInDocument" : {
-                                         "type" : "FindFittingLinearSubgraphs",
-                                         "graphParts" : [ {
-                                           "type" : "EdgeToNodeCondition",
-                                           "nodeCondition" : {
-                                             "type" : "AllTrue",
-                                             "conditions" : [ {
-                                               "type" : "HasAttrQualifiedNameValue",
-                                               "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                               "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                             }, {
-                                               "type" : "HasAttrQualifiedNameValue",
-                                               "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
-                                               "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
-                                             } ]
-                                           }
-                                         }, {
-                                           "type" : "EdgeToNodeCondition",
-                                           "edgeCondition" : {
-                                             "type" : "IsRelation",
-                                             "relation" : "PROV_DERIVATION"
-                                           },
-                                           "nodeCondition" : {
-                                             "type" : "HasAttrQualifiedNameValue",
-                                             "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                             "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                           },
-                                           "nodeIsEffect" : true
-                                         } ]
-                                       },
-                                       "comparisonResult" : "GREATER_THAN_OR_EQUALS",
-                                       "count" : 1
-                                     }
+                                        "type": "TestBundleFits",
+                                        "condition": {
+                                          "type" : "CountCondition",
+                                          "findableInDocument" : {
+                                            "type" : "FindFittingLinearSubgraphs",
+                                            "graphParts" : [ {
+                                              "type" : "EdgeToNodeCondition",
+                                              "nodeCondition" : {
+                                                "type" : "AllTrue",
+                                                "conditions" : [ {
+                                                  "type" : "HasAttrQualifiedNameValue",
+                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                  "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                                }, {
+                                                  "type" : "HasAttrQualifiedNameValue",
+                                                  "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
+                                                  "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
+                                                } ]
+                                              }
+                                            }, {
+                                              "type" : "EdgeToNodeCondition",
+                                              "edgeCondition" : {
+                                                "type" : "IsRelation",
+                                                "relation" : "PROV_DERIVATION"
+                                              },
+                                              "nodeCondition" : {
+                                                "type" : "HasAttrQualifiedNameValue",
+                                                "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                              },
+                                              "nodeIsEffect" : true
+                                            } ]
+                                          },
+                                          "comparisonResult" : "GREATER_THAN_OR_EQUALS",
+                                          "count" : 1
+                                        }
+                                      }
                                     }
                                     """)
                     }
@@ -219,7 +227,6 @@ public class TraverserController {
                             traversalParams.versionPreference,
                             traversalParams.traversalPriority != null ? traversalParams.traversalPriority : ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                             traversalParams.validityChecks != null ? traversalParams.validityChecks : new ArrayList<>(),
-                            traversalParams.queryType,
                             traversalParams.querySpecification
                     )
             );
@@ -256,7 +263,6 @@ public class TraverserController {
         List<String> missing = new ArrayList<String>();
         if (params.bundleId == null) missing.add("bundleId");
         if (params.startNodeId == null) missing.add("startNodeId");
-        if (params.queryType == null) missing.add("queryType");
         if (params.querySpecification == null) missing.add("querySpecification");
 
         return missing;

@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
@@ -7,17 +8,12 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.models.ConnectorData;
-import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.models.QualifiedNameData;
-import cz.muni.xmichalk.queries.EQueryType;
-import cz.muni.xmichalk.queries.IQueryEvaluator;
-import cz.muni.xmichalk.queries.QueryEvaluatorsProvider;
-import cz.muni.xmichalk.querySpecification.ICondition;
+import cz.muni.xmichalk.queries.*;
 import cz.muni.xmichalk.querySpecification.bundleConditions.CountCondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.EComparisonResult;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingLinearSubgraphs;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
-import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.querySpecification.logicalOperations.AllTrue;
 import cz.muni.xmichalk.querySpecification.nodeConditions.*;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
@@ -35,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
@@ -46,22 +41,24 @@ public class QueriesTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
-    Map<EQueryType, IQueryEvaluator<?>> queryEvaluators = QueryEvaluatorsProvider.getQueryEvaluators();
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void findNodeIdsById() throws IOException {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODE_IDS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "NiceMarineStation", "blank");
-        IFindableInDocument<INode> querySpecification = new FindFittingNodes(
-                new HasId(nodeIdToFind.getUri())
+        IQuery<List<QualifiedNameData>> query = new GetNodeIds(
+                new FindFittingNodes(
+                        new HasId(nodeIdToFind.getUri())
+                )
         );
-        JsonNode serializedSpecification = objectMapper.valueToTree(querySpecification);
+        JsonNode serializedSpecification = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         assert result != null;
         assert result instanceof List<?>;
@@ -77,15 +74,18 @@ public class QueriesTest {
     public void findNodesById() throws IOException {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODES);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "NiceMarineStation", "blank");
-        IFindableInDocument<INode> querySpecification = new FindFittingNodes(
-                new HasId(nodeIdToFind.getUri())
+        IQuery<?> query = new GetNodes(
+                new FindFittingNodes(
+                        new HasId(nodeIdToFind.getUri())
+                )
         );
-        JsonNode serializedSpecification = objectMapper.valueToTree(querySpecification);
+        JsonNode serializedSpecification = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         assert result != null;
         assert result instanceof JsonNode;
@@ -102,19 +102,20 @@ public class QueriesTest {
     public void findNodeIdsByType() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODE_IDS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        String attributeName = NameSpaceConstants.PROV_URI + "type";
-        String attributeValue = NameSpaceConstants.SCHEMA_URI + "Person";
-        IFindableInDocument<INode> querySpecification = new FindFittingNodes(
-                new HasAttrQualifiedNameValue(
-                        attributeName,
-                        attributeValue
+        IQuery<?> query = new GetNodeIds(
+                new FindFittingNodes(
+                        new HasAttrQualifiedNameValue(
+                                NameSpaceConstants.PROV_URI + "type",
+                                SCHEMA_URI + "Person"
+                        )
                 )
         );
-        JsonNode serializedSpecification = objectMapper.valueToTree(querySpecification);
+        JsonNode serializedQuery = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         assert result != null;
         assert result instanceof List<?>;
@@ -134,15 +135,16 @@ public class QueriesTest {
     public void findNodesByHasAttr() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODES);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        String attributeName = NameSpaceConstants.SCHEMA_URI + "url";
-        IFindableInDocument<INode> querySpecification = new FindFittingNodes(
+        String attributeName = SCHEMA_URI + "url";
+        IQuery<?> query = new GetNodes(new FindFittingNodes(
                 new HasAttr(attributeName)
-        );
-        JsonNode serialziedSpecification = objectMapper.valueToTree(querySpecification);
+        ));
+        JsonNode serializedQuery = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serialziedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         assert result != null;
         assert result instanceof JsonNode;
@@ -161,9 +163,8 @@ public class QueriesTest {
     public void testFindSubgraph() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.SUBGRAPHS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        IFindableInDocument<List<EdgeToNode>> querySpecification = new FindFittingLinearSubgraphs(List.of(
+        IQuery<?> query = new GetSubgraphs(new FindFittingLinearSubgraphs(List.of(
                 new EdgeToNodeCondition(
                         null,
                         new AllTrue<>(List.of(
@@ -183,10 +184,12 @@ public class QueriesTest {
                         new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY),
                         null
                 )
-        ));
-        JsonNode serializedSpecification = objectMapper.valueToTree(querySpecification);
+        )));
+        JsonNode serializedQuery = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         // Results assertions
 
@@ -220,19 +223,20 @@ public class QueriesTest {
     public void testFits() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.TEST_FITS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        ICondition<INode> samplingNodeSpecification = new HasId(".*Sampling");
-        ICondition<CpmDocument> querySpecification = new CountCondition(
-                new FindFittingNodes(
-                        samplingNodeSpecification
-                ),
-                EComparisonResult.EQUALS,
-                1
-        );
-        JsonNode serializedSpecification = objectMapper.valueToTree(querySpecification);
+        IQuery<?> query = new TestBundleFits(
+                new CountCondition(
+                        new FindFittingNodes(
+                                new HasId(".*Sampling")
+                        ),
+                        EComparisonResult.EQUALS,
+                        1
+                ));
+        JsonNode serializedSpecification = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
         assert result != null;
         assert result instanceof Boolean;
         Boolean fits = (Boolean) result;
@@ -243,23 +247,25 @@ public class QueriesTest {
     public void testDoesNotFit() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.TEST_FITS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        ICondition<INode> backwardConnectorSpecification = new HasAttrQualifiedNameValue(
-                NameSpaceConstants.PROV_URI + "type",
-                NameSpaceConstants.CPM_URI + "backwardConnector"
+        IQuery<?> query = new TestBundleFits(
+                new CountCondition(
+                        new FindFittingNodes(
+                                new HasAttrQualifiedNameValue(
+                                        NameSpaceConstants.PROV_URI + "type",
+                                        NameSpaceConstants.CPM_URI + "backwardConnector"
+                                )
+                        ),
+                        EComparisonResult.GREATER_THAN_OR_EQUALS,
+                        1
+                )
         );
-        ICondition<CpmDocument> querySpecification = new CountCondition(
-                new FindFittingNodes(
-                        backwardConnectorSpecification
-                ),
-                EComparisonResult.GREATER_THAN_OR_EQUALS,
-                1
-        );
+        JsonNode serializedSpecification = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+        });
 
-        JsonNode serializedSpecification = objectMapper.valueToTree(querySpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
         assert result != null;
         assert result instanceof Boolean;
         Boolean fits = (Boolean) result;
@@ -270,11 +276,13 @@ public class QueriesTest {
     public void findBackwardConnectors() throws IOException {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.CONNECTORS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
-        JsonNode serializedSpecification = objectMapper.valueToTree("backward");
+        IQuery<?> query = new GetConnectors(true);
+        JsonNode serializedSpecification = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         assert result != null;
         assert result instanceof List;
@@ -289,11 +297,13 @@ public class QueriesTest {
     public void findForwardConnectors() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
-        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.CONNECTORS);
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
-        JsonNode serializedSpecification = objectMapper.valueToTree("forward");
+        IQuery<?> query = new GetConnectors(false);
+        JsonNode serializedSpecification = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+        });
 
-        Object result = queryEvaluator.apply(cpmDoc, startNodeId, serializedSpecification);
+        Object result = deserializedQuery.evaluate(cpmDoc, cpmDoc.getNode(startNodeId));
 
         assert result != null;
         assert result instanceof List;

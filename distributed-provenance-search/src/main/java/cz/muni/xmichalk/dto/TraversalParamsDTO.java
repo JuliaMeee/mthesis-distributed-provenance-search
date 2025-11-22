@@ -12,20 +12,18 @@ public class TraversalParamsDTO {
     public String versionPreference;
     public ETraversalPriority traversalPriority;
     public List<EValidityCheck> validityChecks;
-    public String queryType;
     public JsonNode querySpecification;
 
     public TraversalParamsDTO() {
 
     }
 
-    public TraversalParamsDTO(QualifiedNameDTO bundleId, QualifiedNameDTO connectorId, String versionPreference, ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks, String queryType, JsonNode querySpecification) {
+    public TraversalParamsDTO(QualifiedNameDTO bundleId, QualifiedNameDTO connectorId, String versionPreference, ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks, JsonNode querySpecification) {
         this.bundleId = bundleId;
         this.startNodeId = connectorId;
         this.versionPreference = versionPreference;
         this.traversalPriority = traversalPriority;
         this.validityChecks = validityChecks;
-        this.queryType = queryType;
         this.querySpecification = querySpecification;
     }
 }

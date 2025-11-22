@@ -2,8 +2,10 @@ package cz.muni.xmichalk.queryService;
 
 import cz.muni.xmichalk.bundleVersionPicker.EVersionPreferrence;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
-import cz.muni.xmichalk.models.*;
-import cz.muni.xmichalk.queries.UnsupportedQueryTypeException;
+import cz.muni.xmichalk.models.PickVersionParams;
+import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.models.QueryParams;
+import cz.muni.xmichalk.models.QueryResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -23,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @RestController
@@ -37,14 +37,6 @@ public class BundleQueryController {
     public BundleQueryController(BundleQueryService bundleQueryService, Map<EVersionPreferrence, IVersionPicker> versionPickers) {
         this.bundleQueryService = bundleQueryService;
         this.versionPickers = versionPickers;
-    }
-
-    @Operation(summary = "List available query types", description = "Returns all defined query types and their descriptions.")
-    @GetMapping(value = "/api/getQueryTypes", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<QueryTypeInfo>> getAvailableQueryTypes() {
-        Stream<QueryTypeInfo> types = bundleQueryService.getQueryEvaluators().keySet().stream().map(t -> new QueryTypeInfo(t, t.description));
-
-        return ResponseEntity.ok(types.collect(Collectors.toList()));
     }
 
     @Operation(summary = "List available version preferences", description = "Returns all defined version preferences.")
@@ -113,7 +105,7 @@ public class BundleQueryController {
                     schema = @Schema(implementation = QueryParams.class),
                     examples = {
                             @ExampleObject(
-                                    name = "Find all persons in the bundle",
+                                    name = "Get all person nodes in the bundle",
                                     value = """
                                             {
                                               "bundleId": {
@@ -124,13 +116,15 @@ public class BundleQueryController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "queryType": "NODES",
                                               "querySpecification": {
-                                                "type" : "FindFittingNodes",
-                                                "nodePredicate" : {
-                                                  "type" : "HasAttrQualifiedNameValue",
-                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                  "uriRegex" : "https://schema.org/Person"
+                                                "type" : "GetNodes",
+                                                "nodeFinder" : {
+                                                  "type" : "FindFittingNodes",
+                                                  "nodePredicate" : {
+                                                    "type" : "HasAttrQualifiedNameValue",
+                                                    "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                    "uriRegex" : "https://schema.org/Person"
+                                                  }
                                                 }
                                               }
                                             }
@@ -148,8 +142,10 @@ public class BundleQueryController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "queryType": "CONNECTORS",
-                                              "querySpecification": "forward"
+                                              "querySpecification": {
+                                                "type" : "GetConnectors",
+                                                "backward" : false
+                                              }
                                             }
                                             """
                             ),
@@ -165,8 +161,9 @@ public class BundleQueryController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "queryType": "TEST_FITS",
                                               "querySpecification": {
+                                                "type": "TestBundleFits",
+                                                "condition": {
                                                   "type" : "CountCondition",
                                                   "findableInDocument" : {
                                                     "type" : "FindFittingNodes",
@@ -179,11 +176,12 @@ public class BundleQueryController {
                                                   "comparisonResult" : "EQUALS",
                                                   "count" : 1
                                                 }
+                                              }
                                             }
                                             """
                             ),
                             @ExampleObject(
-                                    name = "Find all activities Jane Smith was responsible for",
+                                    name = "Get all activities Jane Smith was responsible for",
                                     value = """
                                             {
                                               "bundleId": {
@@ -194,39 +192,47 @@ public class BundleQueryController {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
-                                              "queryType": "SUBGRAPHS",
                                               "querySpecification": {
-                                                   "type" : "FindFittingLinearSubgraphs",
-                                                   "graphParts" : [ {
-                                                     "type" : "EdgeToNodeCondition",
-                                                     "edgeCondition" : null,
-                                                     "nodeCondition" : {
-                                                       "type" : "AllTrue",
-                                                       "conditions" : [ {
-                                                         "type" : "HasAttrQualifiedNameValue",
-                                                         "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                         "uriRegex" : "https://schema.org/Person"
-                                                       }, {
-                                                         "type" : "HasAttrLangStringValue",
-                                                         "attributeNameUri" : "https://schema.org/name",
-                                                         "langRegex" : null,
-                                                         "valueRegex" : "Jane Smith"
-                                                       } ]
-                                                     },
-                                                     "nodeIsEffect" : null
-                                                   }, {
-                                                     "type" : "EdgeToNodeCondition",
-                                                     "edgeCondition" : {
-                                                       "type" : "IsRelation",
-                                                       "relation" : "PROV_ASSOCIATION"
-                                                     },
-                                                     "nodeCondition" : {
-                                                       "type" : "IsKind",
-                                                       "kind" : "PROV_ACTIVITY"
-                                                     },
-                                                     "nodeIsEffect" : null
-                                                   } ]
-                                                 }
+                                                "type": "GetSubgraphs",
+                                                "subgraphFinder": {
+                                                  "type": "FindFittingLinearSubgraphs",
+                                                  "graphParts": [
+                                                    {
+                                                      "type": "EdgeToNodeCondition",
+                                                      "edgeCondition": null,
+                                                      "nodeCondition": {
+                                                        "type": "AllTrue",
+                                                        "conditions": [
+                                                          {
+                                                            "type": "HasAttrQualifiedNameValue",
+                                                            "attributeNameUri": "http://www.w3.org/ns/prov#type",
+                                                            "uriRegex": "https://schema.org/Person"
+                                                          },
+                                                          {
+                                                            "type": "HasAttrLangStringValue",
+                                                            "attributeNameUri": "https://schema.org/name",
+                                                            "langRegex": null,
+                                                            "valueRegex": "Jane Smith"
+                                                          }
+                                                        ]
+                                                      },
+                                                      "nodeIsEffect": null
+                                                    },
+                                                    {
+                                                      "type": "EdgeToNodeCondition",
+                                                      "edgeCondition": {
+                                                        "type": "IsRelation",
+                                                        "relation": "PROV_ASSOCIATION"
+                                                      },
+                                                      "nodeCondition": {
+                                                        "type": "IsKind",
+                                                        "kind": "PROV_ACTIVITY"
+                                                      },
+                                                      "nodeIsEffect": null
+                                                    }
+                                                  ]
+                                                }
+                                              }
                                             }
                                             """
                             )
@@ -247,13 +253,8 @@ public class BundleQueryController {
             QualifiedName bundleId = queryParams.bundleId.toQN();
             QualifiedName connectorId = queryParams.startNodeId.toQN();
 
-            QueryResult queryResult = bundleQueryService.evaluateBundleQuery(bundleId, connectorId, queryParams.queryType, queryParams.querySpecification);
+            QueryResult queryResult = bundleQueryService.evaluateBundleQuery(bundleId, connectorId, queryParams.querySpecification);
             return ResponseEntity.ok(queryResult);
-
-        } catch (UnsupportedQueryTypeException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -277,7 +278,6 @@ public class BundleQueryController {
         List<String> missing = new ArrayList<String>();
         if (params.bundleId == null) missing.add("bundleId");
         if (params.startNodeId == null) missing.add("startNodeId");
-        if (params.queryType == null) missing.add("queryType");
         if (params.querySpecification == null) missing.add("querySpecification");
 
         return missing;

@@ -19,7 +19,8 @@ import java.io.IOException;
 public class ProvServiceAPI {
     private static final Logger log = LoggerFactory.getLogger(ProvServiceAPI.class);
 
-    public static QualifiedName fetchPreferredBundleVersion(String serviceUri, QualifiedName bundleId, String versionPreference) throws IOException {
+    public static QualifiedName fetchPreferredBundleVersion(
+            String serviceUri, QualifiedName bundleId, String versionPreference) throws IOException {
         PickVersionParamsDTO params = new PickVersionParamsDTO(
                 new QualifiedNameDTO().from(bundleId),
                 versionPreference);
@@ -50,10 +51,9 @@ public class ProvServiceAPI {
         return response.getBody().toQN();
     }
 
-    public static BundleQueryResultDTO fetchBundleQueryResult(String serviceUri,
-                                                              QualifiedName bundleId, QualifiedName connectorId,
-                                                              String queryType, JsonNode querySpecification) throws IOException {
-        BundleQueryDTO queryParams = new BundleQueryDTO(bundleId, connectorId, queryType, querySpecification);
+    public static BundleQueryResultDTO fetchBundleQueryResult(
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, JsonNode querySpecification) throws IOException {
+        BundleQueryDTO queryParams = new BundleQueryDTO(bundleId, connectorId, querySpecification);
 
         if (serviceUri == null) {
             throw new IllegalArgumentException("Prov service cannot be null.");
@@ -76,4 +76,18 @@ public class ProvServiceAPI {
 
         return response.getBody();
     }
+
+    public static String getBackwardConnectorsQueryJson = """
+            {
+              "type": "GetConnectors",
+              "backward": true
+            }
+            """;
+
+    public static String getForwardConnectorsQueryJson = """
+            {
+              "type": "GetConnectors",
+              "backward": false
+            }
+            """;
 }

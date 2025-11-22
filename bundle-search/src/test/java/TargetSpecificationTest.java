@@ -366,8 +366,8 @@ public class TargetSpecificationTest {
         IFindableInDocument<INode> findPersons = new FindFittingNodes(isPerson);
 
         INode startNode = CpmUtils.chooseStartNode(samplingBundle_V1);
-        
-        assert (findPersons.find(startNode).size() == 2);
+
+        assert (findPersons.find(samplingBundle_V1, startNode).size() == 2);
     }
 
 

@@ -160,12 +160,13 @@ public class Traverser {
 
             try {
                 BundleQueryResultDTO queryResult = ProvServiceAPI.fetchBundleQueryResult(
-                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
-                        traversalParams.queryType, traversalParams.querySpecification);
+                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, traversalParams.querySpecification);
 
                 BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleQueryResult(
-                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, "connectors",
-                        new ObjectMapper().valueToTree(traversalParams.traverseBackwards ? "backward" : "forward"));
+                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
+                        new ObjectMapper().readTree(traversalParams.traverseBackwards
+                                ? ProvServiceAPI.getBackwardConnectorsQueryJson
+                                : ProvServiceAPI.getForwardConnectorsQueryJson));
 
                 boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
 

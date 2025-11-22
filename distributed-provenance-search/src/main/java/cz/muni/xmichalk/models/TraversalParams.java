@@ -11,19 +11,17 @@ public class TraversalParams {
     public String versionPreference;
     public ETraversalPriority traversalPriority;
     public List<EValidityCheck> validityChecks;
-    public String queryType;
     public JsonNode querySpecification;
 
     public TraversalParams() {
 
     }
 
-    public TraversalParams(boolean traverseBackwards, String versionPreference, ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks, String queryType, JsonNode querySpecification) {
+    public TraversalParams(boolean traverseBackwards, String versionPreference, ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks, JsonNode querySpecification) {
         this.traverseBackwards = traverseBackwards;
         this.versionPreference = versionPreference;
         this.traversalPriority = traversalPriority;
         this.validityChecks = validityChecks;
-        this.queryType = queryType;
         this.querySpecification = querySpecification;
     }
 }

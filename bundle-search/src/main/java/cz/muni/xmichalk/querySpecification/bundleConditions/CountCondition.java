@@ -27,7 +27,7 @@ public class CountCondition implements ICondition<CpmDocument> {
 
         INode startNode = CpmUtils.chooseStartNode(document);
 
-        int actualCount = findableInDocument.find(startNode).size();
+        int actualCount = findableInDocument.find(document, startNode).size();
 
         return switch (comparisonResult) {
             case EComparisonResult.EQUALS -> actualCount == count;

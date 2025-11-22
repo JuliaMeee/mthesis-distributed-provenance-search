@@ -2,6 +2,7 @@ package cz.muni.xmichalk.querySpecification.findable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 
 import java.util.List;
@@ -12,5 +13,5 @@ import java.util.List;
         @JsonSubTypes.Type(value = FindFittingLinearSubgraphs.class, name = "FindFittingLinearSubgraphs"),
 })
 public interface IFindableInDocument<T> {
-    List<T> find(INode startNode);
+    List<T> find(CpmDocument document, INode startNode);
 }

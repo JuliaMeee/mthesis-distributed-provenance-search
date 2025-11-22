@@ -9,9 +9,6 @@ import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.VersionPickerProvider;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageDocumentLoader;
-import cz.muni.xmichalk.queries.EQueryType;
-import cz.muni.xmichalk.queries.IQueryEvaluator;
-import cz.muni.xmichalk.queries.QueryEvaluatorsProvider;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.openprovenance.prov.vanilla.ProvFactory;
@@ -55,20 +52,14 @@ public class Config {
     }
 
     @Bean
-    public Map<EQueryType, IQueryEvaluator<?>> queryEvaluators() {
-        return QueryEvaluatorsProvider.getQueryEvaluators();
-    }
-
-    @Bean
     public Map<EVersionPreferrence, IVersionPicker> versionPickers(IDocumentLoader documentLoader) {
         return VersionPickerProvider.getVersionPickers(documentLoader);
     }
 
     @Bean
     public BundleQueryService bundleQueryService(
-            IDocumentLoader documentLoader,
-            Map<EQueryType, IQueryEvaluator<?>> queryEvaluators
+            IDocumentLoader documentLoader
     ) {
-        return new BundleQueryService(documentLoader, queryEvaluators);
+        return new BundleQueryService(documentLoader);
     }
 }

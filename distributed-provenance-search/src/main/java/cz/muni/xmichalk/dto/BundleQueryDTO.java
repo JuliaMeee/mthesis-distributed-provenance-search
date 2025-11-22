@@ -6,17 +6,15 @@ import org.openprovenance.prov.model.QualifiedName;
 public class BundleQueryDTO {
     public QualifiedNameDTO bundleId;
     public QualifiedNameDTO startNodeId;
-    public String queryType;
     public JsonNode querySpecification;
 
     public BundleQueryDTO() {
 
     }
 
-    public BundleQueryDTO(QualifiedName bundleId, QualifiedName connectorId, String queryType, JsonNode querySpecification) {
+    public BundleQueryDTO(QualifiedName bundleId, QualifiedName connectorId, JsonNode querySpecification) {
         this.bundleId = new QualifiedNameDTO().from(bundleId);
         this.startNodeId = new QualifiedNameDTO().from(connectorId);
-        this.queryType = queryType;
         this.querySpecification = querySpecification;
     }
 }

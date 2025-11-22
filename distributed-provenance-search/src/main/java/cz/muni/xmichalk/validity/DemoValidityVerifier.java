@@ -34,7 +34,7 @@ public class DemoValidityVerifier implements IValidityVerifier {
 
         BundleQueryResultDTO result = null;
         try {
-            result = ProvServiceAPI.fetchBundleQueryResult(provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, "TEST_FITS", validitySpecification);
+            result = ProvServiceAPI.fetchBundleQueryResult(provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, validitySpecification);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
