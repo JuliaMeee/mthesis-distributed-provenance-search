@@ -8,8 +8,8 @@ import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = FindNodes.class, name = "FindNodes"),
-        @JsonSubTypes.Type(value = FindLinearSubgraphs.class, name = "FindLinearSubgraphs"),
+        @JsonSubTypes.Type(value = FindFittingNodes.class, name = "FindFittingNodes"),
+        @JsonSubTypes.Type(value = FindFittingLinearSubgraphs.class, name = "FindFittingLinearSubgraphs"),
 })
 public interface IFindableInDocument<T> {
     List<T> find(INode startNode);

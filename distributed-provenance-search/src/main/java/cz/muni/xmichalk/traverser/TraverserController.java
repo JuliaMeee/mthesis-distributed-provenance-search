@@ -72,11 +72,13 @@ public class TraverserController {
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                       "queryType": "NODES",
                                       "querySpecification": {
-                                        "type" : "HasAttrQualifiedNameValue",
-                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                        "uriRegex" : "https://schema.org/Person"
+                                        "type" : "FindFittingNodes",
+                                        "nodePredicate" : {
+                                          "type" : "HasAttrQualifiedNameValue",
+                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                          "uriRegex" : "https://schema.org/Person"
+                                        }
                                       }
-                                    
                                     }
                                     """),
                             @ExampleObject(name = "Find all backward connectors", value = """
@@ -128,9 +130,12 @@ public class TraverserController {
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                       "queryType": "NODE_IDS",
                                       "querySpecification": {
-                                        "type" : "HasAttrQualifiedNameValue",
-                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                        "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                        "type" : "FindFittingNodes",
+                                        "nodePredicate" : {
+                                          "type" : "HasAttrQualifiedNameValue",
+                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                          "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                        }
                                       }
                                     }
                                     """),
@@ -151,7 +156,7 @@ public class TraverserController {
                                       "querySpecification": {
                                        "type" : "CountCondition",
                                        "findableInDocument" : {
-                                         "type" : "FindLinearSubgraphs",
+                                         "type" : "FindFittingLinearSubgraphs",
                                          "graphParts" : [ {
                                            "type" : "EdgeToNodeCondition",
                                            "nodeCondition" : {

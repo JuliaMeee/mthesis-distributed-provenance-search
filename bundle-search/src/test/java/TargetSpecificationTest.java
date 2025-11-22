@@ -7,8 +7,9 @@ import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.AllNodes;
 import cz.muni.xmichalk.querySpecification.bundleConditions.CountCondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.EComparisonResult;
-import cz.muni.xmichalk.querySpecification.findable.FindLinearSubgraphs;
-import cz.muni.xmichalk.querySpecification.findable.FindNodes;
+import cz.muni.xmichalk.querySpecification.findable.FindFittingLinearSubgraphs;
+import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
+import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.querySpecification.logicalOperations.AllTrue;
 import cz.muni.xmichalk.querySpecification.logicalOperations.AnyTrue;
 import cz.muni.xmichalk.querySpecification.logicalOperations.Either;
@@ -17,6 +18,7 @@ import cz.muni.xmichalk.querySpecification.nodeConditions.*;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsNotRelation;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
+import cz.muni.xmichalk.util.CpmUtils;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.StatementOrBundle;
 
@@ -88,7 +90,7 @@ public class TargetSpecificationTest {
             List.of(
                     // Has exactly one main activity
                     new CountCondition(
-                            new FindNodes(isMainActivity),
+                            new FindFittingNodes(isMainActivity),
                             EComparisonResult.EQUALS,
                             1
                     ),
@@ -131,7 +133,7 @@ public class TargetSpecificationTest {
         );
 
         ICondition<CpmDocument> bundleSpecification = new AllTrue<CpmDocument>(List.of(
-                new CountCondition(new FindNodes(conWithRefs), EComparisonResult.GREATER_THAN_OR_EQUALS, 1),
+                new CountCondition(new FindFittingNodes(conWithRefs), EComparisonResult.GREATER_THAN_OR_EQUALS, 1),
                 new AllNodes(connectorImplication)
         ));
 
@@ -141,7 +143,7 @@ public class TargetSpecificationTest {
     @Test
     public void testCountNonsenseNodes() throws IOException {
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
-                new FindNodes(nonsenseNodeCondition),
+                new FindFittingNodes(nonsenseNodeCondition),
                 EComparisonResult.EQUALS,
                 0
         );
@@ -157,7 +159,7 @@ public class TargetSpecificationTest {
         ));
 
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
-                new FindNodes(mainActivityWithMetaRef),
+                new FindFittingNodes(mainActivityWithMetaRef),
                 EComparisonResult.EQUALS,
                 1
         );
@@ -178,7 +180,7 @@ public class TargetSpecificationTest {
         ));
 
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
-                new FindNodes(joinedConditions),
+                new FindFittingNodes(joinedConditions),
                 EComparisonResult.EQUALS,
                 3
         );
@@ -253,7 +255,7 @@ public class TargetSpecificationTest {
         ));
 
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
-                new FindNodes(conjunction),
+                new FindFittingNodes(conjunction),
                 EComparisonResult.EQUALS,
                 0
         );
@@ -277,7 +279,7 @@ public class TargetSpecificationTest {
 
     @Test
     public void testHasForwardJumpConnectors() throws IOException {
-        FindLinearSubgraphs forwardJumpChain = new FindLinearSubgraphs(
+        FindFittingLinearSubgraphs forwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
                                 null,
@@ -303,7 +305,7 @@ public class TargetSpecificationTest {
 
     @Test
     public void hasBackwardJumpConnectorTo() throws IOException {
-        FindLinearSubgraphs backwardJumpChain = new FindLinearSubgraphs(
+        FindFittingLinearSubgraphs backwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
                                 null,
@@ -335,7 +337,7 @@ public class TargetSpecificationTest {
 
     @Test
     public void testDoesNotHaveForwardJumpConnectors() throws IOException {
-        FindLinearSubgraphs forwardJumpChain = new FindLinearSubgraphs(
+        FindFittingLinearSubgraphs forwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
                                 null,
@@ -357,6 +359,15 @@ public class TargetSpecificationTest {
         );
 
         assert (bundleSpecification.test(processingBundle_V1));
+    }
+
+    @Test
+    public void testFindPersonNodes() {
+        IFindableInDocument<INode> findPersons = new FindFittingNodes(isPerson);
+
+        INode startNode = CpmUtils.chooseStartNode(samplingBundle_V1);
+        
+        assert (findPersons.find(startNode).size() == 2);
     }
 
 

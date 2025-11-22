@@ -4,7 +4,7 @@
     {
       "type": "CountCondition",
       "findableInDocument": {
-        "type": "FindNodes",
+        "type": "FindFittingNodes",
         "nodePredicate": {
           "type": "HasAttrQualifiedNameValue",
           "attributeNameUri": "http://www.w3.org/ns/prov#type",

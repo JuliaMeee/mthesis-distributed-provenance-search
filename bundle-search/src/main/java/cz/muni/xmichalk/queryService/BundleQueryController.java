@@ -126,9 +126,12 @@ public class BundleQueryController {
                                               },
                                               "queryType": "NODES",
                                               "querySpecification": {
-                                                "type" : "HasAttrQualifiedNameValue",
-                                                "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                "uriRegex" : "https://schema.org/Person"
+                                                "type" : "FindFittingNodes",
+                                                "nodePredicate" : {
+                                                  "type" : "HasAttrQualifiedNameValue",
+                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                  "uriRegex" : "https://schema.org/Person"
+                                                }
                                               }
                                             }
                                             """
@@ -166,7 +169,7 @@ public class BundleQueryController {
                                               "querySpecification": {
                                                   "type" : "CountCondition",
                                                   "findableInDocument" : {
-                                                    "type" : "FindNodes",
+                                                    "type" : "FindFittingNodes",
                                                     "nodePredicate" : {
                                                       "type" : "HasAttrQualifiedNameValue",
                                                       "attributeNameUri" : "http://www.w3.org/ns/prov#type",
@@ -193,7 +196,7 @@ public class BundleQueryController {
                                               },
                                               "queryType": "SUBGRAPHS",
                                               "querySpecification": {
-                                                   "type" : "FindLinearSubgraphs",
+                                                   "type" : "FindFittingLinearSubgraphs",
                                                    "graphParts" : [ {
                                                      "type" : "EdgeToNodeCondition",
                                                      "edgeCondition" : null,

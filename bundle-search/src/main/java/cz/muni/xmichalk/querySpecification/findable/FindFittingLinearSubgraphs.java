@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class FindLinearSubgraphs implements IFindableInDocument<List<EdgeToNode>> {
+public class FindFittingLinearSubgraphs implements IFindableInDocument<List<EdgeToNode>> {
     public List<ICondition<EdgeToNode>> graphParts;
 
-    public FindLinearSubgraphs() {
+    public FindFittingLinearSubgraphs() {
     }
 
-    public FindLinearSubgraphs(List<EdgeToNodeCondition> graphParts) {
+    public FindFittingLinearSubgraphs(List<EdgeToNodeCondition> graphParts) {
         this.graphParts = new ArrayList<>(graphParts);
     }
 

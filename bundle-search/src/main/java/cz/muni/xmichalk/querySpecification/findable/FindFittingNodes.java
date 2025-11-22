@@ -6,13 +6,13 @@ import cz.muni.xmichalk.util.BundleNodesTraverser;
 
 import java.util.List;
 
-public class FindNodes implements IFindableInDocument<INode> {
+public class FindFittingNodes implements IFindableInDocument<INode> {
     public ICondition<INode> nodePredicate;
 
-    public FindNodes() {
+    public FindFittingNodes() {
     }
 
-    public FindNodes(ICondition<INode> nodePredicate) {
+    public FindFittingNodes(ICondition<INode> nodePredicate) {
         this.nodePredicate = nodePredicate;
     }
 
