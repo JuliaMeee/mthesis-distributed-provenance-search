@@ -1,6 +1,6 @@
-package cz.muni.xmichalk.targetSpecification.logicalOperations;
+package cz.muni.xmichalk.querySpecification.logicalOperations;
 
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 
 public class Either<T> implements ICondition<T> {
     public ICondition<T> first;

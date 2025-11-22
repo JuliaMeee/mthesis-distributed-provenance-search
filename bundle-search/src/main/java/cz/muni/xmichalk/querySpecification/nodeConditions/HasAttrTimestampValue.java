@@ -1,7 +1,7 @@
-package cz.muni.xmichalk.targetSpecification.nodeConditions;
+package cz.muni.xmichalk.querySpecification.nodeConditions;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.util.CpmUtils;
 
 import javax.xml.datatype.DatatypeConstants;

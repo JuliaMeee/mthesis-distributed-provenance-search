@@ -1,7 +1,7 @@
-package cz.muni.xmichalk.targetSpecification.findable;
+package cz.muni.xmichalk.querySpecification.findable;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
 
 import java.util.List;

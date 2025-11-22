@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.queries.queryEvaluators.FindConnectors;
 import cz.muni.xmichalk.queries.queryEvaluators.FindNodes;
+import cz.muni.xmichalk.queries.queryEvaluators.FindSubgraphs;
 import cz.muni.xmichalk.queries.queryEvaluators.TestFits;
 
 import java.util.List;
@@ -17,6 +18,9 @@ public class QueryEvaluatorsProvider {
                 ),
                 EQueryType.NODES, new FindNodes<JsonNode>(
                         FindNodes::transformResultsToDocJson
+                ),
+                EQueryType.SUBGRAPHS, new FindSubgraphs<List<JsonNode>>(
+                        FindSubgraphs::transformResultsToDocJsonList
                 ),
                 EQueryType.CONNECTORS, new FindConnectors(),
                 EQueryType.TEST_FITS, new TestFits()

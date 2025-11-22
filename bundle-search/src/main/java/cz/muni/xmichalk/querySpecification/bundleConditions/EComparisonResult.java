@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.targetSpecification.bundleConditions;
+package cz.muni.xmichalk.querySpecification.bundleConditions;
 
 public enum EComparisonResult {
     LESS_THAN,

@@ -1,8 +1,8 @@
-package cz.muni.xmichalk.targetSpecification.bundleConditions;
+package cz.muni.xmichalk.querySpecification.bundleConditions;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 
 public class AllNodes implements ICondition<CpmDocument> {
     public ICondition<INode> predicate;

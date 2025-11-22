@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.targetSpecification.findable;
+package cz.muni.xmichalk.querySpecification.findable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

@@ -1,9 +1,9 @@
-package cz.muni.xmichalk.targetSpecification.subgraphConditions;
+package cz.muni.xmichalk.querySpecification.subgraphConditions;
 
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.EdgeToNode;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 
 public class EdgeToNodeCondition implements ICondition<EdgeToNode> {
     public ICondition<IEdge> edgeCondition;

@@ -117,8 +117,8 @@ public class BundleQueryController {
                                     value = """
                                             {
                                               "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
-                                                "localPart": "ProcessingBundle_V1"
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
                                               },
                                               "startNodeId": {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
@@ -138,8 +138,8 @@ public class BundleQueryController {
                                     value = """
                                             {
                                               "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
-                                                "localPart": "ProcessingBundle_V1"
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
                                               },
                                               "startNodeId": {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
@@ -155,8 +155,8 @@ public class BundleQueryController {
                                     value = """
                                             {
                                               "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
-                                                "localPart": "ProcessingBundle_V1"
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
                                               },
                                               "startNodeId": {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
@@ -176,6 +176,54 @@ public class BundleQueryController {
                                                   "comparisonResult" : "EQUALS",
                                                   "count" : 1
                                                 }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Find all activities Jane Smith was responsible for",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "queryType": "SUBGRAPHS",
+                                              "querySpecification": {
+                                                   "type" : "FindLinearSubgraphs",
+                                                   "graphParts" : [ {
+                                                     "type" : "EdgeToNodeCondition",
+                                                     "edgeCondition" : null,
+                                                     "nodeCondition" : {
+                                                       "type" : "AllTrue",
+                                                       "conditions" : [ {
+                                                         "type" : "HasAttrQualifiedNameValue",
+                                                         "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                         "uriRegex" : "https://schema.org/Person"
+                                                       }, {
+                                                         "type" : "HasAttrLangStringValue",
+                                                         "attributeNameUri" : "https://schema.org/name",
+                                                         "langRegex" : null,
+                                                         "valueRegex" : "Jane Smith"
+                                                       } ]
+                                                     },
+                                                     "nodeIsEffect" : null
+                                                   }, {
+                                                     "type" : "EdgeToNodeCondition",
+                                                     "edgeCondition" : {
+                                                       "type" : "IsRelation",
+                                                       "relation" : "PROV_ASSOCIATION"
+                                                     },
+                                                     "nodeCondition" : {
+                                                       "type" : "IsKind",
+                                                       "kind" : "PROV_ACTIVITY"
+                                                     },
+                                                     "nodeIsEffect" : null
+                                                   } ]
+                                                 }
                                             }
                                             """
                             )

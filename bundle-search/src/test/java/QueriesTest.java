@@ -7,30 +7,39 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.models.ConnectorData;
+import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.queries.EQueryType;
 import cz.muni.xmichalk.queries.IQueryEvaluator;
 import cz.muni.xmichalk.queries.QueryEvaluatorsProvider;
-import cz.muni.xmichalk.targetSpecification.ICondition;
-import cz.muni.xmichalk.targetSpecification.bundleConditions.CountCondition;
-import cz.muni.xmichalk.targetSpecification.bundleConditions.EComparisonResult;
-import cz.muni.xmichalk.targetSpecification.findable.FindNodes;
-import cz.muni.xmichalk.targetSpecification.nodeConditions.HasAttr;
-import cz.muni.xmichalk.targetSpecification.nodeConditions.HasAttrQualifiedNameValue;
-import cz.muni.xmichalk.targetSpecification.nodeConditions.HasId;
+import cz.muni.xmichalk.querySpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.bundleConditions.CountCondition;
+import cz.muni.xmichalk.querySpecification.bundleConditions.EComparisonResult;
+import cz.muni.xmichalk.querySpecification.findable.FindLinearSubgraphs;
+import cz.muni.xmichalk.querySpecification.findable.FindNodes;
+import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
+import cz.muni.xmichalk.querySpecification.logicalOperations.AllTrue;
+import cz.muni.xmichalk.querySpecification.nodeConditions.*;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
 import cz.muni.xmichalk.util.CpmUtils;
 import cz.muni.xmichalk.util.NameSpaceConstants;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.QualifiedName;
+import org.openprovenance.prov.model.StatementOrBundle;
 import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
+import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
+import static cz.muni.xmichalk.util.NameSpaceConstants.SCHEMA_URI;
 import static cz.muni.xmichalk.util.ProvDocumentUtils.deserialize;
 
 public class QueriesTest {
@@ -45,8 +54,8 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODE_IDS);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "ProcessedSampleConSpec", "blank");
-        QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "NiceMarineStation", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "NiceMarineStation", "blank");
         ICondition<INode> nodeSpecification = new HasId(nodeIdToFind.getUri());
         JsonNode querySpecification = objectMapper.valueToTree(nodeSpecification);
 
@@ -67,8 +76,8 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODES);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "ProcessedSampleConSpec", "blank");
-        QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "NiceMarineStation", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "NiceMarineStation", "blank");
         ICondition<INode> nodeSpecification = new HasId(nodeIdToFind.getUri());
         JsonNode querySpecification = objectMapper.valueToTree(nodeSpecification);
 
@@ -90,7 +99,7 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODE_IDS);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         String attributeName = NameSpaceConstants.PROV_URI + "type";
         String attributeValue = NameSpaceConstants.SCHEMA_URI + "Person";
         ICondition<INode> nodeSpecification = new HasAttrQualifiedNameValue(
@@ -121,7 +130,7 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.NODES);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         String attributeName = NameSpaceConstants.SCHEMA_URI + "url";
         ICondition<INode> nodeSpecification = new HasAttr(attributeName);
 
@@ -143,11 +152,70 @@ public class QueriesTest {
     }
 
     @Test
+    public void testFindSubgraph() throws IOException {
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+
+        IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.SUBGRAPHS);
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        IFindableInDocument<List<EdgeToNode>> subgraphSpecification = new FindLinearSubgraphs(List.of(
+                new EdgeToNodeCondition(
+                        null,
+                        new AllTrue<>(List.of(
+                                new HasAttrQualifiedNameValue(
+                                        ATTR_PROV_TYPE.getUri(),
+                                        SCHEMA_URI + "Person"),
+                                new HasAttrLangStringValue(
+                                        SCHEMA_URI + "name",
+                                        null,
+                                        "Jane Smith"
+                                )
+                        )),
+                        null
+                ),
+                new EdgeToNodeCondition(
+                        new IsRelation(StatementOrBundle.Kind.PROV_ASSOCIATION),
+                        new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY),
+                        null
+                )
+        ));
+        JsonNode querySpecification = objectMapper.valueToTree(subgraphSpecification);
+
+        Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
+
+        // Results assertions
+
+        assert result != null;
+        assert result instanceof Collection<?>;
+        Collection<?> collection = (Collection<?>) result;
+        assert (collection.size() == 2);
+        List<CpmDocument> subgraphDocs = new ArrayList<>();
+        for (Object subgraphObject : collection) {
+            assert subgraphObject instanceof JsonNode;
+            JsonNode subgraphJsonNode = (JsonNode) subgraphObject;
+            Document subgraphDoc = deserialize(subgraphJsonNode.toString(), Formats.ProvFormat.JSON);
+            assert subgraphDoc != null;
+            CpmDocument subgraphCpmDoc = new CpmDocument(subgraphDoc, pF, cPF, cF);
+            subgraphDocs.add(subgraphCpmDoc);
+        }
+
+        QualifiedName JaneSmithId = new org.openprovenance.prov.vanilla.QualifiedName("https://orcid.org/", "0000-0001-0001-0001", "orcid");
+        QualifiedName activity1Id = new org.openprovenance.prov.vanilla.QualifiedName("gen/", "36294ecf35d15ba81da0bb55dfd8ee07934568e28ec56a51774b3e331ed6fd99", "gen");
+        QualifiedName activity2Id = new org.openprovenance.prov.vanilla.QualifiedName("gen/", "190fd43b1968737f3501420a6bfd9b74873e32416c6e14fef26238fbe3b197a2", "gen");
+
+
+        assert subgraphDocs.stream().allMatch(subgraphDoc -> subgraphDoc.getNodes().size() == 2);
+        assert subgraphDocs.stream().allMatch(subgraphDoc -> subgraphDoc.getNode(JaneSmithId) != null);
+        assert subgraphDocs.stream().anyMatch(subgraphDoc -> subgraphDoc.getNode(activity1Id) != null);
+        assert subgraphDocs.stream().anyMatch(subgraphDoc -> subgraphDoc.getNode(activity2Id) != null);
+
+    }
+
+    @Test
     public void testFits() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.TEST_FITS);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         ICondition<INode> samplingNodeSpecification = new HasId(".*Sampling");
         ICondition<CpmDocument> bundleSpecification = new CountCondition(
                 new FindNodes(
@@ -170,7 +238,7 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.TEST_FITS);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         ICondition<INode> backwardConnectorSpecification = new HasAttrQualifiedNameValue(
                 NameSpaceConstants.PROV_URI + "type",
                 NameSpaceConstants.CPM_URI + "backwardConnector"
@@ -197,7 +265,7 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.CONNECTORS);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         JsonNode querySpecification = objectMapper.valueToTree("backward");
 
         Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);
@@ -208,7 +276,7 @@ public class QueriesTest {
         assert list.size() == 1;
         assert list.getFirst() instanceof ConnectorData;
         ConnectorData connectorData = (ConnectorData) list.getFirst();
-        assert connectorData.id.toQN().getUri().equals(NameSpaceConstants.BLANK_URI + "StoredSampleCon_r1");
+        assert connectorData.id.toQN().getUri().equals(BLANK_URI + "StoredSampleCon_r1");
     }
 
     @Test
@@ -216,7 +284,7 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
         IQueryEvaluator<?> queryEvaluator = queryEvaluators.get(EQueryType.CONNECTORS);
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         JsonNode querySpecification = objectMapper.valueToTree("forward");
 
         Object result = queryEvaluator.apply(cpmDoc, startNodeId, querySpecification);

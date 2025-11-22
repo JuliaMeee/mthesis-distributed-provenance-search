@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.xmichalk.queries.IQueryEvaluator;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 
 public class TestFits implements IQueryEvaluator<Boolean> {
     @Override

@@ -7,7 +7,7 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.queries.IQueryEvaluator;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.util.BundleNodesTraverser;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import cz.muni.xmichalk.util.ProvJsonUtils;
@@ -46,7 +46,7 @@ public class FindNodes<T> implements IQueryEvaluator<T> {
             return null;
         }
 
-        Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes);
+        Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes, null);
         String jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
         jsonString = ProvJsonUtils.removeExplicitBundleId(jsonString);
         ObjectMapper objectMapper = new ObjectMapper();

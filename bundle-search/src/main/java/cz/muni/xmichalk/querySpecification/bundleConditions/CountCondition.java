@@ -1,9 +1,9 @@
-package cz.muni.xmichalk.targetSpecification.bundleConditions;
+package cz.muni.xmichalk.querySpecification.bundleConditions;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.targetSpecification.ICondition;
-import cz.muni.xmichalk.targetSpecification.findable.IFindableInDocument;
+import cz.muni.xmichalk.querySpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.util.CpmUtils;
 
 public class CountCondition implements ICondition<CpmDocument> {

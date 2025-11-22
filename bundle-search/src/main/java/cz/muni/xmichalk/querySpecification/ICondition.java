@@ -1,17 +1,17 @@
-package cz.muni.xmichalk.targetSpecification;
+package cz.muni.xmichalk.querySpecification;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import cz.muni.xmichalk.targetSpecification.bundleConditions.AllNodes;
-import cz.muni.xmichalk.targetSpecification.bundleConditions.CountCondition;
-import cz.muni.xmichalk.targetSpecification.logicalOperations.AllTrue;
-import cz.muni.xmichalk.targetSpecification.logicalOperations.AnyTrue;
-import cz.muni.xmichalk.targetSpecification.logicalOperations.Either;
-import cz.muni.xmichalk.targetSpecification.logicalOperations.Implication;
-import cz.muni.xmichalk.targetSpecification.nodeConditions.*;
-import cz.muni.xmichalk.targetSpecification.subgraphConditions.EdgeToNodeCondition;
-import cz.muni.xmichalk.targetSpecification.subgraphConditions.edgeConditions.IsNotRelation;
-import cz.muni.xmichalk.targetSpecification.subgraphConditions.edgeConditions.IsRelation;
+import cz.muni.xmichalk.querySpecification.bundleConditions.AllNodes;
+import cz.muni.xmichalk.querySpecification.bundleConditions.CountCondition;
+import cz.muni.xmichalk.querySpecification.logicalOperations.AllTrue;
+import cz.muni.xmichalk.querySpecification.logicalOperations.AnyTrue;
+import cz.muni.xmichalk.querySpecification.logicalOperations.Either;
+import cz.muni.xmichalk.querySpecification.logicalOperations.Implication;
+import cz.muni.xmichalk.querySpecification.nodeConditions.*;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsNotRelation;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
 
 import java.util.function.Predicate;
 

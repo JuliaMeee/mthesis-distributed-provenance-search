@@ -1,7 +1,7 @@
-package cz.muni.xmichalk.targetSpecification.subgraphConditions.edgeConditions;
+package cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions;
 
 import cz.muni.fi.cpm.model.IEdge;
-import cz.muni.xmichalk.targetSpecification.ICondition;
+import cz.muni.xmichalk.querySpecification.ICondition;
 import org.openprovenance.prov.model.StatementOrBundle;
 
 public class IsNotRelation implements ICondition<IEdge> {
