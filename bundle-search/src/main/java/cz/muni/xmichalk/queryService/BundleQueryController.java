@@ -54,7 +54,7 @@ public class BundleQueryController {
                                                 "type" : "GetNodes",
                                                 "nodeFinder" : {
                                                   "type" : "FindFittingNodes",
-                                                  "nodePredicate" : {
+                                                  "nodeCondition" : {
                                                     "type" : "HasAttrQualifiedNameValue",
                                                     "attributeNameUri" : "http://www.w3.org/ns/prov#type",
                                                     "uriRegex" : "https://schema.org/Person"
@@ -101,7 +101,7 @@ public class BundleQueryController {
                                                   "type" : "CountCondition",
                                                   "findableInDocument" : {
                                                     "type" : "FindFittingNodes",
-                                                    "nodePredicate" : {
+                                                    "nodeCondition" : {
                                                       "type" : "HasAttrQualifiedNameValue",
                                                       "attributeNameUri" : "http://www.w3.org/ns/prov#type",
                                                       "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"

@@ -4,7 +4,7 @@
     "type": "CountCondition",
     "findableInDocument": {
       "type": "FindFittingNodes",
-      "nodePredicate": {
+      "nodeCondition": {
         "type": "AllTrue",
         "conditions": [
           {

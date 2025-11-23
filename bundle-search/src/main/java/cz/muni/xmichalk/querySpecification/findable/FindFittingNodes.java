@@ -8,17 +8,17 @@ import cz.muni.xmichalk.util.BundleNodesTraverser;
 import java.util.List;
 
 public class FindFittingNodes implements IFindableInDocument<INode> {
-    public ICondition<INode> nodePredicate;
+    public ICondition<INode> nodeCondition;
 
     public FindFittingNodes() {
     }
 
-    public FindFittingNodes(ICondition<INode> nodePredicate) {
-        this.nodePredicate = nodePredicate;
+    public FindFittingNodes(ICondition<INode> nodeCondition) {
+        this.nodeCondition = nodeCondition;
     }
 
     @Override
     public List<INode> find(CpmDocument document, INode startNode) {
-        return BundleNodesTraverser.traverseAndFind(startNode, node -> nodePredicate.test(node));
+        return BundleNodesTraverser.traverseAndFind(startNode, node -> nodeCondition.test(node));
     }
 }
