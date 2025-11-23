@@ -4,9 +4,6 @@ import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.bundleVersionPicker.EVersionPreferrence;
-import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
-import cz.muni.xmichalk.bundleVersionPicker.VersionPickerProvider;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageDocumentLoader;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -14,8 +11,6 @@ import io.swagger.v3.oas.annotations.info.Info;
 import org.openprovenance.prov.vanilla.ProvFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Map;
 
 @Configuration
 @OpenAPIDefinition(
@@ -49,11 +44,6 @@ public class Config {
             ICpmProvFactory cpmProvFactory
     ) {
         return new StorageDocumentLoader(provFactory, cpmFactory, cpmProvFactory);
-    }
-
-    @Bean
-    public Map<EVersionPreferrence, IVersionPicker> versionPickers(IDocumentLoader documentLoader) {
-        return VersionPickerProvider.getVersionPickers(documentLoader);
     }
 
     @Bean

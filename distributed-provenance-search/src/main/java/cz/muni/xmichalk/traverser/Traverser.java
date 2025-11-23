@@ -120,7 +120,7 @@ public class Traverser {
             }
 
             try {
-                QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId, versionPreference);
+                QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, versionPreference);
                 if (preferredVersion != null) {
                     log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(), preferredVersion.getUri());
                     itemToTraverse.bundleId = preferredVersion;
@@ -162,11 +162,9 @@ public class Traverser {
                 BundleQueryResultDTO queryResult = ProvServiceAPI.fetchBundleQueryResult(
                         itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, traversalParams.querySpecification);
 
-                BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleQueryResult(
+                BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleConnectors(
                         itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
-                        new ObjectMapper().readTree(traversalParams.traverseBackwards
-                                ? ProvServiceAPI.getBackwardConnectorsQueryJson
-                                : ProvServiceAPI.getForwardConnectorsQueryJson));
+                        traversalParams.traverseBackwards);
 
                 boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
 

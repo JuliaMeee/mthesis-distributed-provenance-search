@@ -1,9 +1,10 @@
 package cz.muni.xmichalk.provServiceAPI;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.xmichalk.dto.BundleQueryDTO;
 import cz.muni.xmichalk.dto.BundleQueryResultDTO;
-import cz.muni.xmichalk.dto.PickVersionParamsDTO;
 import cz.muni.xmichalk.dto.QualifiedNameDTO;
 import org.openprovenance.prov.model.QualifiedName;
 import org.slf4j.Logger;
@@ -18,38 +19,7 @@ import java.io.IOException;
 
 public class ProvServiceAPI {
     private static final Logger log = LoggerFactory.getLogger(ProvServiceAPI.class);
-
-    public static QualifiedName fetchPreferredBundleVersion(
-            String serviceUri, QualifiedName bundleId, String versionPreference) throws IOException {
-        PickVersionParamsDTO params = new PickVersionParamsDTO(
-                new QualifiedNameDTO().from(bundleId),
-                versionPreference);
-
-        if (serviceUri == null) {
-            throw new IllegalArgumentException("Prov service cannot be null.");
-        }
-
-        String url = serviceUri + "pickVersion";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<PickVersionParamsDTO> request = new HttpEntity<>(params, headers);
-
-        ResponseEntity<QualifiedNameDTO> response = restTemplate.postForEntity(
-                url, request, QualifiedNameDTO.class);
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new IOException("Get preferred version API call failed with status: " + response.getStatusCode());
-        }
-
-        if (response.getBody() == null) {
-            return null;
-        }
-
-        return response.getBody().toQN();
-    }
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static BundleQueryResultDTO fetchBundleQueryResult(
             String serviceUri, QualifiedName bundleId, QualifiedName connectorId, JsonNode querySpecification) throws IOException {
@@ -77,17 +47,41 @@ public class ProvServiceAPI {
         return response.getBody();
     }
 
-    public static String getBackwardConnectorsQueryJson = """
-            {
-              "type": "GetConnectors",
-              "backward": true
-            }
-            """;
+    public static QualifiedName fetchPreferredBundleVersion(
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String versionPreference) throws IOException {
+        BundleQueryResultDTO queryResult = fetchBundleQueryResult(
+                serviceUri, bundleId, connectorId,
+                objectMapper.readTree("""
+                            {
+                              "type": "GetPreferredVersion",
+                              "versionPreference": "%s"
+                            }
+                        """.formatted(versionPreference)
+                )
+        );
 
-    public static String getForwardConnectorsQueryJson = """
-            {
-              "type": "GetConnectors",
-              "backward": false
-            }
-            """;
+        if (queryResult == null || queryResult.result == null) {
+            return null;
+        }
+
+        QualifiedNameDTO pickedBundleIdDto = objectMapper.convertValue(queryResult.result, new TypeReference<QualifiedNameDTO>() {
+        });
+
+        return pickedBundleIdDto.toQN();
+    }
+
+    public static BundleQueryResultDTO fetchBundleConnectors(
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, boolean backward) throws IOException {
+
+        return fetchBundleQueryResult(
+                serviceUri, bundleId, connectorId,
+                objectMapper.readTree("""
+                            {
+                              "type": "GetConnectors",
+                              "backward": %s
+                            }
+                        """.formatted(backward)
+                )
+        );
+    }
 }

@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.bundleVersionPicker.pickerImplementations;
+package cz.muni.xmichalk.bundleVersionPicker.implementations;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
@@ -24,39 +24,29 @@ public class LatestVersionPicker implements IVersionPicker {
     }
 
     @Override
-    public QualifiedName apply(QualifiedName bundleId) {
-        StorageCpmDocument bundle = documentLoader.loadCpmDocument(bundleId.getUri());
-
-        if (bundle == null || bundle.document == null) {
-            throw new RuntimeException("Failed to load bundle document for id: " + bundleId);
+    public QualifiedName apply(CpmDocument bundle) {
+        if (bundle == null) {
+            throw new RuntimeException("Bundle document is null");
         }
 
-        QualifiedName metaBundleId = CpmUtils.getMetaBundleId(bundle.document);
+        QualifiedName metaBundleId = CpmUtils.getMetaBundleId(bundle);
 
         if (metaBundleId == null) {
-            throw new RuntimeException("Failed to find meta bundle reference in bundle: " + bundleId);
+            throw new RuntimeException("Failed to find meta bundle reference in bundle: " + bundle.getBundleId().getUri());
         }
 
         StorageCpmDocument metaDocument = documentLoader.loadMetaCpmDocument(metaBundleId.getUri());
 
         if (metaDocument == null || metaDocument.document == null) {
-            throw new RuntimeException("Failed to load meta bundle: " + metaBundleId);
+            throw new RuntimeException("Failed to load meta bundle: " + metaBundleId.getUri());
         }
 
-        return pickFrom(bundleId, metaDocument.document);
+        INode versionNode = pickLatestVersionNode(metaDocument.document);
+
+        return versionNode != null ? versionNode.getId() : null;
     }
 
-    public static QualifiedName pickFrom(QualifiedName bundleId, CpmDocument metaDocument) {
-        INode versionNode = pickVersionNode(metaDocument);
-
-        if (versionNode == null) {
-            return bundleId;
-        }
-
-        return versionNode.getId();
-    }
-
-    private static INode pickVersionNode(CpmDocument metaDocument) {
+    public static INode pickLatestVersionNode(CpmDocument metaDocument) {
         List<INode> versionNodes = BundleNodesTraverser.traverseAndFind(
                 metaDocument,
                 metaDocument.getNodes().getFirst().getId(),

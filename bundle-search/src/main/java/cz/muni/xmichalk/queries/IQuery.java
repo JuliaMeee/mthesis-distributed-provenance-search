@@ -13,6 +13,7 @@ import cz.muni.fi.cpm.model.INode;
         @JsonSubTypes.Type(value = GetNodes.class, name = "GetNodes"),
         @JsonSubTypes.Type(value = GetSubgraphs.class, name = "GetSubgraphs"),
         @JsonSubTypes.Type(value = TestBundleFits.class, name = "TestBundleFits"),
+        @JsonSubTypes.Type(value = GetPreferredVersion.class, name = "GetPreferredVersion"),
 })
 public interface IQuery<T> {
     T evaluate(CpmDocument document, INode startNode);

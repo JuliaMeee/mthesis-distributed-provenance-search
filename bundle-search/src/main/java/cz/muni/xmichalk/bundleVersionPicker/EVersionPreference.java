@@ -1,6 +1,6 @@
 package cz.muni.xmichalk.bundleVersionPicker;
 
-public enum EVersionPreferrence {
+public enum EVersionPreference {
     SPECIFIED,
     LATEST,
 }

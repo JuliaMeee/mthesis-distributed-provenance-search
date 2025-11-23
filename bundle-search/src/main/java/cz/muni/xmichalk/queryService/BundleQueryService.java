@@ -6,6 +6,7 @@ import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
 import cz.muni.xmichalk.models.QueryResult;
 import cz.muni.xmichalk.queries.IQuery;
+import cz.muni.xmichalk.queries.IRequiresDocumentLoader;
 import org.openprovenance.prov.model.QualifiedName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +20,20 @@ public class BundleQueryService {
         this.documentLoader = documentLoader;
     }
 
-    public QueryResult evaluateBundleQuery(QualifiedName bundleId, QualifiedName startNodeId, IQuery<?> querySpecification) {
+    public QueryResult evaluateBundleQuery(QualifiedName bundleId, QualifiedName startNodeId, IQuery<?> query) {
         StorageCpmDocument retrievedDocument = documentLoader.loadCpmDocument(bundleId.getUri());
         CpmDocument document = retrievedDocument.document;
-        Object result = querySpecification.evaluate(document, document.getNode(startNodeId));
+        injectDependencies(query);
+        Object result = query.evaluate(document, document.getNode(startNodeId));
 
         return new QueryResult(
                 retrievedDocument.token,
                 new ObjectMapper().valueToTree(result));
+    }
+
+    public void injectDependencies(IQuery<?> query) {
+        if (query instanceof IRequiresDocumentLoader) {
+            ((IRequiresDocumentLoader) query).injectDocumentLoader(documentLoader);
+        }
     }
 }

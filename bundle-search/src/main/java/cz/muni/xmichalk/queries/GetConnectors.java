@@ -28,7 +28,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
 
 
     @Override
-    public List<ConnectorData> evaluate(final CpmDocument document, final INode startNode) {
+    public List<ConnectorData> evaluate(CpmDocument document, INode startNode) {
         if (backward == null) return null;
 
         IFindableInDocument<INode> finder = new FindFittingNodes(

@@ -2,9 +2,10 @@ import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
+import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.bundleVersionPicker.pickerImplementations.LatestVersionPicker;
-import cz.muni.xmichalk.bundleVersionPicker.pickerImplementations.SpecifiedVersionPicker;
+import cz.muni.xmichalk.bundleVersionPicker.implementations.LatestVersionPicker;
+import cz.muni.xmichalk.bundleVersionPicker.implementations.SpecifiedVersionPicker;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.QualifiedName;
@@ -25,24 +26,28 @@ public class VersionPickerTest {
 
     @Test
     public void testPickNewestVersion() throws IOException {
-        Path file = Path.of(dataFolder + "metaDocument.json");
+        Path metaFile = Path.of(dataFolder + "metaDocument.json");
 
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
+        Document metaDoc = deserializeFile(metaFile, Formats.ProvFormat.JSON);
 
-        CpmDocument cpmDoc = new CpmDocument(document, pF, cPF, cF);
+        CpmDocument metaCpmDoc = new CpmDocument(metaDoc, pF, cPF, cF);
 
-        QualifiedName bundleId = LatestVersionPicker.pickFrom(
-                new org.openprovenance.prov.vanilla.QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "SamplingBundle_V0", "storage"),
-                cpmDoc
-        );
+        INode latestVersionNode = LatestVersionPicker.pickLatestVersionNode(metaCpmDoc);
 
-        assert bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1");
+        assert latestVersionNode.getId().getUri().equals(
+                "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V1");
     }
 
     @Test
-    public void testPickReferenced() {
+    public void testPickSpecified() throws IOException {
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V0.json");
+
+        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
+
+        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
+
         QualifiedName bundleId = new SpecifiedVersionPicker().apply(
-                new org.openprovenance.prov.vanilla.QualifiedName("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/", "SamplingBundle_V0", "storage")
+                cpmDoc
         );
 
         assert bundleId.getUri().equals("http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/SamplingBundle_V0");

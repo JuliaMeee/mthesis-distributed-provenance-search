@@ -28,7 +28,7 @@ public class GetSubgraphs implements IQuery<List<JsonNode>> {
     }
 
     @Override
-    public List<JsonNode> evaluate(final CpmDocument document, final INode startNode) {
+    public List<JsonNode> evaluate(CpmDocument document, INode startNode) {
         if (subgraphFinder == null) {
             return null;
         }
