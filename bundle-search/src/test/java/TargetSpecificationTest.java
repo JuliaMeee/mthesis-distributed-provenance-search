@@ -22,6 +22,7 @@ import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsR
 import cz.muni.xmichalk.util.CpmUtils;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.StatementOrBundle;
+import org.openprovenance.prov.vanilla.QualifiedName;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,8 +30,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static cz.muni.xmichalk.util.AttributeNames.*;
-import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
-import static cz.muni.xmichalk.util.NameSpaceConstants.SCHEMA_URI;
+import static cz.muni.xmichalk.util.NameSpaceConstants.*;
 
 public class TargetSpecificationTest {
 
@@ -262,6 +262,54 @@ public class TargetSpecificationTest {
         );
 
         assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+    }
+
+    @Test
+    void testHasTimestampTrue() {
+        ICondition<INode> hasTimestamp = new HasAttrTimestampValue(
+                ATTR_START_TIME.getUri(),
+                "2021-01-01T00:00:00.000+01:00",
+                "2021-02-01T00:00:00.000+01:00",
+                "2020-01-01T00:00:00.000+01:00"
+
+        );
+
+        INode node = processingBundle_V0.getNode(new QualifiedName(BLANK_URI, "MaterialProcessing", "blank"));
+
+        assert (hasTimestamp.test(node));
+    }
+
+    @Test
+    void testHasTimestampFalse() {
+        ICondition<INode> hasTimestampEqual = new HasAttrTimestampValue(
+                ATTR_START_TIME.getUri(),
+                "2021-11-01T00:00:00.000+01:00",
+                null,
+                null
+
+        );
+
+        ICondition<INode> hasTimestampBefore = new HasAttrTimestampValue(
+                ATTR_START_TIME.getUri(),
+                null,
+                "2020-01-01T00:00:00.000+01:00",
+                null
+
+        );
+
+        ICondition<INode> hasTimestampAfter = new HasAttrTimestampValue(
+                ATTR_START_TIME.getUri(),
+                null,
+                null,
+                "2022-01-01T00:00:00.000+01:00"
+
+        );
+
+        INode node = processingBundle_V0.getNode(new QualifiedName(BLANK_URI, "MaterialProcessing", "blank"));
+
+        assert (!hasTimestampEqual.test(node));
+        assert (!hasTimestampAfter.test(node));
+        assert (!hasTimestampBefore.test(node));
     }
 
     @Test
