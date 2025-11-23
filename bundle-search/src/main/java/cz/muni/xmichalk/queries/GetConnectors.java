@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.queries;
 
-import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
@@ -28,7 +28,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
 
 
     @Override
-    public List<ConnectorData> evaluate(CpmDocument document, INode startNode) {
+    public List<ConnectorData> evaluate(BundleStart input) {
         if (backward == null) return null;
 
         IFindableInDocument<INode> finder = new FindFittingNodes(
@@ -38,7 +38,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
                 )
         );
 
-        List<INode> foundNodes = finder.find(document, startNode);
+        List<INode> foundNodes = finder.find(input.bundle, input.startNode);
 
         if (foundNodes == null || foundNodes.isEmpty()) return null;
 

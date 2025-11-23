@@ -2,8 +2,8 @@ package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import cz.muni.xmichalk.util.ProvJsonUtils;
@@ -24,11 +24,11 @@ public class GetNodes implements IQuery<JsonNode> {
     }
 
     @Override
-    public JsonNode evaluate(CpmDocument document, INode startNode) {
+    public JsonNode evaluate(BundleStart input) {
         if (nodeFinder == null) {
             return null;
         }
-        List<INode> foundNodes = nodeFinder.find(document, startNode);
+        List<INode> foundNodes = nodeFinder.find(input.bundle, input.startNode);
 
         return transformNodesToDocJson(foundNodes);
     }

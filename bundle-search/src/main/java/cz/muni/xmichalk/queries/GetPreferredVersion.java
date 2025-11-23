@@ -1,12 +1,11 @@
 package cz.muni.xmichalk.queries;
 
-import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.bundleVersionPicker.EVersionPreference;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.LatestVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.SpecifiedVersionPicker;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import org.openprovenance.prov.model.QualifiedName;
 
@@ -28,7 +27,7 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
 
 
     @Override
-    public QualifiedNameData evaluate(CpmDocument document, INode startNode) {
+    public QualifiedNameData evaluate(BundleStart input) {
         IVersionPicker versionPicker = null;
 
         switch (this.versionPreference) {
@@ -42,7 +41,7 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
                 throw new IllegalArgumentException("Unknown version preference: " + this.versionPreference);
         }
 
-        QualifiedName pickedVersion = versionPicker.apply(document);
+        QualifiedName pickedVersion = versionPicker.apply(input.bundle);
 
         if (pickedVersion != null) {
             return new QualifiedNameData().from(pickedVersion);

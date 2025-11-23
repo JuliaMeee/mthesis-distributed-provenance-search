@@ -1,12 +1,10 @@
 package cz.muni.xmichalk.querySpecification.bundleConditions;
 
-import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
-import cz.muni.xmichalk.util.CpmUtils;
 
-public class CountCondition implements ICondition<CpmDocument> {
+public class CountCondition implements ICondition<BundleStart> {
     public IFindableInDocument<?> findableInDocument;
     public EComparisonResult comparisonResult;
     public Integer count;
@@ -20,14 +18,12 @@ public class CountCondition implements ICondition<CpmDocument> {
         this.count = count;
     }
 
-    public boolean test(CpmDocument document) {
+    public boolean test(BundleStart target) {
         if (count == null || comparisonResult == null || findableInDocument == null) {
             throw new IllegalStateException("Missing values in count specification.");
         }
 
-        INode startNode = CpmUtils.chooseStartNode(document);
-
-        int actualCount = findableInDocument.find(document, startNode).size();
+        int actualCount = findableInDocument.find(target.bundle, target.startNode).size();
 
         return switch (comparisonResult) {
             case EComparisonResult.EQUALS -> actualCount == count;

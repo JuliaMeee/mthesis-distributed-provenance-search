@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.queries;
 
-import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 
@@ -18,11 +18,11 @@ public class GetNodeIds implements IQuery<List<QualifiedNameData>> {
     }
 
     @Override
-    public List<QualifiedNameData> evaluate(CpmDocument document, INode startNode) {
+    public List<QualifiedNameData> evaluate(BundleStart input) {
         if (nodeFinder == null) {
             return null;
         }
-        List<INode> foundNodes = nodeFinder.find(document, startNode);
+        List<INode> foundNodes = nodeFinder.find(input.bundle, input.startNode);
 
         return transformNodesToIds(foundNodes);
     }

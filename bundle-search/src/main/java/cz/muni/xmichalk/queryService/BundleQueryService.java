@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QueryResult;
 import cz.muni.xmichalk.queries.IQuery;
 import cz.muni.xmichalk.queries.IRequiresDocumentLoader;
@@ -24,7 +25,7 @@ public class BundleQueryService {
         StorageCpmDocument retrievedDocument = documentLoader.loadCpmDocument(bundleId.getUri());
         CpmDocument document = retrievedDocument.document;
         injectDependencies(query);
-        Object result = query.evaluate(document, document.getNode(startNodeId));
+        Object result = query.evaluate(new BundleStart(document, document.getNode(startNodeId)));
 
         return new QueryResult(
                 retrievedDocument.token,

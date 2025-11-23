@@ -2,9 +2,9 @@ package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
@@ -28,12 +28,12 @@ public class GetSubgraphs implements IQuery<List<JsonNode>> {
     }
 
     @Override
-    public List<JsonNode> evaluate(CpmDocument document, INode startNode) {
+    public List<JsonNode> evaluate(BundleStart input) {
         if (subgraphFinder == null) {
             return null;
         }
 
-        List<List<EdgeToNode>> foundSubgraphs = subgraphFinder.find(document, startNode);
+        List<List<EdgeToNode>> foundSubgraphs = subgraphFinder.find(input.bundle, input.startNode);
 
         if (foundSubgraphs == null || foundSubgraphs.isEmpty()) {
             return null;

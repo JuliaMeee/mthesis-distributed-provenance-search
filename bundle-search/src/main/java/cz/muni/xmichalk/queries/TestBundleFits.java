@@ -1,21 +1,20 @@
 package cz.muni.xmichalk.queries;
 
-import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.querySpecification.ICondition;
 
 public class TestBundleFits implements IQuery<Boolean> {
-    public ICondition<CpmDocument> condition;
+    public ICondition<BundleStart> condition;
 
     public TestBundleFits() {
     }
 
-    public TestBundleFits(ICondition<CpmDocument> condition) {
+    public TestBundleFits(ICondition<BundleStart> condition) {
         this.condition = condition;
     }
 
     @Override
-    public Boolean evaluate(CpmDocument document, INode startNode) {
-        return condition == null || condition.test(document);
+    public Boolean evaluate(BundleStart input) {
+        return condition == null || condition.test(input);
     }
 }

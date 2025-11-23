@@ -2,8 +2,7 @@ package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -16,5 +15,5 @@ import cz.muni.fi.cpm.model.INode;
         @JsonSubTypes.Type(value = GetPreferredVersion.class, name = "GetPreferredVersion"),
 })
 public interface IQuery<T> {
-    T evaluate(CpmDocument document, INode startNode);
+    T evaluate(BundleStart input);
 }

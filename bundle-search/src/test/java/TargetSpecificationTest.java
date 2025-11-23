@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.AllNodes;
 import cz.muni.xmichalk.querySpecification.bundleConditions.CountCondition;
@@ -86,7 +87,7 @@ public class TargetSpecificationTest {
             new HasAttr(ATTR_HASH_ALG.getUri())
     ));
 
-    ICondition<CpmDocument> simpleValidityCondition = new AllTrue<CpmDocument>(
+    ICondition<BundleStart> simpleValidityCondition = new AllTrue<BundleStart>(
             List.of(
                     // Has exactly one main activity
                     new CountCondition(
@@ -132,23 +133,23 @@ public class TargetSpecificationTest {
                 nonActivityWithBundleRef
         );
 
-        ICondition<CpmDocument> bundleSpecification = new AllTrue<CpmDocument>(List.of(
+        ICondition<BundleStart> bundleSpecification = new AllTrue<BundleStart>(List.of(
                 new CountCondition(new FindFittingNodes(conWithRefs), EComparisonResult.GREATER_THAN_OR_EQUALS, 1),
                 new AllNodes(connectorImplication)
         ));
 
-        assert (bundleSpecification.test(samplingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
     }
 
     @Test
     public void testCountNonsenseNodes() throws IOException {
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 new FindFittingNodes(nonsenseNodeCondition),
                 EComparisonResult.EQUALS,
                 0
         );
 
-        assert (bundleSpecification.test(samplingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
     }
 
     @Test
@@ -158,13 +159,13 @@ public class TargetSpecificationTest {
                 isActivityWithMetaRef
         ));
 
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 new FindFittingNodes(mainActivityWithMetaRef),
                 EComparisonResult.EQUALS,
                 1
         );
 
-        assert (bundleSpecification.test(samplingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
     }
 
     @Test
@@ -179,13 +180,13 @@ public class TargetSpecificationTest {
                 hasBundleRefAndMetaRef
         ));
 
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 new FindFittingNodes(joinedConditions),
                 EComparisonResult.EQUALS,
                 3
         );
 
-        assert (bundleSpecification.test(samplingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
     }
 
     @Test
@@ -202,9 +203,9 @@ public class TargetSpecificationTest {
                 backwardOrForwardCon
         );
 
-        ICondition<CpmDocument> bundleSpecification = new AllNodes(conImplication);
+        ICondition<BundleStart> bundleSpecification = new AllNodes(conImplication);
 
-        assert (bundleSpecification.test(processingBundle_V0));
+        assert (bundleSpecification.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
     }
 
     @Test
@@ -217,30 +218,30 @@ public class TargetSpecificationTest {
                 nonsenseNodeCondition
         );
 
-        ICondition<CpmDocument> bundleSpecificationSatisfied1 = new Either<CpmDocument>(
+        ICondition<BundleStart> bundleSpecificationSatisfied1 = new Either<BundleStart>(
                 satisfied,
                 unsatisfied
         );
 
-        ICondition<CpmDocument> bundleSpecificationSatisfied2 = new Either<CpmDocument>(
+        ICondition<BundleStart> bundleSpecificationSatisfied2 = new Either<BundleStart>(
                 unsatisfied,
                 satisfied
         );
 
-        ICondition<CpmDocument> bundleSpecificationUnsatisfied1 = new Either<CpmDocument>(
+        ICondition<BundleStart> bundleSpecificationUnsatisfied1 = new Either<BundleStart>(
                 unsatisfied,
                 unsatisfied
         );
 
-        ICondition<CpmDocument> bundleSpecificationUnsatisfied2 = new Either<CpmDocument>(
+        ICondition<BundleStart> bundleSpecificationUnsatisfied2 = new Either<BundleStart>(
                 satisfied,
                 satisfied
         );
 
-        assert (bundleSpecificationSatisfied1.test(processingBundle_V0));
-        assert (bundleSpecificationSatisfied2.test(processingBundle_V0));
-        assert (!bundleSpecificationUnsatisfied1.test(processingBundle_V0));
-        assert (!bundleSpecificationUnsatisfied2.test(processingBundle_V0));
+        assert (bundleSpecificationSatisfied1.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
+        assert (bundleSpecificationSatisfied2.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
+        assert (!bundleSpecificationUnsatisfied1.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
+        assert (!bundleSpecificationUnsatisfied2.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
     }
 
     @Test
@@ -254,13 +255,13 @@ public class TargetSpecificationTest {
                 notActivity
         ));
 
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 new FindFittingNodes(conjunction),
                 EComparisonResult.EQUALS,
                 0
         );
 
-        assert (bundleSpecification.test(samplingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
     }
 
     @Test
@@ -294,13 +295,13 @@ public class TargetSpecificationTest {
                 )
         );
 
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 forwardJumpChain,
                 EComparisonResult.GREATER_THAN_OR_EQUALS,
                 1
         );
 
-        assert (bundleSpecification.test(samplingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
     }
 
     @Test
@@ -326,13 +327,13 @@ public class TargetSpecificationTest {
                 )
         );
 
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 backwardJumpChain,
                 EComparisonResult.GREATER_THAN_OR_EQUALS,
                 1
         );
 
-        assert (bundleSpecification.test(speciesIdentificationBundle_V0));
+        assert (bundleSpecification.test(new BundleStart(speciesIdentificationBundle_V0, CpmUtils.chooseStartNode(speciesIdentificationBundle_V0))));
     }
 
     @Test
@@ -352,13 +353,13 @@ public class TargetSpecificationTest {
                 )
         );
 
-        ICondition<CpmDocument> bundleSpecification = new CountCondition(
+        ICondition<BundleStart> bundleSpecification = new CountCondition(
                 forwardJumpChain,
                 EComparisonResult.EQUALS,
                 0
         );
 
-        assert (bundleSpecification.test(processingBundle_V1));
+        assert (bundleSpecification.test(new BundleStart(processingBundle_V1, CpmUtils.chooseStartNode(processingBundle_V1))));
     }
 
     @Test
@@ -383,7 +384,7 @@ public class TargetSpecificationTest {
         );
 
         for (CpmDocument cpmDoc : cpmDocs) {
-            assert (simpleValidityCondition.test(cpmDoc));
+            assert (simpleValidityCondition.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
         }
     }
 
@@ -391,20 +392,20 @@ public class TargetSpecificationTest {
     public void testSerializationRoundTrip() throws IOException {
         CpmDocument cpmDoc = samplingBundle_V1;
 
-        assert (simpleValidityCondition.test(cpmDoc));
+        assert (simpleValidityCondition.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
 
         Path filePath = Path.of(specificationsFolder, "simpleValidityCondition.json");
 
         serializeToJson(filePath, simpleValidityCondition);
 
         ObjectMapper mapper = new ObjectMapper();
-        ICondition<CpmDocument> deserialized =
+        ICondition<BundleStart> deserialized =
                 mapper.readValue(
                         filePath.toFile(),
-                        new TypeReference<ICondition<CpmDocument>>() {
+                        new TypeReference<ICondition<BundleStart>>() {
                         }
                 );
-        assert (deserialized.test(cpmDoc));
+        assert (deserialized.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
 
     }
 

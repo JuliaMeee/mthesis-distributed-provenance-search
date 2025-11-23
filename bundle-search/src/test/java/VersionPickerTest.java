@@ -27,10 +27,12 @@ public class VersionPickerTest {
     @Test
     public void testPickNewestVersion() throws IOException {
         Path metaFile = Path.of(dataFolder + "metaDocument.json");
-
         Document metaDoc = deserializeFile(metaFile, Formats.ProvFormat.JSON);
-
         CpmDocument metaCpmDoc = new CpmDocument(metaDoc, pF, cPF, cF);
+
+        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V0.json");
+        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
+        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
 
         INode latestVersionNode = LatestVersionPicker.pickLatestVersionNode(metaCpmDoc);
 
@@ -41,9 +43,7 @@ public class VersionPickerTest {
     @Test
     public void testPickSpecified() throws IOException {
         Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V0.json");
-
         Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
-
         CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
 
         QualifiedName bundleId = new SpecifiedVersionPicker().apply(
