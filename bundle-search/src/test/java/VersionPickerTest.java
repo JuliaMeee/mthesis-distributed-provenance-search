@@ -30,10 +30,6 @@ public class VersionPickerTest {
         Document metaDoc = deserializeFile(metaFile, Formats.ProvFormat.JSON);
         CpmDocument metaCpmDoc = new CpmDocument(metaDoc, pF, cPF, cF);
 
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V0.json");
-        Document doc = deserializeFile(file, Formats.ProvFormat.JSON);
-        CpmDocument cpmDoc = new CpmDocument(doc, pF, cPF, cF);
-
         INode latestVersionNode = LatestVersionPicker.pickLatestVersionNode(metaCpmDoc);
 
         assert latestVersionNode.getId().getUri().equals(

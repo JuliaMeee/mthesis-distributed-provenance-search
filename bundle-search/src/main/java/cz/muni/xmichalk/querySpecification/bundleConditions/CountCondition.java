@@ -12,7 +12,7 @@ public class CountCondition implements ICondition<BundleStart> {
     public CountCondition() {
     }
 
-    public CountCondition(IFindableInDocument countableInDocument, EComparisonResult comparisonResult, Integer count) {
+    public CountCondition(IFindableInDocument<?> countableInDocument, EComparisonResult comparisonResult, Integer count) {
         this.findableInDocument = countableInDocument;
         this.comparisonResult = comparisonResult;
         this.count = count;

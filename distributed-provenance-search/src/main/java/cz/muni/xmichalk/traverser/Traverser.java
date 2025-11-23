@@ -116,7 +116,7 @@ public class Traverser {
             if (traversalState.processing.values().stream()
                     .anyMatch(item -> traversalState.toTraverseQueue.comparator().compare(item, finalItemToTraverse) < 0)) {
                 traversalState.toTraverseQueue.add(finalItemToTraverse);
-                return null; // wait until all bundles with higher priority are processed, because they might add more higher priority items to traverse
+                return null; // wait until all bundles with higher priority are processed, because they might add higher priority items to traverse
             }
 
             try {

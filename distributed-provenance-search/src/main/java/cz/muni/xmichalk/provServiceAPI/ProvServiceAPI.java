@@ -7,8 +7,6 @@ import cz.muni.xmichalk.dto.BundleQueryDTO;
 import cz.muni.xmichalk.dto.BundleQueryResultDTO;
 import cz.muni.xmichalk.dto.QualifiedNameDTO;
 import org.openprovenance.prov.model.QualifiedName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 
 public class ProvServiceAPI {
-    private static final Logger log = LoggerFactory.getLogger(ProvServiceAPI.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static BundleQueryResultDTO fetchBundleQueryResult(

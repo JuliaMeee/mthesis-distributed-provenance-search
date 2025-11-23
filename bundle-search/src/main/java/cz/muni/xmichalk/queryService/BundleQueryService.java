@@ -9,13 +9,9 @@ import cz.muni.xmichalk.models.QueryResult;
 import cz.muni.xmichalk.queries.IQuery;
 import cz.muni.xmichalk.queries.IRequiresDocumentLoader;
 import org.openprovenance.prov.model.QualifiedName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BundleQueryService {
     private final IDocumentLoader documentLoader;
-    private static final Logger log = LoggerFactory.getLogger(BundleQueryService.class);
-
 
     public BundleQueryService(IDocumentLoader documentLoader) {
         this.documentLoader = documentLoader;

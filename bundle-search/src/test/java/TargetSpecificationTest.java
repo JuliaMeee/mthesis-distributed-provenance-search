@@ -117,7 +117,7 @@ public class TargetSpecificationTest {
 
 
     @Test
-    public void testAllSatisfyNodeImplication() throws IOException {
+    public void testAllSatisfyNodeImplication() {
         ICondition<INode> conWithRefs = new AllTrue<INode>(List.of(
                 isConnector,
                 hasBundleRefAndMetaRef
@@ -142,7 +142,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testCountNonsenseNodes() throws IOException {
+    public void testCountNonsenseNodes() {
         ICondition<BundleStart> bundleSpecification = new CountCondition(
                 new FindFittingNodes(nonsenseNodeCondition),
                 EComparisonResult.EQUALS,
@@ -153,7 +153,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testHasSpecificMetaBundleId() throws IOException {
+    public void testHasSpecificMetaBundleId() {
         ICondition<INode> mainActivityWithMetaRef = new AllTrue<>(List.of(
                 isMainActivity,
                 isActivityWithMetaRef
@@ -169,7 +169,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testCountSatisfiedAllTrue() throws IOException {
+    public void testCountSatisfiedAllTrue() {
         ICondition<INode> conSpec = new AllTrue<>(List.of(
                 new HasId("(?i).*spec"),
                 isConnector
@@ -190,7 +190,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testAllNodesImplicationAnyTrue() throws IOException {
+    public void testAllNodesImplicationAnyTrue() {
         // Test that every connector is either a forward connector or has a referenced bundle id and meta bundle id defined
 
         AnyTrue<INode> backwardOrForwardCon = new AnyTrue<INode>(List.of(
@@ -209,7 +209,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testEither() throws IOException {
+    public void testEither() {
         AllNodes satisfied = new AllNodes(
                 new HasId(".*")
         );
@@ -245,7 +245,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testCountNonsenseConjunction() throws IOException {
+    public void testCountNonsenseConjunction() {
         ICondition<INode> activity = new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY);
 
         ICondition<INode> notActivity = new IsNotKind(StatementOrBundle.Kind.PROV_ACTIVITY);
@@ -327,7 +327,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testHasForwardJumpConnectors() throws IOException {
+    public void testHasForwardJumpConnectors() {
         FindFittingLinearSubgraphs forwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
@@ -353,7 +353,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void hasBackwardJumpConnectorTo() throws IOException {
+    public void hasBackwardJumpConnectorTo() {
         FindFittingLinearSubgraphs backwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
@@ -385,7 +385,7 @@ public class TargetSpecificationTest {
     }
 
     @Test
-    public void testDoesNotHaveForwardJumpConnectors() throws IOException {
+    public void testDoesNotHaveForwardJumpConnectors() {
         FindFittingLinearSubgraphs forwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
@@ -421,7 +421,7 @@ public class TargetSpecificationTest {
 
 
     @Test
-    public void testSimpleValiditySpecification() throws IOException {
+    public void testSimpleValiditySpecification() {
         List<CpmDocument> cpmDocs = List.of(
                 samplingBundle_V0,
                 samplingBundle_V1,
