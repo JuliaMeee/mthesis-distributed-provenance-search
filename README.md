@@ -66,6 +66,19 @@ You can also run requests to the prov-traverser and bundle-searcher containers f
 \*<i> Note that the service containers must be running for the OpenAPI specification to load. It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers.  
 \*\* If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.</i>
 
+<h2>Query structure</h2>
+Following diagrams contain information relevant for structuring a query. The methods declared in the interfaces are ommited in their implementations to save space and put emphasis on the fields that user will use to specify a query. Example queries are in the OpenApi specifications.
+
+Possible <i>Kind</i> values are listed here: https://javadoc.io/doc/org.openprovenance.prov/prov-model/latest/prov.model/org/openprovenance/prov/model/StatementOrBundle.Kind.html
+<br>
+<br>
+
+![IQuery interface implementations](./query-structure/iquery.drawio.svg)  
+
+![IFindableInDocument interface implementations](./query-structure/ifindableindocument.drawio.svg)  
+    
+![ICondition interface implementations](./query-structure/icondition.drawio.svg)
+
 <h2>Demo data</h2>
 
 The demo data can be found in `./setup/data/` folder. Below is a schema of traversal information of the bundles, excluding sender and reciever agent nodes (to save space). Main activies are depicted as rectangles, and connectors are depicted as ovals. connectors to the left of the main activity are backwad connectors. Connectors to the right of the main acitivyt are forward connectors.
