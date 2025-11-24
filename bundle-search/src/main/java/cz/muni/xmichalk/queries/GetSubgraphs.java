@@ -42,7 +42,7 @@ public class GetSubgraphs implements IQuery<List<JsonNode>> {
         return foundSubgraphs.stream().map(subgraph -> transformSubgraphToDocJson(subgraph)).collect(Collectors.toList());
     }
 
-    public JsonNode transformSubgraphToDocJson(Collection<EdgeToNode> subgraph) {
+    private JsonNode transformSubgraphToDocJson(Collection<EdgeToNode> subgraph) {
         if (subgraph == null || subgraph.isEmpty()) {
             return null;
         }

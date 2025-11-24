@@ -33,7 +33,7 @@ public class GetNodes implements IQuery<JsonNode> {
         return transformNodesToDocJson(foundNodes);
     }
 
-    public JsonNode transformNodesToDocJson(List<INode> nodes) {
+    private JsonNode transformNodesToDocJson(List<INode> nodes) {
         if (nodes == null || nodes.isEmpty()) {
             return null;
         }

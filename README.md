@@ -53,15 +53,16 @@ Run the following command from directory `./setup` to register organizations and
 - Service that represents a provenance controller and can answer queries about individual bundles in storage of this provenance controller.  
 - OpenAPI specification\*: `http://localhost:8081/swagger-ui/index.html#` 
 
-Checkout the <b>prov-traverser</b> API to list available <i>validity checks</i> and <i>traversal priorities</i>.  
-Checkout the <b>bundle-searcher</b> API to list  available <i>version preferences</i> and <i>query types</i> along with their desriptions.  
+See the <b>prov-traverser</b> API to list available validity checks and traversal priorities. 
+See the <b>bundle-searcher</b> API to understand queries and supported version preferences.
+Currently supported version preferences are "LATEST" and "SPECIFIED.  
 
 Both OpenAPI specifications contains multiple executable query examples to test the demo.
 
-You can also run requests to the prov-traverser and bundle-searcher containers from the <b>debug-shell</b> container.
+You can also run requests to the prov-traverser and bundle-searcher containers from the <b>debug-shell</b> container**.
 
-<i>-- Note that the service containers must be running for the OpenAPI specification to load.  
--- It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers. If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.</i>
+\*<i> Note that the service containers must be running for the OpenAPI specification to load. It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers.  
+\*\* If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.</i>
 
 <h2>Demo data</h2>
 

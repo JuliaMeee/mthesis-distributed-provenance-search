@@ -27,7 +27,7 @@ public class GetNodeIds implements IQuery<List<QualifiedNameData>> {
         return transformNodesToIds(foundNodes);
     }
 
-    public List<QualifiedNameData> transformNodesToIds(List<INode> nodes) {
+    private List<QualifiedNameData> transformNodesToIds(List<INode> nodes) {
         if (nodes == null || nodes.isEmpty()) {
             return null;
         }

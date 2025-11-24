@@ -47,7 +47,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
                 .toList();
     }
 
-    public ConnectorData transformToConnectorData(INode node) {
+    private ConnectorData transformToConnectorData(INode node) {
         ConnectorData connectorData = new ConnectorData();
 
 
