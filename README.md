@@ -1,5 +1,7 @@
 # mthesis-distributed-provenance-search
 
+This project was developed as part of my master's thesis. The result consists of 2 services: <b>prov-traverser</b> and <b>bundle-searcher</b>, that together rpovide federated search of provenance chains.
+
 <h2>Project structure:</h2>
 
 `/bundle-search`: implementation of <b>bundle-searcher</b>.   
