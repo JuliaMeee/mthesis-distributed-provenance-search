@@ -63,7 +63,7 @@ Queries are explained further in this readme.
 
 You can also run requests to the prov-traverser and bundle-searcher containers from the <b>debug-shell</b> container.
 
-\*<i> Note that the service containers must be running for the OpenAPI specification to load.  
+\*<i> Note that the service containers must be running for the OpenAPI specification to load.</i>  
 
 <h2>Query structure</h2>
 Following diagrams contain information relevant for structuring a query. The methods declared in the interfaces are ommited in their implementations to save space and put emphasis on the fields that user will use to specify a query. Example queries are in the OpenApi specifications.
