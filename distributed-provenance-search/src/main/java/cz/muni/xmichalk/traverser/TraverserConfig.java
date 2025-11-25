@@ -1,10 +1,10 @@
 package cz.muni.xmichalk.traverser;
 
-import cz.muni.xmichalk.models.ItemToSearch;
+import cz.muni.xmichalk.models.ItemToTraverse;
 import cz.muni.xmichalk.provServiceTable.IProvServiceTable;
 import cz.muni.xmichalk.provServiceTable.ProvServiceTable;
-import cz.muni.xmichalk.searchPriority.ESearchPriority;
-import cz.muni.xmichalk.searchPriority.IntegrityThenOrderedValidity;
+import cz.muni.xmichalk.traversalPriority.ETraversalPriority;
+import cz.muni.xmichalk.traversalPriority.IntegrityThenOrderedValidity;
 import cz.muni.xmichalk.validity.DemoValidityVerifier;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import cz.muni.xmichalk.validity.IValidityVerifier;
@@ -23,9 +23,9 @@ import java.util.Map;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "Provenance search API",
+                title = "Provenance traversal API",
                 version = "1.0.0",
-                description = "REST API for searching through the provenance chain."
+                description = "REST API for traversing through the provenance chain."
         )
 )
 public class TraverserConfig {
@@ -61,9 +61,9 @@ public class TraverserConfig {
     }
 
     @Bean
-    public Map<ESearchPriority, Comparator<ItemToSearch>> searchPriorities() {
+    public Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators() {
         return Map.of(
-                ESearchPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS, new IntegrityThenOrderedValidity()
+                ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS, new IntegrityThenOrderedValidity()
         );
     }
 
@@ -71,7 +71,7 @@ public class TraverserConfig {
     public Traverser traverser(
             IProvServiceTable provServiceTable,
             Map<EValidityCheck, IValidityVerifier> validityVerifiers,
-            Map<ESearchPriority, Comparator<ItemToSearch>> searchPriorityComparators) {
-        return new Traverser(provServiceTable, traverserConcurrencyDegree, validityVerifiers, searchPriorityComparators);
+            Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
+        return new Traverser(provServiceTable, traverserConcurrencyDegree, validityVerifiers, traversalPriorityComparators);
     }
 }

@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.util;
 
+import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 import org.openprovenance.prov.interop.InteropFramework;
 import org.openprovenance.prov.model.*;
@@ -56,7 +57,7 @@ public class ProvDocumentUtils {
         return serializedDocument;
     }
 
-    public static Document encapsulateInDocument(List<INode> nodes) {
+    public static Document encapsulateInDocument(List<INode> nodes, List<IEdge> edges) {
         ProvFactory pf = ProvFactory.getFactory();
         Document doc = pf.newDocument();
 
@@ -64,11 +65,33 @@ public class ProvDocumentUtils {
 
         Bundle bundle = pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
 
+        if (nodes == null) {
+            nodes = List.of();
+        }
         for (INode node : nodes) {
+            if (node == null) {
+                continue;
+            }
+
             List<Element> elements = node.getElements();
 
             for (Element element : elements) {
                 bundle.getStatement().add(element);
+            }
+        }
+
+        if (edges == null) {
+            edges = List.of();
+        }
+        for (IEdge edge : edges) {
+            if (edge == null) {
+                continue;
+            }
+
+            List<Relation> relations = edge.getRelations();
+
+            for (Relation relation : relations) {
+                bundle.getStatement().add(relation);
             }
         }
 

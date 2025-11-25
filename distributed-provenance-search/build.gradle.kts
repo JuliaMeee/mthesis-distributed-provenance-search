@@ -16,19 +16,7 @@ repositories {
 
 publishing {
     publications {
-        create<MavenPublication>("corePublication") {
-            groupId = "cz.muni.fi.cpm"
-            artifactId = "cpm-core"
-            version = "1.0.0"
-            artifact(file("src/main/resources/cpm-core-1.0.0.jar"))
-        }
 
-        create<MavenPublication>("templatePublication") {
-            groupId = "cz.muni.fi.cpm"
-            artifactId = "cpm-template"
-            version = "1.0.0"
-            artifact(file("src/main/resources/cpm-template-1.0.0.jar"))
-        }
     }
 
     repositories {
@@ -45,9 +33,6 @@ dependencies {
     implementation("org.openprovenance.prov:prov-interop:2.2.1")
     implementation("org.openprovenance.prov:prov-nf:2.2.1")
 
-    implementation(files("src/main/resources/cpm-core-1.0.0.jar"))
-    implementation(files("src/main/resources/cpm-template-1.0.0.jar"))
-
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-logging")
@@ -58,17 +43,6 @@ dependencies {
     implementation("io.github.erdtman:java-json-canonicalization:1.1")
 }
 
-tasks.register("installCore") {
-    dependsOn(tasks.named("publishToMavenLocal"))
-}
-
-tasks.register("installTemplate") {
-    dependsOn(tasks.named("publishToMavenLocal"))
-}
-
-tasks.named("clean") {
-    finalizedBy("installCore", "installTemplate")
-}
 
 tasks.test {
     useJUnitPlatform()

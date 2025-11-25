@@ -29,6 +29,6 @@ public class ProvServiceTable implements IProvServiceTable {
                         mapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, String.class));
         table.putAll(loaded);
 
-        log.info("Loaded traverser table: {}", table);
+        log.info("Loaded prov service table: {}", table);
     }
 }

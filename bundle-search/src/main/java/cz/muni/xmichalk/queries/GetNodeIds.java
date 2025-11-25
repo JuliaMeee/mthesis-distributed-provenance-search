@@ -1,0 +1,39 @@
+package cz.muni.xmichalk.queries;
+
+import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
+
+import java.util.List;
+
+public class GetNodeIds implements IQuery<List<QualifiedNameData>> {
+    public IFindableInDocument<INode> nodeFinder;
+
+    public GetNodeIds() {
+    }
+
+    public GetNodeIds(IFindableInDocument<INode> nodeFinder) {
+        this.nodeFinder = nodeFinder;
+    }
+
+    @Override
+    public List<QualifiedNameData> evaluate(BundleStart input) {
+        if (nodeFinder == null) {
+            return null;
+        }
+        List<INode> foundNodes = nodeFinder.find(input.bundle, input.startNode);
+
+        return transformNodesToIds(foundNodes);
+    }
+
+    private List<QualifiedNameData> transformNodesToIds(List<INode> nodes) {
+        if (nodes == null || nodes.isEmpty()) {
+            return null;
+        }
+
+        return nodes.stream()
+                .map(node -> new QualifiedNameData().from(node.getId()))
+                .toList();
+    }
+}

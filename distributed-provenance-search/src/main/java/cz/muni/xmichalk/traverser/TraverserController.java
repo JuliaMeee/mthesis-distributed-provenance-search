@@ -2,11 +2,11 @@ package cz.muni.xmichalk.traverser;
 
 
 import cz.muni.xmichalk.dto.FoundResultDTO;
-import cz.muni.xmichalk.dto.SearchParamsDTO;
-import cz.muni.xmichalk.dto.SearchResultsDTO;
-import cz.muni.xmichalk.models.SearchParams;
-import cz.muni.xmichalk.models.SearchResults;
-import cz.muni.xmichalk.searchPriority.ESearchPriority;
+import cz.muni.xmichalk.dto.TraversalParamsDTO;
+import cz.muni.xmichalk.dto.TraversalResultsDTO;
+import cz.muni.xmichalk.models.TraversalParams;
+import cz.muni.xmichalk.models.TraversalResults;
+import cz.muni.xmichalk.traversalPriority.ETraversalPriority;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,23 +41,23 @@ public class TraverserController {
         return ResponseEntity.ok(checks);
     }
 
-    @Operation(summary = "List available search priority options", description = "Returns all defined search priority options.")
-    @GetMapping(value = "/api/getSearchPriorities", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Set<ESearchPriority>> getAvailableSearchPriorities() {
-        Set<ESearchPriority> options = traverser.getSearchPriorityComparators().keySet();
+    @Operation(summary = "List available traversal priority options", description = "Returns all defined traversal priority options.")
+    @GetMapping(value = "/api/getTraversalPriorities", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Set<ETraversalPriority>> getAvailableTraversalPriorities() {
+        Set<ETraversalPriority> options = traverser.getTraversalPriorityComparators().keySet();
 
         return ResponseEntity.ok(options);
     }
 
-    @Operation(summary = "Search this bundle and its predecessors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and node, and then searches through all its predecessors. Returns all found results.")
-    @PostMapping(value = "/api/searchPredecessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Traverses given bundle and its predecessors to find results for the query.")
+    @PostMapping(value = "/api/traversePredecessors", produces = MediaType.APPLICATION_JSON_VALUE)
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Search Params",
+            description = "Traversal Params",
             required = true,
             content = @Content(
-                    schema = @Schema(implementation = SearchParamsDTO.class),
+                    schema = @Schema(implementation = TraversalParamsDTO.class),
                     examples = {
-                            @ExampleObject(name = "Find all backward connectors", value = """
+                            @ExampleObject(name = "Get all person nodes", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
@@ -68,13 +68,22 @@ public class TraverserController {
                                         "localPart": "IdentifiedSpeciesCon"
                                       },
                                       "versionPreference": "SPECIFIED",
-                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "targetType": "CONNECTORS",
-                                        "targetSpecification": "backward"
+                                      "querySpecification": {
+                                        "type": "GetNodes",
+                                        "nodeFinder": {
+                                          "type" : "FindFittingNodes",
+                                          "nodeCondition" : {
+                                            "type" : "HasAttrQualifiedNameValue",
+                                            "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                            "uriRegex" : "https://schema.org/Person"
+                                          }
+                                        }
+                                      }
                                     }
                                     """),
-                            @ExampleObject(name = "Find all person nodes", value = """
+                            @ExampleObject(name = "Get all backward connectors", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
@@ -85,34 +94,32 @@ public class TraverserController {
                                         "localPart": "IdentifiedSpeciesCon"
                                       },
                                       "versionPreference": "SPECIFIED",
-                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "targetType": "NODES",
-                                      "targetSpecification": {
-                                        "type" : "HasAttrQualifiedNameValue",
-                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                        "uriRegex" : "https://schema.org/Person"
+                                      "querySpecification": {
+                                        "type": "GetConnectors",
+                                        "backward": "true"
                                       }
-                                    
                                     }
                                     """)
+
                     }
             )
     )
-    public ResponseEntity<?> searchPredecessors(
-            @RequestBody SearchParamsDTO searchParams) {
-        return searchChain(searchParams, true);
+    public ResponseEntity<?> traversePredecessors(
+            @RequestBody TraversalParamsDTO traverseParams) {
+        return traverseChain(traverseParams, true);
     }
 
-    @Operation(summary = "Search this bundle and its successors", description = "Searches for targets fitting the target specification. Starts in the specified bundle and node, and then searches through all its successors. Returns all found results.")
-    @PostMapping(value = "/api/searchSuccessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Traverses given bundle and its successors to find results for the query.")
+    @PostMapping(value = "/api/traverseSuccessors", produces = MediaType.APPLICATION_JSON_VALUE)
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Search Params",
+            description = "Traversal Params",
             required = true,
             content = @Content(
-                    schema = @Schema(implementation = SearchParamsDTO.class),
+                    schema = @Schema(implementation = TraversalParamsDTO.class),
                     examples = {
-                            @ExampleObject(name = "Find main activity ids", value = """
+                            @ExampleObject(name = "Get main activity ids", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
@@ -123,13 +130,18 @@ public class TraverserController {
                                         "localPart": "StoredSampleCon_r1"
                                       },
                                       "versionPreference": "LATEST",
-                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "targetType": "NODE_IDS",
-                                      "targetSpecification": {
-                                        "type" : "HasAttrQualifiedNameValue",
-                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                        "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                      "querySpecification": {
+                                        "type": "GetNodeIds",
+                                        "nodeFinder": {
+                                          "type" : "FindFittingNodes",
+                                          "nodeCondition" : {
+                                            "type" : "HasAttrQualifiedNameValue",
+                                            "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                            "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                          }
+                                        }
                                       }
                                     }
                                     """),
@@ -144,51 +156,58 @@ public class TraverserController {
                                         "localPart": "StoredSampleCon_r1"
                                       },
                                       "versionPreference": "LATEST",
-                                      "searchPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "targetType": "TEST_FITS",
-                                      "targetSpecification": {
-                                        "type" : "CountCondition",
-                                        "findableInDocument" : {
-                                          "type" : "FindLinearSubgraphs",
-                                          "firstNode" : {
-                                            "type" : "AllTrue",
-                                            "conditions" : [ {
-                                              "type" : "HasAttrQualifiedNameValue",
-                                              "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                              "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                      "querySpecification": {
+                                        "type": "TestBundleFits",
+                                        "condition": {
+                                          "type" : "CountCondition",
+                                          "findableInDocument" : {
+                                            "type" : "FindFittingLinearSubgraphs",
+                                            "graphParts" : [ {
+                                              "type" : "EdgeToNodeCondition",
+                                              "nodeCondition" : {
+                                                "type" : "AllTrue",
+                                                "conditions" : [ {
+                                                  "type" : "HasAttrQualifiedNameValue",
+                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                  "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                                }, {
+                                                  "type" : "HasAttrQualifiedNameValue",
+                                                  "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
+                                                  "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
+                                                } ]
+                                              }
                                             }, {
-                                              "type" : "HasAttrQualifiedNameValue",
-                                              "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
-                                              "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
+                                              "type" : "EdgeToNodeCondition",
+                                              "edgeCondition" : {
+                                                "type" : "IsRelation",
+                                                "relation" : "PROV_DERIVATION"
+                                              },
+                                              "nodeCondition" : {
+                                                "type" : "HasAttrQualifiedNameValue",
+                                                "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
+                                              },
+                                              "nodeIsEffect" : true
                                             } ]
                                           },
-                                          "edgesAndNodes" : [ {
-                                            "isKind" : "PROV_DERIVATION",
-                                            "isNotKind" : null,
-                                            "nodeIsEffect" : true,
-                                            "nodeCondition" : {
-                                              "type" : "HasAttrQualifiedNameValue",
-                                              "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                              "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                            }
-                                          } ]
-                                        },
-                                        "comparisonResult" : "GREATER_THAN_OR_EQUALS",
-                                        "count" : 1
+                                          "comparisonResult" : "GREATER_THAN_OR_EQUALS",
+                                          "count" : 1
+                                        }
                                       }
                                     }
                                     """)
                     }
             )
     )
-    public ResponseEntity<?> searchSuccessors(
-            @RequestBody SearchParamsDTO searchParams) {
-        return searchChain(searchParams, false);
+    public ResponseEntity<?> traverseSuccessors(
+            @RequestBody TraversalParamsDTO traversalParams) {
+        return traverseChain(traversalParams, false);
     }
 
-    private ResponseEntity<?> searchChain(SearchParamsDTO searchParams, boolean searchBackwards) {
-        List<String> missingParams = getMissingParams(searchParams);
+    private ResponseEntity<?> traverseChain(TraversalParamsDTO traversalParams, boolean traverseBackwards) {
+        List<String> missingParams = getMissingParams(traversalParams);
         if (!missingParams.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -197,23 +216,22 @@ public class TraverserController {
 
         try {
 
-            QualifiedName bundleId = searchParams.bundleId.toQN();
-            QualifiedName connectorId = searchParams.startNodeId.toQN();
+            QualifiedName bundleId = traversalParams.bundleId.toQN();
+            QualifiedName connectorId = traversalParams.startNodeId.toQN();
 
-            SearchResults results = traverser.searchChain(
+            TraversalResults results = traverser.traverseChain(
                     bundleId,
                     connectorId,
-                    new SearchParams(
-                            searchBackwards,
-                            searchParams.versionPreference,
-                            searchParams.searchPriority != null ? searchParams.searchPriority : ESearchPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
-                            searchParams.validityChecks != null ? searchParams.validityChecks : new ArrayList<>(),
-                            searchParams.targetType,
-                            searchParams.targetSpecification
+                    new TraversalParams(
+                            traverseBackwards,
+                            traversalParams.versionPreference,
+                            traversalParams.traversalPriority != null ? traversalParams.traversalPriority : ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
+                            traversalParams.validityChecks != null ? traversalParams.validityChecks : new ArrayList<>(),
+                            traversalParams.querySpecification
                     )
             );
 
-            SearchResultsDTO resultsDTO = new SearchResultsDTO(
+            TraversalResultsDTO resultsDTO = new TraversalResultsDTO(
                     results.results.stream()
                             .map(fr -> new FoundResultDTO().from(fr))
                             .toList(),
@@ -241,12 +259,11 @@ public class TraverserController {
         return builder.toString();
     }
 
-    private static List<String> getMissingParams(SearchParamsDTO params) {
+    private static List<String> getMissingParams(TraversalParamsDTO params) {
         List<String> missing = new ArrayList<String>();
         if (params.bundleId == null) missing.add("bundleId");
         if (params.startNodeId == null) missing.add("startNodeId");
-        if (params.targetType == null) missing.add("targetType");
-        if (params.targetSpecification == null) missing.add("targetSpecification");
+        if (params.querySpecification == null) missing.add("querySpecification");
 
         return missing;
     }

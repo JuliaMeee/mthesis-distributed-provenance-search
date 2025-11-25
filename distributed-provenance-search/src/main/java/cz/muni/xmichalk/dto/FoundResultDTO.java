@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.models.FoundResult;
+import cz.muni.xmichalk.models.ResultFromBundle;
 import cz.muni.xmichalk.validity.EValidityCheck;
 
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class FoundResultDTO {
         this.result = result;
     }
 
-    public FoundResultDTO from(FoundResult domainModel) {
+    public FoundResultDTO from(ResultFromBundle domainModel) {
         if (domainModel == null) {
             return null;
         }

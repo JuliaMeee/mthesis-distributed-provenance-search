@@ -2,8 +2,8 @@ package cz.muni.xmichalk.validity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.xmichalk.dto.BundleSearchResultDTO;
-import cz.muni.xmichalk.models.ItemToSearch;
+import cz.muni.xmichalk.dto.BundleQueryResultDTO;
+import cz.muni.xmichalk.models.ItemToTraverse;
 import cz.muni.xmichalk.provServiceAPI.ProvServiceAPI;
 import cz.muni.xmichalk.provServiceTable.IProvServiceTable;
 
@@ -27,23 +27,23 @@ public class DemoValidityVerifier implements IValidityVerifier {
 
 
     @Override
-    public boolean verify(ItemToSearch itemToSearch, BundleSearchResultDTO bundleSearchResult) {
-        String bundleUri = bundleSearchResult.token.data().additionalData().bundle();
+    public boolean verify(ItemToTraverse itemToTraverse, BundleQueryResultDTO queryResult) {
+        String bundleUri = queryResult.token.data().additionalData().bundle();
 
         String provServiceUri = provServiceTable.getServiceUri(bundleUri);
 
-        BundleSearchResultDTO result = null;
+        BundleQueryResultDTO result = null;
         try {
-            result = ProvServiceAPI.fetchSearchBundleResult(provServiceUri, itemToSearch.bundleId, itemToSearch.connectorId, "TEST_FITS", validitySpecification);
+            result = ProvServiceAPI.fetchBundleQueryResult(provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, validitySpecification);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         if (result == null) {
-            throw new RuntimeException("Fetch test bundle result for bundle: " + itemToSearch.bundleId.getUri() + " returned null.");
+            throw new RuntimeException("Fetch TEST_FITS result for bundle: " + itemToTraverse.bundleId.getUri() + " returned null.");
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(result.found, Boolean.class);
+        return objectMapper.convertValue(result.result, Boolean.class);
     }
 }
