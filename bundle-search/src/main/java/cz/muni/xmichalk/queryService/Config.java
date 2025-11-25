@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
         ),
         externalDocs = @ExternalDocumentation(
                 description = "Query structure documentation",
-                url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search/tree/main#query-structure"
+                url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search#query-structure"
         )
 )
 public class Config {
