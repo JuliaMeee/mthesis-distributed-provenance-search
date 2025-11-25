@@ -11,6 +11,8 @@ public class IntegrityThenOrderedValidity implements Comparator<ItemToTraverse> 
 
     @Override
     public int compare(ItemToTraverse first, ItemToTraverse second) {
+        if (first == null) return 1;
+        if (second == null) return -1;
         if (first.pathIntegrity && !second.pathIntegrity) {
             return -1;
         }

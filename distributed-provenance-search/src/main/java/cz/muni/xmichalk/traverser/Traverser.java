@@ -108,12 +108,14 @@ public class Traverser {
             AtomicInteger runningTasks
     ) {
         ItemToTraverse next;
-        while (runningTasks.get() < concurrencyDegree
-                && (next = pollNextToTraverse(traversalState, traversalParams.versionPreference)) != null) {
+        while (runningTasks.get() < concurrencyDegree && (next = pollNextToTraverse(traversalState)) != null) {
             runningTasks.incrementAndGet();
             final ItemToTraverse finalNext = next;
             completionService.submit(() -> {
-                traverseItem(finalNext, traversalState, traversalParams);
+                ItemToTraverse prefferedVersionItem = transformToPreferredVersion(finalNext, traversalParams.versionPreference);
+                if (tryMarkAsProcessing(prefferedVersionItem, traversalState)) {
+                    traverseItem(prefferedVersionItem, traversalState, traversalParams);
+                }
                 return null;
             });
         }
@@ -161,42 +163,48 @@ public class Traverser {
         }
     }
 
-    private ItemToTraverse pollNextToTraverse(TraversalState traversalState, String versionPreference) {
-        ItemToTraverse itemToTraverse;
-        while ((itemToTraverse = traversalState.toTraverseQueue.poll()) != null) {
-            final ItemToTraverse finalItemToTraverse = itemToTraverse;
-            if (traversalState.processing.values().stream()
-                    .anyMatch(item -> traversalState.toTraverseQueue.comparator().compare(item, finalItemToTraverse) < 0)) {
-                traversalState.toTraverseQueue.add(finalItemToTraverse);
-                return null; // wait until all bundles with higher priority are processed, because they might add higher priority items to traverse
-            }
-
-            try {
-                QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, versionPreference);
-                if (preferredVersion != null) {
-                    log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(), preferredVersion.getUri());
-                    itemToTraverse.bundleId = preferredVersion;
-                } else {
-                    log.warn("Fetch preferred version for bundle: {} returned null", itemToTraverse.bundleId.getUri());
-                }
-            } catch (Exception e) {
-                log.error("Error while fetching preferred version for bundle {}: {}", itemToTraverse.bundleId.getUri(), e);
-            }
-
-            if (traversalState.processing.putIfAbsent(itemToTraverse.bundleId, itemToTraverse) == null) {
-                if (!traversalState.visited.containsKey(itemToTraverse.bundleId)) {
-                    return itemToTraverse;
-                } else {
-                    traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
-                    log.info("Already traversed bundle: {}", itemToTraverse.bundleId.getUri());
-                }
-            } else {
-                log.info("Already traversing bundle: {}", itemToTraverse.bundleId.getUri());
-            }
-
-
+    private ItemToTraverse pollNextToTraverse(TraversalState traversalState) {
+        ItemToTraverse itemToTraverse = traversalState.toTraverseQueue.poll();
+        if (itemToTraverse == null) return null;
+        if (traversalState.processing.values().stream()
+                .anyMatch(item -> traversalState.toTraverseQueue.comparator().compare(item, itemToTraverse) < 0)) {
+            traversalState.toTraverseQueue.add(itemToTraverse);
+            return null; // wait until all bundles with higher priority are processed, because they might add higher priority items to traverse
         }
-        return null;
+
+        return itemToTraverse;
+    }
+
+    private ItemToTraverse transformToPreferredVersion(ItemToTraverse itemToTraverse, String versionPreference) {
+        try {
+            log.info("Fetching preferred version for bundle: {} with preference: {}", itemToTraverse.bundleId.getUri(), versionPreference);
+            QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, versionPreference);
+            if (preferredVersion != null) {
+                log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(), preferredVersion.getUri());
+                itemToTraverse.bundleId = preferredVersion;
+            } else {
+                log.warn("Fetch preferred version for bundle: {} returned null", itemToTraverse.bundleId.getUri());
+            }
+        } catch (Exception e) {
+            log.error("Error while fetching preferred version for bundle {}: {}", itemToTraverse.bundleId.getUri(), e);
+        }
+
+        return itemToTraverse;
+    }
+
+    private boolean tryMarkAsProcessing(ItemToTraverse itemToTraverse, TraversalState traversalState) {
+        if (traversalState.processing.putIfAbsent(itemToTraverse.bundleId, itemToTraverse) == null) {
+            if (!traversalState.visited.containsKey(itemToTraverse.bundleId)) {
+                return true;
+            } else {
+                traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
+                log.info("Already traversed bundle: {}", itemToTraverse.bundleId.getUri());
+            }
+        } else {
+            log.info("Already traversing bundle: {}", itemToTraverse.bundleId.getUri());
+        }
+
+        return false;
     }
 
     private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult, BundleQueryResultDTO findConnectorsResult) {
