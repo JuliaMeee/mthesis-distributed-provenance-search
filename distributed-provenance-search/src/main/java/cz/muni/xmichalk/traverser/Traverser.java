@@ -65,41 +65,34 @@ public class Traverser {
                 new ConcurrentLinkedQueue<>()
         );
 
-        traversalState.toTraverseQueue.add(new ItemToTraverse(
-                startBundleId,
-                startNodeId,
-                provServiceTable.getServiceUri(startBundleId.getUri()),
-                true,
-                new LinkedHashMap<>(traversalParams.validityChecks.stream().collect(Collectors.toMap(
-                        check -> check, check -> true))
-                )));
+        traversalState.toTraverseQueue.add(
+                new ItemToTraverse(
+                        startBundleId,
+                        startNodeId,
+                        provServiceTable.getServiceUri(startBundleId.getUri()),
+                        true,
+                        new LinkedHashMap<>(traversalParams.validityChecks.stream().collect(Collectors.toMap(
+                                check -> check, check -> true))
+                        )
+                )
+        );
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrencyDegree);
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
 
         AtomicInteger runningTasks = new AtomicInteger(0);
 
-        for (int i = 0; i < concurrencyDegree; i++) {
-            ItemToTraverse itemToTraverse = pollNextToTraverse(traversalState, traversalParams.versionPreference);
-            if (itemToTraverse != null) {
-                submitTraverseTask(itemToTraverse, traversalState, traversalParams,
-                        completionService, runningTasks);
-            }
-        }
+        submitTraverseTasks(traversalState, traversalParams, completionService, runningTasks);
 
         try {
             while (runningTasks.get() > 0) {
                 completionService.take(); // wait for a task to finish
                 runningTasks.decrementAndGet();
 
-                ItemToTraverse next;
-                while (runningTasks.get() < concurrencyDegree
-                        && (next = pollNextToTraverse(traversalState, traversalParams.versionPreference)) != null) {
-                    submitTraverseTask(next, traversalState, traversalParams,
-                            completionService, runningTasks);
-                }
+                submitTraverseTasks(traversalState, traversalParams, completionService, runningTasks);
             }
         } catch (InterruptedException e) {
+            log.warn(e.getMessage());
             Thread.currentThread().interrupt();
         } finally {
             executor.shutdown();
@@ -108,8 +101,67 @@ public class Traverser {
         return new TraversalResults(traversalState.results.stream().toList(), traversalState.errors);
     }
 
+    private void submitTraverseTasks(
+            TraversalState traversalState,
+            TraversalParams traversalParams,
+            CompletionService<Void> completionService,
+            AtomicInteger runningTasks
+    ) {
+        ItemToTraverse next;
+        while (runningTasks.get() < concurrencyDegree
+                && (next = pollNextToTraverse(traversalState, traversalParams.versionPreference)) != null) {
+            runningTasks.incrementAndGet();
+            final ItemToTraverse finalNext = next;
+            completionService.submit(() -> {
+                traverseItem(finalNext, traversalState, traversalParams);
+                return null;
+            });
+        }
+    }
+
+    private void traverseItem(ItemToTraverse itemToTraverse,
+                              TraversalState traversalState,
+                              TraversalParams traversalParams) {
+        log.info("Started processing bundle {} from connector {}", itemToTraverse.bundleId.getUri(), itemToTraverse.connectorId.getUri());
+
+        try {
+            BundleQueryResultDTO queryResult = ProvServiceAPI.fetchBundleQueryResult(
+                    itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, traversalParams.querySpecification);
+
+            BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleConnectors(
+                    itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
+                    traversalParams.traverseBackwards);
+
+            boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
+
+            LinkedHashMap<EValidityCheck, Boolean> validityChecks = evaluateValidityChecks(
+                    traversalParams.validityChecks, itemToTraverse, queryResult);
+
+            ResultFromBundle newResult = convertToNewResult(itemToTraverse, queryResult, hasIntegrity, validityChecks);
+            if (newResult != null) {
+                traversalState.results.add(newResult);
+                log.info("In bundle {} found query result: {}", itemToTraverse.bundleId.getUri(), newResult.result.toString());
+            }
+
+            List<ItemToTraverse> newItemsToTraverse = convertToNewItemsToTraverse(itemToTraverse, findConnectorsResult, hasIntegrity, validityChecks);
+            traversalState.toTraverseQueue.addAll(newItemsToTraverse);
+            log.info("In bundle {} found connections to: {}", itemToTraverse.bundleId.getUri(),
+                    newItemsToTraverse.stream().map(item -> item.bundleId.getUri())
+                            .collect(Collectors.joining(", ")));
+
+
+        } catch (Exception e) {
+            String errorMessage = "Error while processing bundle: " + itemToTraverse.bundleId.getUri() + ", error: " + e.getMessage();
+            log.error(errorMessage);
+            traversalState.errors.add(errorMessage);
+        } finally {
+            traversalState.visited.put(itemToTraverse.bundleId, new VisitedItem(itemToTraverse.bundleId));
+            traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
+            log.info("Finished processing bundle: {}", itemToTraverse.bundleId.getUri());
+        }
+    }
+
     private ItemToTraverse pollNextToTraverse(TraversalState traversalState, String versionPreference) {
-        log.info("Poll next item to traverse.");
         ItemToTraverse itemToTraverse;
         while ((itemToTraverse = traversalState.toTraverseQueue.poll()) != null) {
             final ItemToTraverse finalItemToTraverse = itemToTraverse;
@@ -133,8 +185,6 @@ public class Traverser {
 
             if (traversalState.processing.putIfAbsent(itemToTraverse.bundleId, itemToTraverse) == null) {
                 if (!traversalState.visited.containsKey(itemToTraverse.bundleId)) {
-                    log.info("Next to traverse bundle id: {}, connector id: {}, pathIntegrity: {}, pathValidityChecks: {}",
-                            itemToTraverse.bundleId.getUri(), itemToTraverse.connectorId.getUri(), itemToTraverse.pathIntegrity, itemToTraverse.pathValidityChecks);
                     return itemToTraverse;
                 } else {
                     traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
@@ -147,57 +197,6 @@ public class Traverser {
 
         }
         return null;
-    }
-
-    private void submitTraverseTask(ItemToTraverse itemToTraverse,
-                                    TraversalState traversalState,
-                                    TraversalParams traversalParams,
-                                    CompletionService<Void> completionService,
-                                    AtomicInteger runningTasks) {
-        runningTasks.incrementAndGet();
-        completionService.submit(() -> {
-            log.info("Started processing bundle {} from connector {}", itemToTraverse.bundleId.getUri(), itemToTraverse.connectorId.getUri());
-
-            try {
-                BundleQueryResultDTO queryResult = ProvServiceAPI.fetchBundleQueryResult(
-                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, traversalParams.querySpecification);
-
-                BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleConnectors(
-                        itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
-                        traversalParams.traverseBackwards);
-
-                boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
-
-                LinkedHashMap<EValidityCheck, Boolean> validityChecks = evaluateValidityChecks(
-                        traversalParams.validityChecks, itemToTraverse, queryResult);
-
-                ResultFromBundle newResult = convertToNewResult(itemToTraverse, queryResult, hasIntegrity, validityChecks);
-                if (newResult != null) {
-                    traversalState.results.add(newResult);
-                    log.info("In bundle {} found query result: {}", itemToTraverse.bundleId.getUri(), newResult.result.toString());
-                }
-
-                List<ItemToTraverse> newItemsToTraverse = convertToNewItemsToTraverse(itemToTraverse, findConnectorsResult, hasIntegrity, validityChecks);
-                traversalState.toTraverseQueue.addAll(newItemsToTraverse);
-                log.info("In bundle {} found connections to: {}", itemToTraverse.bundleId.getUri(),
-                        newItemsToTraverse.stream().map(item -> item.bundleId.getUri())
-                                .collect(Collectors.joining(", ")));
-
-
-            } catch (Exception e) {
-                String errorMessage = "Error while processing bundle: " + itemToTraverse.bundleId.getUri() + ", error: " + e.getMessage();
-                log.error(errorMessage);
-                traversalState.errors.add(errorMessage);
-            } finally {
-                traversalState.visited.put(itemToTraverse.bundleId, new VisitedItem(itemToTraverse.bundleId));
-                traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
-
-            }
-
-            log.info("Finished processing bundle: {}", itemToTraverse.bundleId.getUri());
-
-            return null;
-        });
     }
 
     private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult, BundleQueryResultDTO findConnectorsResult) {
