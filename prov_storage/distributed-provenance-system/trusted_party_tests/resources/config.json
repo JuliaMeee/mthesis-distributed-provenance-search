@@ -1,7 +1,0 @@
-{
-  "id": "TrustedParty",
-  "fqdn": "127.0.1.1:8020",
-  "trustedCertsDirPath": "C:/skola/diplomka/certs/trusted_certs",
-  "publicCertPath": "C:/skola/diplomka/certs/cert.pem",
-  "privateKeyPath": "C:/skola/diplomka/certs/ec_key.pem"
-}

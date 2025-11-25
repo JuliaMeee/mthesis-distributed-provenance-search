@@ -6,14 +6,14 @@ This project was developed as part of my master's thesis. The result consists of
 
 `/bundle-search`: implementation of <b>bundle-searcher</b>.   
 `/distributed-provenance-search`: implementation of <b>prov-traverser</b>.   
-`/prov_storage`: implementation of provenance storage and trusted party from https://gitlab.fi.muni.cz/xmojzis1/provenance-system-tests.  
+`/prov-storage`: implementation of provenance storage and trusted party from https://gitlab.fi.muni.cz/xmojzis1/provenance-system-tests.  
 `/setup`: has sripts and data for demo setup.  
 
 <h2>Demo setup:</h2>
 
 Download the repo files or clone the repo.'/
 
-Build the docker images from working directory `/prov_storage/distributed-provenance-system/` with  
+Build the docker images for trusted party and provenance storage from working directory `/prov-storage/` with  
 ```sh
 docker build -f Dockerfile.TrustedParty -t trusted_party .
 ```  
@@ -90,7 +90,7 @@ This is a list of issues encountered when working with the storage service and j
 
 - Issue: In meta document, id of entity representing a version did not match represented bundle id.  
 Fix: Changed the entity id namespaceUri generation in
-`prov_storage\distributed-provenance-system\distributed_prov_system\provenance\neomodel2prov.py`.
+`prov-storage\distributed_prov_system\provenance\neomodel2prov.py ln 92`.
 - Issue: Some values in meta documents were not strings. prov toolbox then could not load the document.  
 Fix: Before deserializing json document, stringify all values.
 - Issue: In meta documents, "prov:type" attribute values were not serialized as a list of typed values. Prov toolbox then failed to load this attribute.  
