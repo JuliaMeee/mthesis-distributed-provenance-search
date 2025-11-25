@@ -1,5 +1,5 @@
 # from Matej Gallos simmulation of the provenance application https://gitlab.ics.muni.cz/422328/dbprov/
-# deleted not needed services
+# further edited for this project
 services:
   postgres:
     container_name: postgres
@@ -64,8 +64,6 @@ services:
 
   trusted-party:
     container_name: trusted-party
-    # build:
-    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.TrustedParty
     image: trusted_party
     ports:
       - 8020:8020
@@ -80,8 +78,6 @@ services:
 
   prov-storage-1:
     container_name: prov-storage-1
-    # build:
-    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
     image: distributed_prov_system
     environment:
       NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-1:7687
@@ -92,6 +88,8 @@ services:
     ports:
       - 8001:8000
     depends_on:
+      neo4j-storage-1:
+        condition: service_healthy
       trusted-party:
         condition: service_healthy
     healthcheck:
@@ -101,8 +99,7 @@ services:
 
   prov-storage-2:
     container_name: prov-storage-2
-    # build:
-    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
+    
     image: distributed_prov_system
     environment:
       NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-2:7687
@@ -113,6 +110,8 @@ services:
     ports:
       - 8002:8000
     depends_on:
+      neo4j-storage-2:
+        condition: service_healthy
       trusted-party:
         condition: service_healthy
     healthcheck:
@@ -122,8 +121,6 @@ services:
 
   prov-storage-3:
     container_name: prov-storage-3
-    # build:
-    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
     image: distributed_prov_system
     environment:
       NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-3:7687
@@ -134,6 +131,8 @@ services:
     ports:
       - 8003:8000
     depends_on:
+      neo4j-storage-3:
+        condition: service_healthy
       trusted-party:
         condition: service_healthy
     healthcheck:
@@ -143,8 +142,6 @@ services:
   
   prov-storage-4:
     container_name: prov-storage-4
-    # build:
-    #   dockerfile: prov_storage/distributed-provenance-system/Dockerfile.ProvStorage
     image: distributed_prov_system
     environment:
       NEO4J_BOLT_URL: bolt://neo4j:password@neo4j-storage-4:7687
@@ -155,6 +152,8 @@ services:
     ports:
       - 8004:8000
     depends_on:
+      neo4j-storage-4:
+        condition: service_healthy
       trusted-party:
         condition: service_healthy
     healthcheck:

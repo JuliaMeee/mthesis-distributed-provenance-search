@@ -6,14 +6,15 @@ This project was developed as part of my master's thesis. The result consists of
 
 `/bundle-search`: implementation of <b>bundle-searcher</b>.   
 `/distributed-provenance-search`: implementation of <b>prov-traverser</b>.   
-`/prov_storage`: implementation of provenance storage and trusted party from https://gitlab.fi.muni.cz/xmojzis1/provenance-system-tests.  
-`/setup`: has sripts and data for demo setup.  
+`/prov-storage`: implementation of provenance storage and trusted party from https://gitlab.fi.muni.cz/xmojzis1/provenance-system-tests.  
+`/query-structure`: contains diagrams explaining the queries structure.  
+`/setup`: contains scripts and data for demo setup.  
 
 <h2>Demo setup:</h2>
 
 Download the repo files or clone the repo.'/
 
-Build the docker images from working directory `/prov_storage/distributed-provenance-system/` with  
+Build the docker images for trusted party and provenance storage from working directory `/prov-storage/` with  
 ```sh
 docker build -f Dockerfile.TrustedParty -t trusted_party .
 ```  
@@ -40,7 +41,7 @@ Run the following command from directory `./setup` to register organizations and
 ```sh
 ./simulation_setup.sh
 ```
-
+ It might take a few minutes untill all the containers are runing and all the services are fully initialized.
 
 <h2>Services</h2>
 
@@ -55,16 +56,14 @@ Run the following command from directory `./setup` to register organizations and
 - Service that represents a provenance controller and can answer queries about individual bundles in storage of this provenance controller.  
 - OpenAPI specification\*: `http://localhost:8081/swagger-ui/index.html#` 
 
+Both OpenAPI specifications contain multiple executable query examples to test the demo.
+
 See the <b>prov-traverser</b> API to list available validity checks and traversal priorities. 
-See the <b>bundle-searcher</b> API to understand queries and supported version preferences.
-Currently supported version preferences are "LATEST" and "SPECIFIED.  
+Queries are explained further in this readme.
 
-Both OpenAPI specifications contains multiple executable query examples to test the demo.
+You can also run requests to the prov-traverser and bundle-searcher containers from the <b>debug-shell</b> container.
 
-You can also run requests to the prov-traverser and bundle-searcher containers from the <b>debug-shell</b> container**.
-
-\*<i> Note that the service containers must be running for the OpenAPI specification to load. It might take up to a minute for the services and their OpenAPI specifications to load after (re)starting the containers.  
-\*\* If you get `Failed to connect to prov-traverser port 8000 after X ms: Connection refused`, wait a few seconds and try again.</i>
+\*<i> Note that the service containers must be running for the OpenAPI specification to load.  
 
 <h2>Query structure</h2>
 Following diagrams contain information relevant for structuring a query. The methods declared in the interfaces are ommited in their implementations to save space and put emphasis on the fields that user will use to specify a query. Example queries are in the OpenApi specifications.
@@ -90,7 +89,7 @@ This is a list of issues encountered when working with the storage service and j
 
 - Issue: In meta document, id of entity representing a version did not match represented bundle id.  
 Fix: Changed the entity id namespaceUri generation in
-`prov_storage\distributed-provenance-system\distributed_prov_system\provenance\neomodel2prov.py`.
+`prov-storage\distributed_prov_system\provenance\neomodel2prov.py ln 92`.
 - Issue: Some values in meta documents were not strings. prov toolbox then could not load the document.  
 Fix: Before deserializing json document, stringify all values.
 - Issue: In meta documents, "prov:type" attribute values were not serialized as a list of typed values. Prov toolbox then failed to load this attribute.  
