@@ -8,6 +8,7 @@ import cz.muni.xmichalk.traversalPriority.IntegrityThenOrderedValidity;
 import cz.muni.xmichalk.validity.DemoValidityVerifier;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import cz.muni.xmichalk.validity.IValidityVerifier;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,10 @@ import java.util.Map;
                 title = "Provenance traversal API",
                 version = "1.0.0",
                 description = "REST API for traversing through the provenance chain."
+        ),
+        externalDocs = @ExternalDocumentation(
+                description = "Query structure documentation",
+                url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search#query-structure"
         )
 )
 public class TraverserConfig {

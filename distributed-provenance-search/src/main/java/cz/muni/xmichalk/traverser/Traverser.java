@@ -58,7 +58,8 @@ public class Traverser {
         }
 
         TraversalState traversalState = new TraversalState(
-                new ConcurrentHashMap<>(),
+                ConcurrentHashMap.newKeySet(),
+                ConcurrentHashMap.newKeySet(),
                 new ConcurrentHashMap<>(),
                 new PriorityBlockingQueue<>(10, traversalPriorityComparator),
                 new ConcurrentLinkedQueue<>(),
@@ -109,12 +110,17 @@ public class Traverser {
     ) {
         ItemToTraverse next;
         while (runningTasks.get() < concurrencyDegree && (next = pollNextToTraverse(traversalState)) != null) {
-            runningTasks.incrementAndGet();
             final ItemToTraverse finalNext = next;
+            if (traversalState.referencedVisited.contains(finalNext.bundleId)) {
+                log.info("Already traversing/traversed preferred version of: {}", finalNext.bundleId.getUri());
+                continue;
+            }
+            traversalState.referencedVisited.add(finalNext.bundleId);
+            runningTasks.incrementAndGet();
             completionService.submit(() -> {
-                ItemToTraverse prefferedVersionItem = transformToPreferredVersion(finalNext, traversalParams.versionPreference);
-                if (tryMarkAsProcessing(prefferedVersionItem, traversalState)) {
-                    traverseItem(prefferedVersionItem, traversalState, traversalParams);
+                transformToPreferredVersion(finalNext, traversalParams.versionPreference);
+                if (tryMarkAsProcessing(finalNext, traversalState)) {
+                    traverseItem(finalNext, traversalState, traversalParams);
                 }
                 return null;
             });
@@ -157,7 +163,7 @@ public class Traverser {
             log.error(errorMessage);
             traversalState.errors.add(errorMessage);
         } finally {
-            traversalState.visited.put(itemToTraverse.bundleId, new VisitedItem(itemToTraverse.bundleId));
+            traversalState.visited.add(itemToTraverse.bundleId);
             traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
             log.info("Finished processing bundle: {}", itemToTraverse.bundleId.getUri());
         }
@@ -194,7 +200,7 @@ public class Traverser {
 
     private boolean tryMarkAsProcessing(ItemToTraverse itemToTraverse, TraversalState traversalState) {
         if (traversalState.processing.putIfAbsent(itemToTraverse.bundleId, itemToTraverse) == null) {
-            if (!traversalState.visited.containsKey(itemToTraverse.bundleId)) {
+            if (!traversalState.visited.contains(itemToTraverse.bundleId)) {
                 return true;
             } else {
                 traversalState.processing.remove(itemToTraverse.bundleId, itemToTraverse);
