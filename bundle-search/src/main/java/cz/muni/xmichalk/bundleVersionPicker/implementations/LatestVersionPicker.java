@@ -5,6 +5,7 @@ import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
+import cz.muni.xmichalk.util.AttributeUtils;
 import cz.muni.xmichalk.util.BundleTraverser;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
@@ -62,7 +63,7 @@ public class LatestVersionPicker implements IVersionPicker {
         INode latestVersionNode = null;
 
         for (INode node : versionNodes) {
-            String versionString = ((LangString) CpmUtils.getAttributeValue(node, ATTR_VERSION)).getValue();
+            String versionString = ((LangString) AttributeUtils.getAttributeValue(node, ATTR_VERSION)).getValue();
             double version = Double.parseDouble(versionString);
 
             if (version > latestVersion) {
@@ -76,12 +77,12 @@ public class LatestVersionPicker implements IVersionPicker {
 
 
     private static boolean hasProvTypeBundle(INode node) {
-        return CpmUtils.hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class, qn ->
+        return AttributeUtils.hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class, qn ->
                 qn.getUri().equals(PROV_URI + "bundle")
         );
     }
 
     private static boolean hasVersionAttribute(INode node) {
-        return CpmUtils.hasAttributeTargetValue(node, ATTR_VERSION, LangString.class, v -> true);
+        return AttributeUtils.hasAttributeTargetValue(node, ATTR_VERSION, LangString.class, v -> true);
     }
 }

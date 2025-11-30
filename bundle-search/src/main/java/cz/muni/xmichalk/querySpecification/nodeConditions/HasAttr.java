@@ -2,7 +2,7 @@ package cz.muni.xmichalk.querySpecification.nodeConditions;
 
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.querySpecification.ICondition;
-import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.util.AttributeUtils;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class HasAttr implements ICondition<INode> {
 
     @Override
     public boolean test(INode node) {
-        Object value = CpmUtils.getAttributeValue(node, attributeNameUri);
+        Object value = AttributeUtils.getAttributeValue(node, attributeNameUri);
         return (value != null && !(value instanceof List<?> && ((List<?>) value).isEmpty()));
     }
 }

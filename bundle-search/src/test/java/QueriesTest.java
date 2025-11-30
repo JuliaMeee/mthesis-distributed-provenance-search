@@ -20,7 +20,7 @@ import cz.muni.xmichalk.querySpecification.nodeConditions.*;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.DerivationPathCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
-import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.util.AttributeUtils;
 import cz.muni.xmichalk.util.NameSpaceConstants;
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.Document;
@@ -159,7 +159,7 @@ public class QueriesTest extends TestDocumentProvider {
         assert resultsCpmDoc.getNodes().size() == 3;
 
         for (INode node : resultsCpmDoc.getNodes()) {
-            assert CpmUtils.getAttributeValue(node, attributeName) != null;
+            assert AttributeUtils.getAttributeValue(node, attributeName) != null;
         }
     }
 

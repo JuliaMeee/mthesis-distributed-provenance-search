@@ -2,7 +2,7 @@ package cz.muni.xmichalk.querySpecification.nodeConditions;
 
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.querySpecification.ICondition;
-import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.util.AttributeUtils;
 import org.openprovenance.prov.model.QualifiedName;
 
 public class HasAttrQualifiedNameValue implements ICondition<INode> {
@@ -22,7 +22,7 @@ public class HasAttrQualifiedNameValue implements ICondition<INode> {
         if (attributeNameUri == null || uriRegex == null) return true;
 
         try {
-            return CpmUtils.hasAttributeTargetValue(node, attributeNameUri, QualifiedName.class, (qn) ->
+            return AttributeUtils.hasAttributeTargetValue(node, attributeNameUri, QualifiedName.class, (qn) ->
                     qn.getUri().matches(uriRegex));
         } catch (Exception e) {
             return false;

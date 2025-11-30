@@ -2,7 +2,7 @@ package cz.muni.xmichalk.querySpecification.nodeConditions;
 
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.querySpecification.ICondition;
-import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.util.AttributeUtils;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -27,7 +27,7 @@ public class HasAttrTimestampValue implements ICondition<INode> {
     @Override
     public boolean test(INode node) {
         try {
-            XMLGregorianCalendar value = (XMLGregorianCalendar) CpmUtils.getAttributeValue(node, attributeNameUri);
+            XMLGregorianCalendar value = (XMLGregorianCalendar) AttributeUtils.getAttributeValue(node, attributeNameUri);
             if (value == null) {
                 return false;
             }

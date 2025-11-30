@@ -9,6 +9,7 @@ import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.querySpecification.nodeConditions.HasAttrQualifiedNameValue;
+import cz.muni.xmichalk.util.AttributeUtils;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
@@ -66,22 +67,22 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
         connectorData.referencedConnectorId =
                 new QualifiedNameData().from(referencedConnectorIdValue == null ? node.getId() : referencedConnectorIdValue);
 
-        Object referencedBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
+        Object referencedBundleIdValue = AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
         connectorData.referencedBundleId = referencedBundleIdValue == null ? null :
                 new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedBundleIdValue);
 
-        Object referencedMetaBundleIdValue = CpmUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
+        Object referencedMetaBundleIdValue = AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
         connectorData.referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
                 new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
 
-        Object provServiceUriValue = CpmUtils.getAttributeValue(node, ATTR_PROVENANCE_SERVICE_URI);
+        Object provServiceUriValue = AttributeUtils.getAttributeValue(node, ATTR_PROVENANCE_SERVICE_URI);
         connectorData.provenanceServiceUri = provServiceUriValue == null ? null : ((LangString) provServiceUriValue).getValue();
 
 
-        LangString bundleHashValueObj = (LangString) CpmUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
+        LangString bundleHashValueObj = (LangString) AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
         connectorData.referencedBundleHashValue = bundleHashValueObj != null ? bundleHashValueObj.getValue() : null;
 
-        LangString hashAlgObj = (LangString) CpmUtils.getAttributeValue(node, ATTR_HASH_ALG);
+        LangString hashAlgObj = (LangString) AttributeUtils.getAttributeValue(node, ATTR_HASH_ALG);
         connectorData.hashAlg = hashAlgObj != null ? hashAlgObj.getValue() : null;
 
         return connectorData;

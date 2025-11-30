@@ -4,6 +4,7 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
+import cz.muni.xmichalk.util.AttributeUtils;
 import cz.muni.xmichalk.util.CpmUtils;
 import cz.muni.xmichalk.util.NameSpaceConstants;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ public class CpmUtilsTest extends TestDocumentProvider {
         List<Object> foundLocations = new ArrayList<Object>();
 
         cpmDoc.getNodes().forEach(node -> {
-            Object value = CpmUtils.getAttributeValue(node, attributeName);
+            Object value = AttributeUtils.getAttributeValue(node, attributeName);
             if (value != null) {
                 if (value instanceof List<?> listValue) {
                     if (!listValue.isEmpty()) {
@@ -79,7 +80,7 @@ public class CpmUtilsTest extends TestDocumentProvider {
         QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
                 NameSpaceConstants.PROV_URI, "type", "prov");
 
-        boolean hasValue = CpmUtils.hasAttributeTargetValue(
+        boolean hasValue = AttributeUtils.hasAttributeTargetValue(
                 node,
                 attributeName,
                 QualifiedName.class,
@@ -99,7 +100,7 @@ public class CpmUtilsTest extends TestDocumentProvider {
         QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
                 NameSpaceConstants.PROV_URI, "type", "prov");
 
-        boolean hasValue = CpmUtils.hasAttributeTargetValue(
+        boolean hasValue = AttributeUtils.hasAttributeTargetValue(
                 node,
                 attributeName,
                 QualifiedName.class,
