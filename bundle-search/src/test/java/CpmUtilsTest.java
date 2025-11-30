@@ -16,15 +16,18 @@ import java.util.List;
 
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
-public class CpmUtilsTest {
+public class CpmUtilsTest extends TestDocumentProvider {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
 
+    public CpmUtilsTest() throws IOException {
+    }
+
     @Test
     public void testGetMetaBundleId() throws IOException {
-        CpmDocument cpmDoc = TestDocument.getProcessingBundle_V0();
+        CpmDocument cpmDoc = processingBundle_V0;
 
         QualifiedName metaId = CpmUtils.getMetaBundleId(cpmDoc);
 
@@ -33,7 +36,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testGetReferencedConnectorId() throws IOException {
-        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+        CpmDocument cpmDoc = samplingBundle_V1;
 
         INode connectorNode = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank")
@@ -46,7 +49,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testGetLocation() throws IOException {
-        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+        CpmDocument cpmDoc = samplingBundle_V1;
         QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
                 "http://www.w3.org/ns/prov#", "location", "prov");
 
@@ -68,7 +71,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testHasAttributeValue() throws IOException {
-        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+        CpmDocument cpmDoc = samplingBundle_V1;
         INode node = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(
                         BLANK_URI, "Sampling", "blank")
@@ -88,7 +91,7 @@ public class CpmUtilsTest {
 
     @Test
     public void testDoesNotHaveAttributeValue() throws IOException {
-        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+        CpmDocument cpmDoc = samplingBundle_V1;
         INode node = cpmDoc.getNode(
                 new org.openprovenance.prov.vanilla.QualifiedName(
                         BLANK_URI, "Sampling", "blank")

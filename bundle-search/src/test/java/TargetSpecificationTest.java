@@ -32,15 +32,9 @@ import java.util.List;
 import static cz.muni.xmichalk.util.AttributeNames.*;
 import static cz.muni.xmichalk.util.NameSpaceConstants.*;
 
-public class TargetSpecificationTest {
+public class TargetSpecificationTest extends TestDocumentProvider {
 
     String specificationsFolder = System.getProperty("user.dir") + "/src/test/resources/targetSpecifications/";
-    CpmDocument samplingBundle_V0 = TestDocument.getSamplingBundle_V0();
-    CpmDocument samplingBundle_V1 = TestDocument.getSamplingBundle_V1();
-    CpmDocument processingBundle_V0 = TestDocument.getProcessingBundle_V0();
-    CpmDocument processingBundle_V1 = TestDocument.getProcessingBundle_V1();
-    CpmDocument speciesIdentificationBundle_V0 = TestDocument.getSpeciesIdentificationBundle_V0();
-    CpmDocument dnaSequencingBundle_V0 = TestDocument.getDnaSequencingBundle_V0();
 
     public TargetSpecificationTest() throws IOException {
     }
