@@ -21,6 +21,7 @@ import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsN
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.openprovenance.prov.model.StatementOrBundle;
 import org.openprovenance.prov.vanilla.QualifiedName;
 
@@ -28,16 +29,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static cz.muni.xmichalk.util.AttributeNames.*;
 import static cz.muni.xmichalk.util.NameSpaceConstants.*;
 
-public class TargetSpecificationTest extends TestDocumentProvider {
-
+public class TargetSpecificationTest {
     String specificationsFolder = System.getProperty("user.dir") + "/src/test/resources/targetSpecifications/";
-
-    public TargetSpecificationTest() throws IOException {
-    }
 
     ICondition<INode> isMainActivity = new HasAttrQualifiedNameValue(
             ATTR_PROV_TYPE.getUri(),
@@ -112,6 +110,8 @@ public class TargetSpecificationTest extends TestDocumentProvider {
 
     @Test
     public void testAllSatisfyNodeImplication() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<INode> conWithRefs = new AllTrue<INode>(List.of(
                 isConnector,
                 hasBundleRefAndMetaRef
@@ -132,22 +132,26 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 new AllNodes(connectorImplication)
         ));
 
-        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testCountNonsenseNodes() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<BundleStart> bundleSpecification = new CountCondition(
                 new FindFittingNodes(nonsenseNodeCondition),
                 EComparisonResult.EQUALS,
                 0
         );
 
-        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testHasSpecificMetaBundleId() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<INode> mainActivityWithMetaRef = new AllTrue<>(List.of(
                 isMainActivity,
                 isActivityWithMetaRef
@@ -159,11 +163,13 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 1
         );
 
-        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testCountSatisfiedAllTrue() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<INode> conSpec = new AllTrue<>(List.of(
                 new HasId("(?i).*spec"),
                 isConnector
@@ -180,12 +186,13 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 3
         );
 
-        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testAllNodesImplicationAnyTrue() {
         // Test that every connector is either a forward connector or has a referenced bundle id and meta bundle id defined
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V0;
 
         AnyTrue<INode> backwardOrForwardCon = new AnyTrue<INode>(List.of(
                 hasBundleRefAndMetaRef,
@@ -199,11 +206,13 @@ public class TargetSpecificationTest extends TestDocumentProvider {
 
         ICondition<BundleStart> bundleSpecification = new AllNodes(conImplication);
 
-        assert (bundleSpecification.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testEither() {
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V0;
+
         AllNodes satisfied = new AllNodes(
                 new HasId(".*")
         );
@@ -232,14 +241,16 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 satisfied
         );
 
-        assert (bundleSpecificationSatisfied1.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
-        assert (bundleSpecificationSatisfied2.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
-        assert (!bundleSpecificationUnsatisfied1.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
-        assert (!bundleSpecificationUnsatisfied2.test(new BundleStart(processingBundle_V0, CpmUtils.chooseStartNode(processingBundle_V0))));
+        assert (bundleSpecificationSatisfied1.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
+        assert (bundleSpecificationSatisfied2.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
+        assert (!bundleSpecificationUnsatisfied1.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
+        assert (!bundleSpecificationUnsatisfied2.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testCountNonsenseConjunction() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<INode> activity = new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY);
 
         ICondition<INode> notActivity = new IsNotKind(StatementOrBundle.Kind.PROV_ACTIVITY);
@@ -255,11 +266,13 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 0
         );
 
-        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     void testHasTimestampTrue() {
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V0;
+
         ICondition<INode> hasTimestamp = new HasAttrTimestampValue(
                 ATTR_START_TIME.getUri(),
                 "2021-01-01T00:00:00.000+01:00",
@@ -268,13 +281,15 @@ public class TargetSpecificationTest extends TestDocumentProvider {
 
         );
 
-        INode node = processingBundle_V0.getNode(new QualifiedName(BLANK_URI, "MaterialProcessing", "blank"));
+        INode node = cpmDoc.getNode(new QualifiedName(BLANK_URI, "MaterialProcessing", "blank"));
 
         assert (hasTimestamp.test(node));
     }
 
     @Test
     void testHasTimestampFalse() {
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V0;
+
         ICondition<INode> hasTimestampEqual = new HasAttrTimestampValue(
                 ATTR_START_TIME.getUri(),
                 "2021-11-01T00:00:00.000+01:00",
@@ -299,7 +314,7 @@ public class TargetSpecificationTest extends TestDocumentProvider {
 
         );
 
-        INode node = processingBundle_V0.getNode(new QualifiedName(BLANK_URI, "MaterialProcessing", "blank"));
+        INode node = cpmDoc.getNode(new QualifiedName(BLANK_URI, "MaterialProcessing", "blank"));
 
         assert (!hasTimestampEqual.test(node));
         assert (!hasTimestampAfter.test(node));
@@ -308,20 +323,26 @@ public class TargetSpecificationTest extends TestDocumentProvider {
 
     @Test
     void testIsRelation() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<IEdge> isDerivation = new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION);
 
-        assert (samplingBundle_V1.getEdges().stream().anyMatch(edge -> isDerivation.test(edge)));
+        assert (cpmDoc.getEdges().stream().anyMatch(edge -> isDerivation.test(edge)));
     }
 
     @Test
     void testIsNotRelation() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         ICondition<IEdge> isNotDerivation = new IsNotRelation(StatementOrBundle.Kind.PROV_DERIVATION);
 
-        assert (samplingBundle_V1.getEdges().stream().anyMatch(edge -> isNotDerivation.test(edge)));
+        assert (cpmDoc.getEdges().stream().anyMatch(edge -> isNotDerivation.test(edge)));
     }
 
     @Test
     public void testHasForwardJumpConnectors() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         FindFittingLinearSubgraphs forwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
@@ -343,11 +364,13 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 1
         );
 
-        assert (bundleSpecification.test(new BundleStart(samplingBundle_V1, CpmUtils.chooseStartNode(samplingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void hasBackwardJumpConnectorTo() {
+        CpmDocument cpmDoc = TestDocumentProvider.speciesIdentificationBundle_V0;
+
         FindFittingLinearSubgraphs backwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
@@ -375,11 +398,13 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 1
         );
 
-        assert (bundleSpecification.test(new BundleStart(speciesIdentificationBundle_V0, CpmUtils.chooseStartNode(speciesIdentificationBundle_V0))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testDoesNotHaveForwardJumpConnectors() {
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
+
         FindFittingLinearSubgraphs forwardJumpChain = new FindFittingLinearSubgraphs(
                 List.of(
                         new EdgeToNodeCondition(
@@ -401,38 +426,40 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                 0
         );
 
-        assert (bundleSpecification.test(new BundleStart(processingBundle_V1, CpmUtils.chooseStartNode(processingBundle_V1))));
+        assert (bundleSpecification.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
     }
 
     @Test
     public void testFindPersonNodes() {
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
+
         IFindableInDocument<INode> findPersons = new FindFittingNodes(isPerson);
 
-        INode startNode = CpmUtils.chooseStartNode(samplingBundle_V1);
+        INode startNode = CpmUtils.chooseStartNode(cpmDoc);
 
-        assert (findPersons.find(samplingBundle_V1, startNode).size() == 2);
+        assert (findPersons.find(cpmDoc, startNode).size() == 2);
     }
 
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("testSimpleValiditySpecificationParams")
+    public void testSimpleValiditySpecification(CpmDocument cpmDoc, INode startNode) {
+        assert (simpleValidityCondition.test(new BundleStart(cpmDoc, startNode)));
+    }
 
-    @Test
-    public void testSimpleValiditySpecification() {
-        List<CpmDocument> cpmDocs = List.of(
-                samplingBundle_V0,
-                samplingBundle_V1,
-                processingBundle_V0,
-                processingBundle_V1,
-                speciesIdentificationBundle_V0,
-                dnaSequencingBundle_V0
+    static Stream<Object[]> testSimpleValiditySpecificationParams() {
+        return Stream.of(
+                new Object[]{TestDocumentProvider.samplingBundle_V0, CpmUtils.chooseStartNode(TestDocumentProvider.samplingBundle_V0)},
+                new Object[]{TestDocumentProvider.samplingBundle_V1, CpmUtils.chooseStartNode(TestDocumentProvider.samplingBundle_V1)},
+                new Object[]{TestDocumentProvider.processingBundle_V0, CpmUtils.chooseStartNode(TestDocumentProvider.processingBundle_V0)},
+                new Object[]{TestDocumentProvider.processingBundle_V1, CpmUtils.chooseStartNode(TestDocumentProvider.processingBundle_V1)},
+                new Object[]{TestDocumentProvider.speciesIdentificationBundle_V0, CpmUtils.chooseStartNode(TestDocumentProvider.speciesIdentificationBundle_V0)},
+                new Object[]{TestDocumentProvider.dnaSequencingBundle_V0, CpmUtils.chooseStartNode(TestDocumentProvider.dnaSequencingBundle_V0)}
         );
-
-        for (CpmDocument cpmDoc : cpmDocs) {
-            assert (simpleValidityCondition.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
-        }
     }
 
     @Test
     public void testSerializationRoundTrip() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         assert (simpleValidityCondition.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
 
@@ -448,7 +475,6 @@ public class TargetSpecificationTest extends TestDocumentProvider {
                         }
                 );
         assert (deserialized.test(new BundleStart(cpmDoc, CpmUtils.chooseStartNode(cpmDoc))));
-
     }
 
     public void serializeToJson(Path filePath, Object object) throws IOException {

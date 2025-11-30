@@ -11,11 +11,11 @@ import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import javax.xml.datatype.DatatypeFactory;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 import static cz.muni.xmichalk.util.ProvDocumentUtils.deserializeFile;
 
 public class TestDocumentProvider {
@@ -24,44 +24,52 @@ public class TestDocumentProvider {
     static ICpmProvFactory cPF = new CpmProvFactory(pF);
     static String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
 
-    public Document testDocument1 = getTestDocument1();
-    public Document testDocument2 = getTestDocument2();
+    public static CpmDocument testDocument1 = getTestDocument1();
+    public static CpmDocument testDocument2 = getTestDocument2();
 
-    public CpmDocument samplingBundle_V0 = getSamplingBundle_V0();
-    public CpmDocument samplingBundle_V1 = getSamplingBundle_V1();
-    public CpmDocument processingBundle_V0 = getProcessingBundle_V0();
-    public CpmDocument processingBundle_V1 = getProcessingBundle_V1();
-    public CpmDocument speciesIdentificationBundle_V0 = getSpeciesIdentificationBundle_V0();
-    public CpmDocument dnaSequencingBundle_V0 = getDnaSequencingBundle_V0();
+    public static CpmDocument samplingBundle_V0 = loadCpmDocument(dataFolder + "dataset1/SamplingBundle_V0.json");
+    public static CpmDocument samplingBundle_V1 = loadCpmDocument(dataFolder + "dataset1/SamplingBundle_V1.json");
+    public static CpmDocument processingBundle_V0 = loadCpmDocument(dataFolder + "dataset2/ProcessingBundle_V0.json");
+    public static CpmDocument processingBundle_V1 = loadCpmDocument(dataFolder + "dataset2/ProcessingBundle_V1.json");
+    public static CpmDocument speciesIdentificationBundle_V0 = loadCpmDocument(dataFolder + "dataset3/SpeciesIdentificationBundle_V0.json");
+    public static CpmDocument dnaSequencingBundle_V0 = loadCpmDocument(dataFolder + "dataset4/DnaSequencingBundle_V0.json");
 
-    public CpmDocument samplingBundleMeta = getSamplingBundleMeta();
+    public static CpmDocument samplingBundleMeta = loadCpmDocument(dataFolder + "metaDocument.json");
 
-    public TestDocumentProvider() throws IOException {
-    }
-
-    public static Document getTestDocument1() {
-        QualifiedName entityId = cPF.newCpmQualifiedName("entity1");
+    public static CpmDocument getTestDocument1() {
+        QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(
+                BLANK_URI, "entity1", "blank");
         Entity entity = cPF.getProvFactory().newEntity(entityId);
 
-        QualifiedName agentId = cPF.newCpmQualifiedName("agent1");
+        QualifiedName agentId = new org.openprovenance.prov.vanilla.QualifiedName(
+                BLANK_URI, "agent1", "blank");
         Agent agent = cPF.getProvFactory().newAgent(agentId);
 
-        QualifiedName activityId = cPF.newCpmQualifiedName("activity1");
+        QualifiedName activityId = new org.openprovenance.prov.vanilla.QualifiedName(
+                BLANK_URI, "activity1", "blank");
         Activity activity = cPF.getProvFactory().newActivity(activityId);
         activity.setStartTime(pF.newISOTime("2025-08-16T10:00:00Z"));
         activity.setEndTime(pF.newISOTime("2025-08-16T11:00:00Z"));
 
-        Relation relation = cPF.getProvFactory().newWasAttributedTo(cPF.newCpmQualifiedName("attr"), entityId, agentId);
-        Relation relation2 = cPF.getProvFactory().newWasAssociatedWith(cPF.newCpmQualifiedName("assoc"), activityId, agentId);
-        Relation relation3 = cPF.getProvFactory().newWasGeneratedBy(cPF.newCpmQualifiedName("gen"), entityId, activityId);
+        Relation relation = cPF.getProvFactory().newWasAttributedTo(
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "attr", "blank"),
+                entityId,
+                agentId);
+        Relation relation2 = cPF.getProvFactory().newWasAssociatedWith(
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "assoc", "blank"),
+                activityId,
+                agentId);
+        Relation relation3 = cPF.getProvFactory().newWasGeneratedBy(
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "gen", "blank"),
+                entityId,
+                activityId);
 
         QualifiedName bundleId = pF.newQualifiedName("www.example.com/", "bundleA", "ex");
 
-        CpmDocument cpmDocument = new CpmDocument(List.of(entity, agent, activity, relation, relation2, relation3), bundleId, pF, cPF, cF);
-        return cpmDocument.toDocument();
+        return new CpmDocument(List.of(entity, agent, activity, relation, relation2, relation3), bundleId, pF, cPF, cF);
     }
 
-    public static Document getTestDocument2() {
+    public static CpmDocument getTestDocument2() {
         try {
             DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
             TraversalInformation ti = new TraversalInformation();
@@ -89,51 +97,19 @@ public class TestDocumentProvider {
             ti.getForwardConnectors().add(fC);
 
             ITemplateProvMapper mapper = new TemplateProvMapper(new CpmProvFactory(pF));
-            return mapper.map(ti);
+            Document document = mapper.map(ti);
+            return new CpmDocument(document, pF, cPF, cF);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static CpmDocument getSamplingBundle_V0() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V0.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
-    }
-
-    public static CpmDocument getSamplingBundle_V1() throws IOException {
-        Path file = Path.of(dataFolder + "dataset1/SamplingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
-    }
-
-    public static CpmDocument getProcessingBundle_V0() throws IOException {
-        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V0.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
-    }
-
-    public static CpmDocument getProcessingBundle_V1() throws IOException {
-        Path file = Path.of(dataFolder + "dataset2/ProcessingBundle_V1.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
-    }
-
-    public static CpmDocument getSpeciesIdentificationBundle_V0() throws IOException {
-        Path file = Path.of(dataFolder + "dataset3/SpeciesIdentificationBundle_V0.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
-    }
-
-    public static CpmDocument getDnaSequencingBundle_V0() throws IOException {
-        Path file = Path.of(dataFolder + "dataset4/DnaSequencingBundle_V0.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
-    }
-
-    public static CpmDocument getSamplingBundleMeta() throws IOException {
-        Path file = Path.of(dataFolder + "metaDocument.json");
-        Document document = deserializeFile(file, Formats.ProvFormat.JSON);
-        return new CpmDocument(document, pF, cPF, cF);
+    public static CpmDocument loadCpmDocument(String filePath) {
+        try {
+            Document document = deserializeFile(Path.of(filePath), Formats.ProvFormat.JSON);
+            return new CpmDocument(document, pF, cPF, cF);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

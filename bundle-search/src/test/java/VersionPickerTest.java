@@ -5,31 +5,25 @@ import cz.muni.xmichalk.bundleVersionPicker.implementations.SpecifiedVersionPick
 import org.junit.jupiter.api.Test;
 import org.openprovenance.prov.model.QualifiedName;
 
-import java.io.IOException;
-
-public class VersionPickerTest extends TestDocumentProvider {
-    public VersionPickerTest() throws IOException {
-    }
-
-
+public class VersionPickerTest {
     @Test
     public void testPickNewestVersion() {
-        CpmDocument metaCpmDoc = samplingBundleMeta;
+        CpmDocument metaCpmDoc = TestDocumentProvider.samplingBundleMeta;
 
         INode latestVersionNode = LatestVersionPicker.pickLatestVersionNode(metaCpmDoc);
 
         assert latestVersionNode.getId().getUri().equals(
-                samplingBundle_V1.getBundleId().getUri());
+                TestDocumentProvider.samplingBundle_V1.getBundleId().getUri());
     }
 
     @Test
     public void testPickSpecified() {
-        CpmDocument cpmDoc = samplingBundle_V0;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V0;
 
         QualifiedName bundleId = new SpecifiedVersionPicker().apply(
                 cpmDoc
         );
 
-        assert bundleId.getUri().equals(samplingBundle_V0.getBundleId().getUri());
+        assert bundleId.getUri().equals(TestDocumentProvider.samplingBundle_V0.getBundleId().getUri());
     }
 }

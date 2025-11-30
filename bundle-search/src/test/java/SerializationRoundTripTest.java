@@ -13,14 +13,11 @@ import org.openprovenance.prov.vanilla.ProvFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class SerializationRoundTripTest extends TestDocumentProvider {
+public class SerializationRoundTripTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/serialization/";
-
-    public SerializationRoundTripTest() throws IOException {
-    }
 
     public static String getExtension(Formats.ProvFormat format) {
         return switch (format) {
@@ -57,8 +54,8 @@ public class SerializationRoundTripTest extends TestDocumentProvider {
     @Test
     public void testMultipleFormats() {
         Document[] documents = {
-                testDocument1,
-                testDocument2,
+                TestDocumentProvider.testDocument1.toDocument(),
+                TestDocumentProvider.testDocument2.toDocument(),
         };
 
         Formats.ProvFormat[] formats = {

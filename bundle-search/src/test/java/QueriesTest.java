@@ -38,18 +38,15 @@ import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
 import static cz.muni.xmichalk.util.NameSpaceConstants.*;
 import static cz.muni.xmichalk.util.ProvDocumentUtils.deserialize;
 
-public class QueriesTest extends TestDocumentProvider {
+public class QueriesTest {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public QueriesTest() throws IOException {
-    }
-
     @Test
     public void findNodeIdsById() {
-        CpmDocument cpmDoc = processingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "NiceMarineStation", "blank");
@@ -76,7 +73,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void findNodesById() throws IOException {
-        CpmDocument cpmDoc = processingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         QualifiedName nodeIdToFind = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "NiceMarineStation", "blank");
@@ -104,7 +101,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void findNodeIdsByType() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new GetNodeIds(
@@ -137,7 +134,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void findNodesByHasAttr() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         String attributeName = SCHEMA_URI + "url";
@@ -165,7 +162,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void testDerivationSubgraph() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
 
         IQuery<?> query = new GetFilteredSubgraph(
@@ -193,7 +190,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void testBackwardBackboneSubgraph() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
 
         ICondition<INode> nodeCondition = new AnyTrue<>(List.of(
@@ -247,7 +244,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void testgetPersonsResponsibleForActionsOnGenerationSubgraph() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V0;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V0;
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
 
         ICondition<EdgeToNode> generationPath = new AnyTrue<>(List.of(
@@ -311,7 +308,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void testFindSubgraph() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new GetSubgraphs(new FindFittingLinearSubgraphs(List.of(
@@ -371,7 +368,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void testFits() {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new TestBundleFits(
@@ -395,7 +392,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void testDoesNotFit() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new TestBundleFits(
@@ -424,7 +421,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void findBackwardConnectors() throws IOException {
-        CpmDocument cpmDoc = processingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         IQuery<?> query = new GetConnectors(true, new DerivationPathCondition(true));
@@ -445,7 +442,7 @@ public class QueriesTest extends TestDocumentProvider {
 
     @Test
     public void findForwardConnectors() throws IOException {
-        CpmDocument cpmDoc = samplingBundle_V1;
+        CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new GetConnectors(false);
