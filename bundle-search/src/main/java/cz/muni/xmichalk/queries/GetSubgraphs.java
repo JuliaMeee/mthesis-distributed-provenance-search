@@ -8,7 +8,6 @@ import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
-import cz.muni.xmichalk.util.ProvJsonUtils;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.interop.Formats;
 
@@ -54,7 +53,6 @@ public class GetSubgraphs implements IQuery<List<JsonNode>> {
 
         Document subgraphDocument = ProvDocumentUtils.encapsulateInDocument(nodes, edges);
         String jsonString = ProvDocumentUtils.serialize(subgraphDocument, Formats.ProvFormat.JSON);
-        jsonString = ProvJsonUtils.removeExplicitBundleId(jsonString);
         try {
             return objectMapper.readTree(jsonString);
         } catch (IOException e) {

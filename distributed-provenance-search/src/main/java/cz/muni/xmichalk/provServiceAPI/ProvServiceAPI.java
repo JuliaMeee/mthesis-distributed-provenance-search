@@ -75,9 +75,13 @@ public class ProvServiceAPI {
                 objectMapper.readTree("""
                             {
                               "type": "GetConnectors",
-                              "backward": %s
+                              "backward": %s,
+                              "pathCondition": {
+                                "type": "DerivationPathCondition",
+                                "backward": %s
+                              }
                             }
-                        """.formatted(backward)
+                        """.formatted(backward, backward)
                 )
         );
     }

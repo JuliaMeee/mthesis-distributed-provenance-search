@@ -29,12 +29,21 @@ public class ProvDocumentUtils {
         InteropFramework interop = new InteropFramework();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         interop.writeDocument(outputStream, document, ProvFormatToIntermediaType(format), false);
-        return outputStream.toString(charset);
+        String serialized = outputStream.toString(charset);
+        return finalizeAfterSerialization(serialized, format);
     }
 
     public static void serializeIntoFile(Path filePath, Document document, Formats.ProvFormat format) throws IOException {
         String string = serialize(document, format);
         Files.writeString(filePath, string, charset);
+    }
+
+    public static String finalizeAfterSerialization(String serializedDocument, Formats.ProvFormat format) {
+        if (format == Formats.ProvFormat.JSON) {
+            serializedDocument = ProvJsonUtils.removeExplicitBundleId(serializedDocument);
+        }
+
+        return serializedDocument;
     }
 
     public static Document deserialize(String serialized, Formats.ProvFormat format) throws IOException {

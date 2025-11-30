@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 public class FindFittingLinearSubgraphs implements IFindableInDocument<List<EdgeToNode>> {
     public List<ICondition<EdgeToNode>> graphParts;
+    public ICondition<EdgeToNode> pathCondition;
 
     public FindFittingLinearSubgraphs() {
     }
@@ -23,8 +24,12 @@ public class FindFittingLinearSubgraphs implements IFindableInDocument<List<Edge
 
     @Override
     public List<List<EdgeToNode>> find(CpmDocument document, INode startNode) {
+        if (graphParts == null) {
+            throw new IllegalStateException("Graph part specification cannot be null.");
+        }
+
         List<Predicate<EdgeToNode>> graphSpecification = List.copyOf(graphParts);
 
-        return LinearSubgraphFinder.findAnywhere(startNode, graphSpecification);
+        return LinearSubgraphFinder.findSubgraphs(startNode, graphSpecification, pathCondition);
     }
 }

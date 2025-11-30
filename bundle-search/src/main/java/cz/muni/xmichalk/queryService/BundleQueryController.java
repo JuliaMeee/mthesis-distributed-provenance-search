@@ -65,6 +65,68 @@ public class BundleQueryController {
                                             """
                             ),
                             @ExampleObject(
+                                    name = "Get subgraph formed by only Derivation and Specialization relations going in both directions from the start node",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "querySpecification": {
+                                                "type" : "GetFilteredSubgraph",
+                                                "pathCondition": {
+                                                  "type": "DerivationPathCondition",
+                                                  "backward": null
+                                                }
+                                              }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Get all mainActivity and connector nodes on path formed by Derivation, Usage or Generation relations going in backward direction from the start node",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "querySpecification": {
+                                                 "type" : "GetNodes",
+                                                 "nodeFinder" : {
+                                                   "type" : "FindFittingNodes",
+                                                   "nodeCondition" : null,
+                                                   "pathCondition" : {
+                                                     "type" : "EdgeToNodeCondition",
+                                                     "edgeCondition" : {
+                                                       "type" : "AnyTrue",
+                                                       "conditions" : [ {
+                                                         "type" : "IsRelation",
+                                                         "relation" : "PROV_DERIVATION"
+                                                       }, {
+                                                         "type" : "IsRelation",
+                                                         "relation" : "PROV_USAGE"
+                                                       }, {
+                                                         "type" : "IsRelation",
+                                                         "relation" : "PROV_GENERATION"
+                                                       } ]
+                                                     },
+                                                     "nodeCondition" : null,
+                                                     "nodeIsEffect" : null
+                                                   }
+                                                 }
+                                               }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
                                     name = "Get all forward connectors in the bundle",
                                     value = """
                                             {
@@ -79,6 +141,29 @@ public class BundleQueryController {
                                               "querySpecification": {
                                                 "type" : "GetConnectors",
                                                 "backward" : false
+                                              }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Get forward connectors derived from a specific connector",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "querySpecification": {
+                                                "type" : "GetConnectors",
+                                                "backward" : false,
+                                                "pathCondition": {
+                                                  "type": "DerivationPathCondition",
+                                                  "backward": false
+                                                }
                                               }
                                             }
                                             """

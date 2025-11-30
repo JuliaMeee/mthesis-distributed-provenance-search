@@ -2,21 +2,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
-import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.ICpmFactory;
-import cz.muni.fi.cpm.model.ICpmProvFactory;
-import cz.muni.fi.cpm.model.INode;
+import cz.muni.fi.cpm.model.*;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.queries.*;
+import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.CountCondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.EComparisonResult;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingLinearSubgraphs;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
 import cz.muni.xmichalk.querySpecification.logicalOperations.AllTrue;
+import cz.muni.xmichalk.querySpecification.logicalOperations.AnyTrue;
 import cz.muni.xmichalk.querySpecification.nodeConditions.*;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.DerivationPathCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
 import cz.muni.xmichalk.util.CpmUtils;
@@ -34,8 +34,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
-import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
-import static cz.muni.xmichalk.util.NameSpaceConstants.SCHEMA_URI;
+import static cz.muni.xmichalk.util.NameSpaceConstants.*;
 import static cz.muni.xmichalk.util.ProvDocumentUtils.deserialize;
 
 public class QueriesTest {
@@ -161,6 +160,88 @@ public class QueriesTest {
     }
 
     @Test
+    public void testDerivationSubgraph() throws IOException {
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+
+        IQuery<?> query = new GetFilteredSubgraph(
+                new DerivationPathCondition()
+        );
+        JsonNode serializedQuery = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
+        });
+
+        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+
+        assert result != null;
+        assert result instanceof JsonNode;
+        JsonNode resultDocJsonNode = (JsonNode) result;
+        Document resultDoc = deserialize(resultDocJsonNode.toString(), Formats.ProvFormat.JSON);
+        assert resultDoc != null;
+        CpmDocument resultCpmDoc = new CpmDocument(resultDoc, pF, cPF, cF);
+        assert resultCpmDoc.getNodes().size() == 5;
+        assert resultCpmDoc.getEdges().size() == 4;
+
+        for (IEdge edge : resultCpmDoc.getEdges()) {
+            assert edge.getKind() == StatementOrBundle.Kind.PROV_DERIVATION || edge.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION;
+        }
+    }
+
+    @Test
+    public void testBackwardBackboneSubgraph() throws IOException {
+        CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+
+        ICondition<INode> nodeCondition = new AnyTrue<>(List.of(
+                new HasAttrQualifiedNameValue(
+                        ATTR_PROV_TYPE.getUri(),
+                        CPM_URI + "mainActivity"),
+                new HasAttrQualifiedNameValue(
+                        ATTR_PROV_TYPE.getUri(),
+                        CPM_URI + "(backward|forward)Connector")
+
+        ));
+
+        IQuery<?> query = new GetFilteredSubgraph(
+                new AnyTrue<>(List.of(
+                        new EdgeToNodeCondition(
+                                new AnyTrue<>(List.of(
+                                        new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION),
+                                        new IsRelation(StatementOrBundle.Kind.PROV_GENERATION),
+                                        new IsRelation(StatementOrBundle.Kind.PROV_USAGE)
+                                )
+                                ),
+                                nodeCondition,
+                                false
+                        ),
+                        new EdgeToNodeCondition(
+                                new IsRelation(StatementOrBundle.Kind.PROV_SPECIALIZATION),
+                                nodeCondition,
+                                null
+                        )
+                ))
+        );
+        JsonNode serializedQuery = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
+        });
+
+        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+
+        assert result != null;
+        assert result instanceof JsonNode;
+        JsonNode resultDocJsonNode = (JsonNode) result;
+        Document resultDoc = deserialize(resultDocJsonNode.toString(), Formats.ProvFormat.JSON);
+        assert resultDoc != null;
+        CpmDocument resultCpmDoc = new CpmDocument(resultDoc, pF, cPF, cF);
+        assert resultCpmDoc.getNodes().size() == 3;
+        assert resultCpmDoc.getEdges().size() == 2;
+
+        for (IEdge edge : resultCpmDoc.getEdges()) {
+            assert edge.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION || edge.getKind() == StatementOrBundle.Kind.PROV_GENERATION;
+        }
+    }
+
+    @Test
     public void testFindSubgraph() throws IOException {
         CpmDocument cpmDoc = TestDocument.getSamplingBundle_V1();
 
@@ -278,7 +359,7 @@ public class QueriesTest {
         CpmDocument cpmDoc = TestDocument.getProcessingBundle_V1();
 
         QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
-        IQuery<?> query = new GetConnectors(true);
+        IQuery<?> query = new GetConnectors(true, new DerivationPathCondition(true));
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
         });

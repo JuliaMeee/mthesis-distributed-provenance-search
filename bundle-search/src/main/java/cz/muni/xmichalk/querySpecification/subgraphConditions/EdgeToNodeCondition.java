@@ -20,17 +20,24 @@ public class EdgeToNodeCondition implements ICondition<EdgeToNode> {
     }
 
     public boolean test(EdgeToNode edgeToNode) {
-        if (edgeCondition != null && !edgeCondition.test(edgeToNode.edge)) {
+        INode node = edgeToNode == null ? null : edgeToNode.node;
+        IEdge edge = edgeToNode == null ? null : edgeToNode.edge;
+
+
+        if (edgeCondition != null && !edgeCondition.test(edge)) {
             return false;
         }
 
-        if (nodeCondition != null && !nodeCondition.test(edgeToNode.node)) {
+        if (nodeCondition != null && !nodeCondition.test(node)) {
             return false;
         }
 
         if (nodeIsEffect != null) {
-            INode effectNode = edgeToNode.edge.getEffect();
-            return nodeIsEffect.equals(effectNode.equals(edgeToNode.node));
+            INode effectNode = edge == null ? null : edge.getEffect();
+            if (node == null || effectNode == null) {
+                return false;
+            }
+            return nodeIsEffect.equals(effectNode.equals(node));
         }
 
         return true;

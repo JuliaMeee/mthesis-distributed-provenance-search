@@ -3,7 +3,9 @@ package cz.muni.xmichalk.queries;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
+import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.querySpecification.nodeConditions.HasAttrQualifiedNameValue;
@@ -18,12 +20,18 @@ import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
 
 public class GetConnectors implements IQuery<List<ConnectorData>> {
     public Boolean backward;
+    public ICondition<EdgeToNode> pathCondition;
 
     public GetConnectors() {
     }
 
     public GetConnectors(Boolean backward) {
         this.backward = backward;
+    }
+
+    public GetConnectors(Boolean backward, ICondition<EdgeToNode> pathCondition) {
+        this.backward = backward;
+        this.pathCondition = pathCondition;
     }
 
 
@@ -35,7 +43,8 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
                 new HasAttrQualifiedNameValue(
                         ATTR_PROV_TYPE.getUri(),
                         CPM_URI + ((backward) ? "backwardConnector" : "forwardConnector")
-                )
+                ),
+                pathCondition
         );
 
         List<INode> foundNodes = finder.find(input.bundle, input.startNode);

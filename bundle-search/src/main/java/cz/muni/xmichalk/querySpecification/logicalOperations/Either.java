@@ -18,7 +18,7 @@ public class Either<T> implements ICondition<T> {
     public boolean test(T item) {
 
         if (first == null || second == null) {
-            throw new IllegalStateException("Both specifications must be non-null for XOR operation.");
+            throw new IllegalStateException("Either operation must have both 'first' and 'second' specified.");
         }
 
         return first.test(item) ^ second.test(item);

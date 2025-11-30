@@ -6,7 +6,6 @@ import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
-import cz.muni.xmichalk.util.ProvJsonUtils;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.interop.Formats;
 
@@ -40,7 +39,6 @@ public class GetNodes implements IQuery<JsonNode> {
 
         Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes, null);
         String jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
-        jsonString = ProvJsonUtils.removeExplicitBundleId(jsonString);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readTree(jsonString);

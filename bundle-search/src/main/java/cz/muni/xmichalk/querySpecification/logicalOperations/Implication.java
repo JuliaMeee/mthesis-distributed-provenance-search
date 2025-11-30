@@ -17,7 +17,7 @@ public class Implication<T> implements ICondition<T> {
     @Override
     public boolean test(T target) {
         if (premise == null || consequence == null) {
-            throw new IllegalStateException("Premise and consequence must be set before testing.");
+            throw new IllegalStateException("Implication must have both 'premise' and 'consequence' specified.");
         }
         if (premise.test(target)) {
             return consequence.test(target);

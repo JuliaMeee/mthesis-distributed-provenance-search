@@ -8,7 +8,8 @@
         "type" : "HasAttrQualifiedNameValue",
         "attributeNameUri" : "http://www.w3.org/ns/prov#type",
         "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
-      }
+      },
+      "pathCondition" : null
     },
     "comparisonResult" : "EQUALS",
     "count" : 1

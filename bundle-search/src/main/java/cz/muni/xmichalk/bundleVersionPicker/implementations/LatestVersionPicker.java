@@ -5,7 +5,7 @@ import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
-import cz.muni.xmichalk.util.BundleNodesTraverser;
+import cz.muni.xmichalk.util.BundleTraverser;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
@@ -47,10 +47,11 @@ public class LatestVersionPicker implements IVersionPicker {
     }
 
     public static INode pickLatestVersionNode(CpmDocument metaDocument) {
-        List<INode> versionNodes = BundleNodesTraverser.traverseAndFind(
-                metaDocument,
-                metaDocument.getNodes().getFirst().getId(),
-                node -> hasProvTypeBundle(node) && hasVersionAttribute(node)
+
+        List<INode> versionNodes = BundleTraverser.traverseAndFindNodes(
+                metaDocument.getNodes().getFirst(),
+                (node) -> hasProvTypeBundle(node) && hasVersionAttribute(node),
+                null
         );
 
         if (versionNodes == null || versionNodes.isEmpty()) {

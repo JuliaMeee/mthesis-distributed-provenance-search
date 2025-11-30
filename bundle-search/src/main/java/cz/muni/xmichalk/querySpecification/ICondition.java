@@ -9,6 +9,7 @@ import cz.muni.xmichalk.querySpecification.logicalOperations.AnyTrue;
 import cz.muni.xmichalk.querySpecification.logicalOperations.Either;
 import cz.muni.xmichalk.querySpecification.logicalOperations.Implication;
 import cz.muni.xmichalk.querySpecification.nodeConditions.*;
+import cz.muni.xmichalk.querySpecification.subgraphConditions.DerivationPathCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.EdgeToNodeCondition;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsNotRelation;
 import cz.muni.xmichalk.querySpecification.subgraphConditions.edgeConditions.IsRelation;
@@ -28,6 +29,7 @@ import java.util.function.Predicate;
         @JsonSubTypes.Type(value = IsRelation.class, name = "IsRelation"),
         @JsonSubTypes.Type(value = IsNotRelation.class, name = "IsNotRelation"),
         @JsonSubTypes.Type(value = EdgeToNodeCondition.class, name = "EdgeToNodeCondition"),
+        @JsonSubTypes.Type(value = DerivationPathCondition.class, name = "DerivationPathCondition"),
 
         @JsonSubTypes.Type(value = CountCondition.class, name = "CountCondition"),
         @JsonSubTypes.Type(value = AllNodes.class, name = "AllNodes"),

@@ -19,9 +19,11 @@ public class CpmUtils {
         if (startNode == null) {
             return null;
         }
-        List<INode> mainActivities = BundleNodesTraverser.traverseAndFind(bundle, startNode.getId(),
+        List<INode> mainActivities = BundleTraverser.traverseAndFindNodes(
+                startNode,
                 node -> hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
-                        qName -> qName.getUri().equals(CPM_URI + "mainActivity"))
+                        qName -> qName.getUri().equals(CPM_URI + "mainActivity")),
+                null
         );
 
         if (mainActivities == null || mainActivities.size() != 1) {
@@ -51,7 +53,7 @@ public class CpmUtils {
                         qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
                 return isSpecialization && isGeneralEntity && isForwardConnector;
             });
-            List<List<EdgeToNode>> subgraphs = LinearSubgraphFinder.findFrom(connectorNode, subgraphConstraints);
+            List<List<EdgeToNode>> subgraphs = LinearSubgraphFinder.findSubgraphsFrom(connectorNode, subgraphConstraints);
             if (subgraphs.isEmpty() || subgraphs.getFirst().size() != 2) {
                 return null;
             }

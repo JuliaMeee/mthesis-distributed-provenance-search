@@ -10,6 +10,7 @@ import cz.muni.xmichalk.models.BundleStart;
         @JsonSubTypes.Type(value = GetConnectors.class, name = "GetConnectors"),
         @JsonSubTypes.Type(value = GetNodeIds.class, name = "GetNodeIds"),
         @JsonSubTypes.Type(value = GetNodes.class, name = "GetNodes"),
+        @JsonSubTypes.Type(value = GetFilteredSubgraph.class, name = "GetFilteredSubgraph"),
         @JsonSubTypes.Type(value = GetSubgraphs.class, name = "GetSubgraphs"),
         @JsonSubTypes.Type(value = TestBundleFits.class, name = "TestBundleFits"),
         @JsonSubTypes.Type(value = GetPreferredVersion.class, name = "GetPreferredVersion"),

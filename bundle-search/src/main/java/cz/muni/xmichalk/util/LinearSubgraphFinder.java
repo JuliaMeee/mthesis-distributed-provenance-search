@@ -11,30 +11,30 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class LinearSubgraphFinder {
-    public static List<List<EdgeToNode>> findAnywhere(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification) {
+    public static List<List<EdgeToNode>> findSubgraphs(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification, Predicate<EdgeToNode> pathFilter) {
         List<List<EdgeToNode>> results = new ArrayList<>();
 
         if (startNode == null) {
             throw new IllegalArgumentException("Start node cannot be null");
         }
 
-        BundleNodesTraverser.traverseAndExecute(startNode, node -> {
-            List<List<EdgeToNode>> subgraphsFromNode = findFrom(node, subgraphSpecification);
+        BundleTraverser.traverseFrom(startNode, edgeToNode -> {
+            List<List<EdgeToNode>> subgraphsFromNode = findSubgraphsFrom(edgeToNode.node, subgraphSpecification);
             results.addAll(subgraphsFromNode);
-        });
+        }, pathFilter);
 
         return results;
     }
 
-    public static List<List<EdgeToNode>> findFrom(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification) {
+    public static List<List<EdgeToNode>> findSubgraphsFrom(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification) {
         List<List<EdgeToNode>> results = new ArrayList<>();
 
-        recursiveFind(new EdgeToNode(null, startNode), new ArrayList<>(), subgraphSpecification, new HashSet<>(), results);
+        recursiveFindSubgraph(new EdgeToNode(null, startNode), new ArrayList<>(), subgraphSpecification, new HashSet<>(), results);
 
         return results;
     }
 
-    private static void recursiveFind(EdgeToNode current, List<EdgeToNode> foundPart, List<Predicate<EdgeToNode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
+    private static void recursiveFindSubgraph(EdgeToNode current, List<EdgeToNode> foundPart, List<Predicate<EdgeToNode>> specification, Set<IEdge> visited, List<List<EdgeToNode>> results) {
         if (current == null) return;
         if (foundPart == null) foundPart = new ArrayList<>();
 
@@ -59,13 +59,13 @@ public class LinearSubgraphFinder {
         }
 
         for (IEdge e : node.getCauseEdges()) {
-            recursiveFind(
+            recursiveFindSubgraph(
                     new EdgeToNode(e, e.getEffect()),
                     new ArrayList<>(foundPart),
                     specification, new HashSet<>(visited), results);
         }
         for (IEdge e : node.getEffectEdges()) {
-            recursiveFind(
+            recursiveFindSubgraph(
                     new EdgeToNode(e, e.getCause()),
                     new ArrayList<>(foundPart),
                     specification, new HashSet<>(visited), results);
