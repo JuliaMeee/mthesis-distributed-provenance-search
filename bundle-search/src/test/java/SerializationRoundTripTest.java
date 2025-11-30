@@ -4,7 +4,7 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.interop.Formats;
@@ -12,6 +12,7 @@ import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 public class SerializationRoundTripTest {
     ProvFactory pF = new ProvFactory();
@@ -31,7 +32,9 @@ public class SerializationRoundTripTest {
         };
     }
 
-    public void testFormat(Document document, Formats.ProvFormat format) throws IOException {
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("serializationRoundTripParams")
+    public void testSerializationRoundTrip(Document document, Formats.ProvFormat format) throws IOException {
         QualifiedName bundleId = ProvDocumentUtils.getBundleId(document);
         String id = bundleId.getLocalPart();
 
@@ -51,33 +54,23 @@ public class SerializationRoundTripTest {
         assert (cpmDocument1.getBundleId().equals(bundleId));
     }
 
-    @Test
-    public void testMultipleFormats() {
-        Document[] documents = {
-                TestDocumentProvider.testDocument1.toDocument(),
-                TestDocumentProvider.testDocument2.toDocument(),
-        };
+    static Stream<Object[]> serializationRoundTripParams() {
+        return Stream.of(
+                new Object[]{TestDocumentProvider.testDocument1.toDocument(), Formats.ProvFormat.JSON},
+                new Object[]{TestDocumentProvider.testDocument1.toDocument(), Formats.ProvFormat.JSONLD},
+                new Object[]{TestDocumentProvider.testDocument1.toDocument(), Formats.ProvFormat.PROVN},
+                /* Failing tests
+                new Object[]{TestDocumentProvider.testDocument1.toDocument(), Formats.ProvFormat.RDFXML},
+                new Object[]{TestDocumentProvider.testDocument1.toDocument(), Formats.ProvFormat.TURTLE},
+                new Object[]{TestDocumentProvider.testDocument1.toDocument(), Formats.ProvFormat.TRIG},*/
 
-        Formats.ProvFormat[] formats = {
-                Formats.ProvFormat.JSON,
-                Formats.ProvFormat.JSONLD,
-                Formats.ProvFormat.PROVN,
-        };
-
-        boolean allTestsPassed = true;
-
-        for (Document document : documents) {
-            for (Formats.ProvFormat format : formats) {
-                try {
-                    testFormat(document, format);
-                } catch (Exception e) {
-                    System.err.println("Error testing format " + format +
-                            " for document with bundle ID " + ProvDocumentUtils.getBundleId(document).getLocalPart() + ": " + e);
-                    allTestsPassed = false;
-                }
-            }
-        }
-
-        assert (allTestsPassed);
+                new Object[]{TestDocumentProvider.testDocument2.toDocument(), Formats.ProvFormat.JSON},
+                new Object[]{TestDocumentProvider.testDocument2.toDocument(), Formats.ProvFormat.JSONLD},
+                new Object[]{TestDocumentProvider.testDocument2.toDocument(), Formats.ProvFormat.PROVN}
+                /* Failing tests
+                new Object[]{TestDocumentProvider.testDocument2.toDocument(), Formats.ProvFormat.RDFXML},
+                new Object[]{TestDocumentProvider.testDocument2.toDocument(), Formats.ProvFormat.TURTLE},
+                new Object[]{TestDocumentProvider.testDocument2.toDocument(), Formats.ProvFormat.TRIG}*/
+        );
     }
 }
