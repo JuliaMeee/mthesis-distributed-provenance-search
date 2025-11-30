@@ -1,0 +1,177 @@
+{
+  "prefix": {
+    "cpm": "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/",
+    "default": "prov-storage-2:8000",
+    "dct": "http://purl.org/dc/terms/",
+    "pav": "http://purl.org/pav/",
+    "meta": "prov-storage-2:8000/api/v1/documents/meta/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "pre_0": "prov-storage-2:8000",
+    "ORG2": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "bundle": {
+    "meta:ProcessingBundle_V0_meta": {
+      "entity": {
+        "ORG2_ProcessingBundle_V0_token": {
+          "cpm:tokenTimestamp": [
+            "xsd:int",
+            "1764097346"
+          ],
+          "cpm:documentCreationTimestamp": [
+            "xsd:int",
+            "1764097344"
+          ],
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "cpm:token"
+            }
+          ]
+        },
+        "ORG2:ProcessingBundle_V1": {
+          "pav:version": [
+            "2",
+            "xsd:int"
+          ],
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "prov:bundle"
+            }
+          ]
+        },
+        "ORG2:V0_gen": {
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "prov:bundle"
+            }
+          ]
+        },
+        "ORG2:ProcessingBundle_V0": {
+          "pav:version": [
+            "1",
+            "xsd:int"
+          ],
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "prov:bundle"
+            }
+          ]
+        },
+        "ORG2_ProcessingBundle_V1_token": {
+          "cpm:tokenTimestamp": [
+            "xsd:int",
+            "1764097373"
+          ],
+          "cpm:documentCreationTimestamp": [
+            "xsd:int",
+            "1764097372"
+          ],
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "cpm:token"
+            }
+          ]
+        }
+      },
+      "activity": {
+        "ProcessingBundle_V1_tokenGeneration": {
+          "prov:startTime": "2025-11-25T19:02:53.000Z",
+          "prov:endTime": "2025-11-25T19:02:53.000Z",
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "cpm:tokenGeneration"
+            }
+          ]
+        },
+        "ProcessingBundle_V0_tokenGeneration": {
+          "prov:startTime": "2025-11-25T19:02:26.000Z",
+          "prov:endTime": "2025-11-25T19:02:26.000Z",
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "cpm:tokenGeneration"
+            }
+          ]
+        }
+      },
+      "agent": {
+        "Trusted_Party": {
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "cpm:trustedParty"
+            }
+          ]
+        }
+      },
+      "used": {
+        "_:n0": {
+          "prov:activity": "ProcessingBundle_V0_tokenGeneration",
+          "prov:entity": "ORG2:ProcessingBundle_V0"
+        },
+        "_:n1": {
+          "prov:activity": "ProcessingBundle_V1_tokenGeneration",
+          "prov:entity": "ORG2:ProcessingBundle_V1"
+        }
+      },
+      "wasAssociatedWith": {
+        "_:n5": {
+          "prov:activity": "ProcessingBundle_V1_tokenGeneration",
+          "prov:agent": "Trusted_Party"
+        },
+        "_:n4": {
+          "prov:activity": "ProcessingBundle_V0_tokenGeneration",
+          "prov:agent": "Trusted_Party"
+        }
+      },
+      "wasAttributedTo": {
+        "_:n6": {
+          "prov:entity": "ORG2_ProcessingBundle_V0_token",
+          "prov:agent": "Trusted_Party"
+        },
+        "_:n7": {
+          "prov:entity": "ORG2_ProcessingBundle_V1_token",
+          "prov:agent": "Trusted_Party"
+        }
+      },
+      "specializationOf": {
+        "_:n8": {
+          "prov:specificEntity": "ORG2:ProcessingBundle_V0",
+          "prov:generalEntity": "ORG2:V0_gen"
+        },
+        "_:n9": {
+          "prov:specificEntity": "ORG2:ProcessingBundle_V1",
+          "prov:generalEntity": "ORG2:V0_gen"
+        }
+      },
+      "wasDerivedFrom": {
+        "_:n10": {
+          "prov:generatedEntity": "ORG2:ProcessingBundle_V1",
+          "prov:usedEntity": "ORG2:ProcessingBundle_V0",
+          "prov:type": [
+            {
+              "type": "prov:QUALIFIED_NAME",
+              "$": "prov:revisionOf"
+            }
+          ]
+        }
+      },
+      "wasGeneratedBy": {
+        "_:n2": {
+          "prov:entity": "ORG2_ProcessingBundle_V0_token",
+          "prov:activity": "ProcessingBundle_V0_tokenGeneration"
+        },
+        "_:n3": {
+          "prov:entity": "ORG2_ProcessingBundle_V1_token",
+          "prov:activity": "ProcessingBundle_V1_tokenGeneration"
+        }
+      }
+    }
+  }
+}

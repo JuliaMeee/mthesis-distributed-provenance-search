@@ -63,7 +63,7 @@ public class CpmUtilsTest {
                 new Object[]{TestDocumentProvider.processingBundle_V1},
                 new Object[]{TestDocumentProvider.speciesIdentificationBundle_V0},
                 new Object[]{TestDocumentProvider.dnaSequencingBundle_V0},
-                new Object[]{TestDocumentProvider.samplingBundleMeta}
+                new Object[]{TestDocumentProvider.samplingBundle_V0_meta}
         );
     }
 
