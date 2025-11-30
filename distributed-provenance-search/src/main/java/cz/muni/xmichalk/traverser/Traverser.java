@@ -28,17 +28,20 @@ public class Traverser {
     private final Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators;
     private static final Logger log = LoggerFactory.getLogger(Traverser.class);
     private final int concurrencyDegree;
+    private final boolean preferProvServiceFromConnectors;
 
     public Traverser(
             IProvServiceTable traverserTable,
             int concurrencyDegree,
+            boolean preferProvServiceFromConnectors,
             Map<EValidityCheck, IValidityVerifier> validityCheckers,
             Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
         this.provServiceTable = traverserTable;
         this.concurrencyDegree = concurrencyDegree;
+        this.preferProvServiceFromConnectors = preferProvServiceFromConnectors;
         this.validityVerifiers = validityCheckers;
         this.traversalPriorityComparators = traversalPriorityComparators;
-        log.info("Instantiated traverser with concurrency degree: {}", concurrencyDegree);
+        log.info("Instantiated traverser with concurrency degree: {}, preferProvServiceFromConnectors: {}", concurrencyDegree, preferProvServiceFromConnectors);
     }
 
     public Map<EValidityCheck, IValidityVerifier> getValidityVerifiers() {
@@ -279,16 +282,11 @@ public class Traverser {
         for (ConnectorDTO connector : connectors) {
             if (connector == null || connector.referencedBundleId == null) continue;
 
-            String provServiceUri = connector.provenanceServiceUri;
-            if (provServiceUri == null) {
-                provServiceUri = provServiceTable.getServiceUri(connector.referencedBundleId.toQN().getUri());
-            }
-
             newItemsToTraverse.add(
                     new ItemToTraverse(
                             connector.referencedBundleId.toQN(),
                             connector.referencedConnectorId.toQN(),
-                            provServiceUri,
+                            getProvServiceUri(connector, provServiceTable, preferProvServiceFromConnectors),
                             itemTraversed.pathIntegrity && integrity,
                             combineValidityChecks(itemTraversed.pathValidityChecks, validityChecks)
                     )
@@ -296,6 +294,17 @@ public class Traverser {
         }
 
         return newItemsToTraverse;
+    }
+
+    private String getProvServiceUri(ConnectorDTO connector, IProvServiceTable provServiceTable, boolean preferProvServiceFromConnectors) {
+        String fromTable = provServiceTable.getServiceUri(connector.referencedBundleId.toQN().getUri());
+        String fromConnector = connector.provenanceServiceUri;
+
+        if (preferProvServiceFromConnectors) {
+            return fromConnector != null ? fromConnector : fromTable;
+        } else {
+            return fromTable != null ? fromTable : fromConnector;
+        }
     }
 
     private LinkedHashMap<EValidityCheck, Boolean> combineValidityChecks(LinkedHashMap<EValidityCheck, Boolean> first, LinkedHashMap<EValidityCheck, Boolean> second) {

@@ -37,6 +37,9 @@ public class TraverserConfig {
     @Value("${traverser.concurrencyDegree:10}")
     private int traverserConcurrencyDegree;
 
+    @Value("${traverser.preferProvServiceFromConnectors}")
+    private boolean preferProvServiceFromConnectors;
+
     @Bean
     public IProvServiceTable provServiceTable() {
         ProvServiceTable table = new ProvServiceTable();
@@ -77,6 +80,6 @@ public class TraverserConfig {
             IProvServiceTable provServiceTable,
             Map<EValidityCheck, IValidityVerifier> validityVerifiers,
             Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
-        return new Traverser(provServiceTable, traverserConcurrencyDegree, validityVerifiers, traversalPriorityComparators);
+        return new Traverser(provServiceTable, traverserConcurrencyDegree, preferProvServiceFromConnectors, validityVerifiers, traversalPriorityComparators);
     }
 }
