@@ -22,6 +22,11 @@ public class FindFittingLinearSubgraphs implements IFindableInDocument<List<Edge
         this.graphParts = new ArrayList<>(graphParts);
     }
 
+    public FindFittingLinearSubgraphs(List<EdgeToNodeCondition> graphParts, ICondition<EdgeToNode> pathCondition) {
+        this.graphParts = new ArrayList<>(graphParts);
+        this.pathCondition = pathCondition;
+    }
+
     @Override
     public List<List<EdgeToNode>> find(CpmDocument document, INode startNode) {
         if (graphParts == null) {

@@ -6,6 +6,7 @@ import cz.muni.fi.cpm.model.*;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
+import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.models.QualifiedNameData;
 import cz.muni.xmichalk.queries.*;
 import cz.muni.xmichalk.querySpecification.ICondition;
@@ -241,6 +242,70 @@ public class QueriesTest extends TestDocumentProvider {
 
         for (IEdge edge : resultCpmDoc.getEdges()) {
             assert edge.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION || edge.getKind() == StatementOrBundle.Kind.PROV_GENERATION;
+        }
+    }
+
+    @Test
+    public void testgetPersonsResponsibleForActionsOnGenerationSubgraph() throws IOException {
+        CpmDocument cpmDoc = samplingBundle_V0;
+        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
+
+        ICondition<EdgeToNode> generationPath = new AnyTrue<>(List.of(
+                new EdgeToNodeCondition(
+                        new AnyTrue<>(List.of(
+                                new IsRelation(StatementOrBundle.Kind.PROV_GENERATION),
+                                new IsRelation(StatementOrBundle.Kind.PROV_USAGE)
+                        )
+                        ),
+                        null,
+                        false
+                ),
+                new EdgeToNodeCondition(
+                        new IsRelation(StatementOrBundle.Kind.PROV_SPECIALIZATION),
+                        null,
+                        null
+                )
+        ));
+
+        IQuery<?> query = new GetSubgraphs(
+                new FindFittingLinearSubgraphs(
+                        new ArrayList<>(List.of(
+                                new EdgeToNodeCondition(
+                                        null,
+                                        new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY),
+                                        null
+                                ),
+                                new EdgeToNodeCondition(
+                                        new IsRelation(StatementOrBundle.Kind.PROV_ASSOCIATION),
+                                        new HasAttrQualifiedNameValue(
+                                                ATTR_PROV_TYPE.getUri(),
+                                                SCHEMA_URI + "Person"
+                                        ),
+                                        null
+                                )
+                        )),
+                        generationPath
+                )
+        );
+        JsonNode serializedQuery = objectMapper.valueToTree(query);
+        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
+        });
+
+        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+
+        assert result != null;
+        assert result instanceof List<?>;
+        Collection<?> collection = (Collection<?>) result;
+        assert (collection.size() == 3);
+
+        for (Object subgraphObject : collection) {
+            assert subgraphObject instanceof JsonNode;
+            JsonNode subgraphJsonNode = (JsonNode) subgraphObject;
+            Document subgraphDoc = deserialize(subgraphJsonNode.toString(), Formats.ProvFormat.JSON);
+            assert subgraphDoc != null;
+            CpmDocument subgraphCpmDoc = new CpmDocument(subgraphDoc, pF, cPF, cF);
+            assert subgraphCpmDoc.getNodes().size() == 2;
+            assert subgraphCpmDoc.getEdges().size() == 1;
         }
     }
 

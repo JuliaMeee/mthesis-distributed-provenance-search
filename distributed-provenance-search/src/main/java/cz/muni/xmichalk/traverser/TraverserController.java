@@ -101,6 +101,73 @@ public class TraverserController {
                                         "backward": "true"
                                       }
                                     }
+                                    """),
+                            @ExampleObject(name = "Find subgraphs of agents and activities they were responsible for, that are on the generation path (via Specializations, Generations, and Usages)", value = """
+                                    {
+                                      "bundleId": {
+                                        "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                        "localPart": "SpeciesIdentificationBundle_V0"
+                                      },
+                                      "startNodeId": {
+                                        "nameSpaceUri": "https://openprovenance.org/blank/",
+                                        "localPart": "IdentifiedSpeciesCon"
+                                      },
+                                      "versionPreference": "SPECIFIED",
+                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                      "querySpecification": {
+                                        "type" : "GetSubgraphs",
+                                        "subgraphFinder" : {
+                                          "type" : "FindFittingLinearSubgraphs",
+                                          "graphParts" : [ {
+                                            "type" : "EdgeToNodeCondition",
+                                            "edgeCondition" : null,
+                                            "nodeCondition" : {
+                                              "type" : "IsKind",
+                                              "kind" : "PROV_ACTIVITY"
+                                            },
+                                            "nodeIsEffect" : null
+                                          }, {
+                                            "type" : "EdgeToNodeCondition",
+                                            "edgeCondition" : {
+                                              "type" : "IsRelation",
+                                              "relation" : "PROV_ASSOCIATION"
+                                            },
+                                            "nodeCondition" : {
+                                              "type" : "IsKind",
+                                              "kind" : "PROV_AGENT"
+                                            },
+                                            "nodeIsEffect" : null
+                                          } ],
+                                          "pathCondition" : {
+                                            "type" : "AnyTrue",
+                                            "conditions" : [ {
+                                              "type" : "EdgeToNodeCondition",
+                                              "edgeCondition" : {
+                                                "type" : "AnyTrue",
+                                                "conditions" : [ {
+                                                  "type" : "IsRelation",
+                                                  "relation" : "PROV_GENERATION"
+                                                }, {
+                                                  "type" : "IsRelation",
+                                                  "relation" : "PROV_USAGE"
+                                                } ]
+                                              },
+                                              "nodeCondition" : null,
+                                              "nodeIsEffect" : false
+                                            }, {
+                                              "type" : "EdgeToNodeCondition",
+                                              "edgeCondition" : {
+                                                "type" : "IsRelation",
+                                                "relation" : "PROV_SPECIALIZATION"
+                                              },
+                                              "nodeCondition" : null,
+                                              "nodeIsEffect" : null
+                                            } ]
+                                          }
+                                        }
+                                      }
+                                    }
                                     """)
 
                     }
