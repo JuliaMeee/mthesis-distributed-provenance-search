@@ -111,16 +111,6 @@ public class ProvDocumentUtils {
         return doc;
     }
 
-    public static QualifiedName getBundleId(Document document) {
-        for (Object o : document.getStatementOrBundle()) {
-            if (o instanceof Bundle bundle) {
-                return bundle.getId();
-            }
-        }
-
-        return null;
-    }
-
     public static void doForEachQualifiedName(Object provObject, Consumer<QualifiedName> action) {
         if (provObject instanceof Document doc) {
             for (StatementOrBundle statement : doc.getStatementOrBundle()) {
