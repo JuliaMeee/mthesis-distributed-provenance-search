@@ -21,6 +21,13 @@ public class HasAttrLangStringValue implements ICondition<INode> {
 
     @Override
     public boolean test(INode node) {
+        if (attributeNameUri == null) {
+            throw new IllegalStateException("Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
+        }
+        if (langRegex == null && valueRegex == null) {
+            throw new IllegalStateException("At least one of langRegex or valueRegex must be non-null in " + this.getClass().getSimpleName());
+        }
+
         try {
             return AttributeUtils.hasAttributeTargetValue(node, attributeNameUri, LangString.class, (langString)
                     -> {

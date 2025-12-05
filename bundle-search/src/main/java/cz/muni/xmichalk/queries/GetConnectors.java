@@ -3,11 +3,11 @@ package cz.muni.xmichalk.queries;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
-import cz.muni.xmichalk.models.EdgeToNode;
 import cz.muni.xmichalk.models.QualifiedNameData;
-import cz.muni.xmichalk.querySpecification.ICondition;
-import cz.muni.xmichalk.querySpecification.findable.FindFittingNodes;
-import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
+import cz.muni.xmichalk.models.SubgraphWrapper;
+import cz.muni.xmichalk.querySpecification.findable.FittingNodes;
+import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
+import cz.muni.xmichalk.querySpecification.findable.WholeGraph;
 import cz.muni.xmichalk.querySpecification.nodeConditions.HasAttrQualifiedNameValue;
 import cz.muni.xmichalk.util.AttributeUtils;
 import cz.muni.xmichalk.util.CpmUtils;
@@ -15,13 +15,15 @@ import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static cz.muni.xmichalk.util.AttributeNames.*;
 import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
 
 public class GetConnectors implements IQuery<List<ConnectorData>> {
-    public Boolean backward;
-    public ICondition<EdgeToNode> pathCondition;
+    public Boolean backward = null;
+    public IFindableSubgraph fromSubgraphs = new WholeGraph();
 
     public GetConnectors() {
     }
@@ -30,29 +32,38 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
         this.backward = backward;
     }
 
-    public GetConnectors(Boolean backward, ICondition<EdgeToNode> pathCondition) {
+    public GetConnectors(Boolean backward, IFindableSubgraph fromSubgraphs) {
         this.backward = backward;
-        this.pathCondition = pathCondition;
+        this.fromSubgraphs = fromSubgraphs;
     }
-
 
     @Override
     public List<ConnectorData> evaluate(BundleStart input) {
-        if (backward == null) return null;
+        String typeValueRegex = backward == null ? CPM_URI + "(backward|forward)Connector"
+                : CPM_URI + (backward ? "backwardConnector" : "forwardConnector");
 
-        IFindableInDocument<INode> finder = new FindFittingNodes(
+        IFindableSubgraph finder = new FittingNodes(
                 new HasAttrQualifiedNameValue(
                         ATTR_PROV_TYPE.getUri(),
-                        CPM_URI + ((backward) ? "backwardConnector" : "forwardConnector")
+                        typeValueRegex
                 ),
-                pathCondition
+                fromSubgraphs
         );
 
-        List<INode> foundNodes = finder.find(input.bundle, input.startNode);
+        List<SubgraphWrapper> subgraphs = finder.find(input);
 
-        if (foundNodes == null || foundNodes.isEmpty()) return null;
+        if (subgraphs == null || subgraphs.isEmpty()) {
+            return List.of();
+        }
 
-        return foundNodes.stream()
+        Set<INode> connectors = subgraphs.stream()
+                .flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
+
+        if (connectors.isEmpty()) {
+            return List.of();
+        }
+
+        return connectors.stream()
                 .map(this::transformToConnectorData)
                 .toList();
     }
@@ -63,9 +74,9 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
 
         connectorData.id = new QualifiedNameData().from(node.getId());
 
-        QualifiedName referencedConnectorIdValue = CpmUtils.getConnectorIdInReferencedBundle(node);
-        connectorData.referencedConnectorId =
-                new QualifiedNameData().from(referencedConnectorIdValue == null ? node.getId() : referencedConnectorIdValue);
+        INode referencedConnector = CpmUtils.getGeneralConnectorId(node);
+        QualifiedName referencedConnectorIdValue = referencedConnector != null ? referencedConnector.getId() : node.getId();
+        connectorData.referencedConnectorId = new QualifiedNameData().from(referencedConnectorIdValue);
 
         Object referencedBundleIdValue = AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
         connectorData.referencedBundleId = referencedBundleIdValue == null ? null :

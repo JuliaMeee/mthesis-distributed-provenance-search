@@ -3,11 +3,13 @@ package cz.muni.xmichalk.util;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.EdgeToNode;
+import cz.muni.xmichalk.models.SubgraphWrapper;
 import org.openprovenance.prov.model.QualifiedName;
 import org.openprovenance.prov.model.StatementOrBundle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
@@ -20,21 +22,20 @@ public class CpmUtils {
         if (startNode == null) {
             return null;
         }
-        List<INode> mainActivities = BundleTraverser.traverseAndFindNodes(
+        Set<INode> mainActivities = GraphTraverser.traverseAndFindNodes(
                 startNode,
                 node -> AttributeUtils.hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
-                        qName -> qName.getUri().equals(CPM_URI + "mainActivity")),
-                null
+                        qName -> qName.getUri().equals(CPM_URI + "mainActivity"))
         );
 
         if (mainActivities == null || mainActivities.size() != 1) {
             return null;
         }
 
-        return (QualifiedName) AttributeUtils.getAttributeValue(mainActivities.getFirst(), ATTR_REFERENCED_META_BUNDLE_ID);
+        return (QualifiedName) AttributeUtils.getAttributeValue(mainActivities.stream().findFirst().get(), ATTR_REFERENCED_META_BUNDLE_ID);
     }
 
-    public static QualifiedName getConnectorIdInReferencedBundle(INode connectorNode) {
+    public static INode getGeneralConnectorId(INode connectorNode) {
         // backward connector id matches general forward connector id in the other bundle
         // specific forward connector id is not present in the other bundle as a backward connector, resolve it to general forward connector id
         Object provType = AttributeUtils.getAttributeValue(connectorNode, ATTR_PROV_TYPE);
@@ -42,7 +43,7 @@ public class CpmUtils {
             return null;
         }
         if (AttributeUtils.isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "backwardConnector"))) {
-            return connectorNode.getId();
+            return connectorNode;
         }
         if (AttributeUtils.isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "forwardConnector"))) {
             ArrayList<Predicate<EdgeToNode>> subgraphConstraints = new ArrayList<Predicate<EdgeToNode>>();
@@ -54,11 +55,11 @@ public class CpmUtils {
                         qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
                 return isSpecialization && isGeneralEntity && isForwardConnector;
             });
-            List<List<EdgeToNode>> subgraphs = LinearSubgraphFinder.findSubgraphsFrom(connectorNode, subgraphConstraints);
-            if (subgraphs.isEmpty() || subgraphs.getFirst().size() != 2) {
+            List<SubgraphWrapper> subgraphs = LinearSubgraphFinder.findSubgraphsFrom(connectorNode, subgraphConstraints);
+            if (subgraphs.isEmpty() || subgraphs.getFirst().getNodes().size() != 2) {
                 return null;
             }
-            return subgraphs.getFirst().getLast().node.getId();
+            return subgraphs.getFirst().getNodes().getLast();
         }
 
         return null;

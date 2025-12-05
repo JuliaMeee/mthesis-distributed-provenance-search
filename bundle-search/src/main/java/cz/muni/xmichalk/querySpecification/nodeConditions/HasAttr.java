@@ -18,6 +18,10 @@ public class HasAttr implements ICondition<INode> {
 
     @Override
     public boolean test(INode node) {
+        if (attributeNameUri == null) {
+            throw new IllegalStateException("Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
+        }
+
         Object value = AttributeUtils.getAttributeValue(node, attributeNameUri);
         return (value != null && !(value instanceof List<?> && ((List<?>) value).isEmpty()));
     }

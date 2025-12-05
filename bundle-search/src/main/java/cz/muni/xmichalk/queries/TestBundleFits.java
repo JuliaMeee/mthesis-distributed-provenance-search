@@ -15,6 +15,10 @@ public class TestBundleFits implements IQuery<Boolean> {
 
     @Override
     public Boolean evaluate(BundleStart input) {
-        return condition == null || condition.test(input);
+
+        if (condition == null) {
+            throw new IllegalStateException("Value of condition cannot be null in " + this.getClass().getName());
+        }
+        return condition.test(input);
     }
 }

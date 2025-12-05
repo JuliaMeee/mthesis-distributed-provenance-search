@@ -57,27 +57,78 @@ public class TraverserController {
             content = @Content(
                     schema = @Schema(implementation = TraversalParamsDTO.class),
                     examples = {
-                            @ExampleObject(name = "Get all person nodes", value = """
+                            @ExampleObject(name = "Get storing activities on the usage/generation path going backwards (via undirected Specializations, backward Generations and Usages)", value = """
                                     {
                                       "bundleId": {
-                                        "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
-                                        "localPart": "SpeciesIdentificationBundle_V0"
+                                        "nameSpaceUri": "http://prov-storage-4:8000/api/v1/organizations/ORG4/documents/",
+                                        "localPart": "DnaSequencingBundle_V0"
                                       },
                                       "startNodeId": {
                                         "nameSpaceUri": "https://openprovenance.org/blank/",
-                                        "localPart": "IdentifiedSpeciesCon"
+                                        "localPart": "FilteredSequencesCon"
                                       },
                                       "versionPreference": "SPECIFIED",
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                       "querySpecification": {
-                                        "type": "GetNodes",
-                                        "nodeFinder": {
-                                          "type" : "FindFittingNodes",
+                                        "type" : "GetNodes",
+                                        "fromSubgraphs" : {
+                                          "type" : "FittingNodes",
                                           "nodeCondition" : {
-                                            "type" : "HasAttrQualifiedNameValue",
-                                            "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                            "uriRegex" : "https://schema.org/Person"
+                                            "type" : "AllTrue",
+                                            "conditions" : [ {
+                                              "type" : "IsKind",
+                                              "kind" : "PROV_ACTIVITY"
+                                            }, {
+                                              "type" : "HasAttrLangStringValue",
+                                              "attributeNameUri" : "http://purl.org/dc/terms/type",
+                                              "valueRegex" : "(?i).*storing.*"
+                                            } ]
+                                          },
+                                          "startsIn" : {
+                                            "type" : "FilteredSubgraphs",
+                                            "filter" : {
+                                              "type" : "AnyTrue",
+                                              "conditions" : [ {
+                                                "type" : "EdgeToNodeCondition",
+                                                "edgeCondition" : {
+                                                  "type" : "AnyTrue",
+                                                  "conditions" : [ {
+                                                    "type" : "IsRelation",
+                                                    "relation" : "PROV_USAGE"
+                                                  }, {
+                                                    "type" : "IsRelation",
+                                                    "relation" : "PROV_GENERATION"
+                                                  } ]
+                                                },
+                                                "nodeIsEffect" : false
+                                              }, {
+                                                "type" : "EdgeToNodeCondition",
+                                                "edgeCondition" : {
+                                                  "type" : "IsRelation",
+                                                  "relation" : "PROV_SPECIALIZATION"
+                                                }
+                                              } ]
+                                            },
+                                            "startsIn" : {
+                                              "type" : "FilteredSubgraphs",
+                                              "filter" : {
+                                                "type" : "EdgeToNodeCondition",
+                                                "edgeCondition" : {
+                                                  "type" : "IsRelation",
+                                                  "relation" : "PROV_DERIVATION"
+                                                },
+                                                "nodeCondition" : {
+                                                  "type" : "HasAttrQualifiedNameValue",
+                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                  "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/forwardConnector"
+                                                },
+                                                "nodeIsEffect" : false
+                                              },
+                                              "startsIn" : {
+                                                "type" : "StartNode"
+                                              }
+                                            }
                                           }
                                         }
                                       }
@@ -102,73 +153,6 @@ public class TraverserController {
                                       }
                                     }
                                     """),
-                            @ExampleObject(name = "Find subgraphs of agents and activities they were responsible for, that are on the generation path (via Specializations, Generations, and Usages)", value = """
-                                    {
-                                      "bundleId": {
-                                        "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
-                                        "localPart": "SpeciesIdentificationBundle_V0"
-                                      },
-                                      "startNodeId": {
-                                        "nameSpaceUri": "https://openprovenance.org/blank/",
-                                        "localPart": "IdentifiedSpeciesCon"
-                                      },
-                                      "versionPreference": "SPECIFIED",
-                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
-                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "querySpecification": {
-                                        "type" : "GetSubgraphs",
-                                        "subgraphFinder" : {
-                                          "type" : "FindFittingLinearSubgraphs",
-                                          "graphParts" : [ {
-                                            "type" : "EdgeToNodeCondition",
-                                            "edgeCondition" : null,
-                                            "nodeCondition" : {
-                                              "type" : "IsKind",
-                                              "kind" : "PROV_ACTIVITY"
-                                            },
-                                            "nodeIsEffect" : null
-                                          }, {
-                                            "type" : "EdgeToNodeCondition",
-                                            "edgeCondition" : {
-                                              "type" : "IsRelation",
-                                              "relation" : "PROV_ASSOCIATION"
-                                            },
-                                            "nodeCondition" : {
-                                              "type" : "IsKind",
-                                              "kind" : "PROV_AGENT"
-                                            },
-                                            "nodeIsEffect" : null
-                                          } ],
-                                          "pathCondition" : {
-                                            "type" : "AnyTrue",
-                                            "conditions" : [ {
-                                              "type" : "EdgeToNodeCondition",
-                                              "edgeCondition" : {
-                                                "type" : "AnyTrue",
-                                                "conditions" : [ {
-                                                  "type" : "IsRelation",
-                                                  "relation" : "PROV_GENERATION"
-                                                }, {
-                                                  "type" : "IsRelation",
-                                                  "relation" : "PROV_USAGE"
-                                                } ]
-                                              },
-                                              "nodeCondition" : null,
-                                              "nodeIsEffect" : false
-                                            }, {
-                                              "type" : "EdgeToNodeCondition",
-                                              "edgeCondition" : {
-                                                "type" : "IsRelation",
-                                                "relation" : "PROV_SPECIALIZATION"
-                                              },
-                                              "nodeCondition" : null,
-                                              "nodeIsEffect" : null
-                                            } ]
-                                          }
-                                        }
-                                      }
-                                    }
-                                    """)
 
                     }
             )
@@ -200,19 +184,19 @@ public class TraverserController {
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                       "querySpecification": {
-                                        "type": "GetNodeIds",
-                                        "nodeFinder": {
-                                          "type" : "FindFittingNodes",
-                                          "nodeCondition" : {
-                                            "type" : "HasAttrQualifiedNameValue",
-                                            "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                            "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
-                                          }
-                                        }
-                                      }
+                                         "type" : "GetNodeIds",
+                                         "fromSubgraphs" : {
+                                           "type" : "FittingNodes",
+                                           "nodeCondition" : {
+                                             "type" : "HasAttrQualifiedNameValue",
+                                             "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                             "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                           }
+                                         }
+                                       }
                                     }
                                     """),
-                            @ExampleObject(name = "Check if bundles have a backward jump connector to a bundle with defined meta uri", value = """
+                            @ExampleObject(name = "Find subgraphs of Jane Smith and activities they were responsible for", value = """
                                     {
                                       "bundleId": {
                                         "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
@@ -220,47 +204,47 @@ public class TraverserController {
                                       },
                                       "startNodeId": {
                                         "nameSpaceUri": "https://openprovenance.org/blank/",
-                                        "localPart": "StoredSampleCon_r1"
+                                        "localPart": "StoredSampleCon_r2_3um"
                                       },
                                       "versionPreference": "LATEST",
                                       "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                                       "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                       "querySpecification": {
-                                        "type": "TestBundleFits",
-                                        "condition": {
-                                          "type" : "CountCondition",
-                                          "findableInDocument" : {
-                                            "type" : "FindFittingLinearSubgraphs",
-                                            "graphParts" : [ {
-                                              "type" : "EdgeToNodeCondition",
-                                              "nodeCondition" : {
-                                                "type" : "AllTrue",
-                                                "conditions" : [ {
-                                                  "type" : "HasAttrQualifiedNameValue",
-                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                  "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                                }, {
-                                                  "type" : "HasAttrQualifiedNameValue",
-                                                  "attributeNameUri" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/referencedMetaBundleId",
-                                                  "uriRegex" : "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"
-                                                } ]
-                                              }
-                                            }, {
-                                              "type" : "EdgeToNodeCondition",
-                                              "edgeCondition" : {
-                                                "type" : "IsRelation",
-                                                "relation" : "PROV_DERIVATION"
-                                              },
-                                              "nodeCondition" : {
+                                        "type" : "GetSubgraphs",
+                                        "subgraph" : {
+                                          "type" : "FittingLinearSubgraphs",
+                                          "graphParts" : [ {
+                                            "type" : "EdgeToNodeCondition",
+                                            "edgeCondition" : null,
+                                            "nodeCondition" : {
+                                              "type" : "IsKind",
+                                              "kind" : "PROV_ACTIVITY"
+                                            },
+                                            "nodeIsEffect" : null
+                                          }, {
+                                            "type" : "EdgeToNodeCondition",
+                                            "edgeCondition" : {
+                                              "type" : "IsRelation",
+                                              "relation" : "PROV_ASSOCIATION"
+                                            },
+                                            "nodeCondition" : {
+                                              "type" : "AllTrue",
+                                              "conditions" : [ {
                                                 "type" : "HasAttrQualifiedNameValue",
                                                 "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/backwardConnector"
-                                              },
-                                              "nodeIsEffect" : true
-                                            } ]
-                                          },
-                                          "comparisonResult" : "GREATER_THAN_OR_EQUALS",
-                                          "count" : 1
+                                                "valueUriRegex" : "https://schema.org/Person"
+                                              }, {
+                                                "type" : "HasAttrLangStringValue",
+                                                "attributeNameUri" : "https://schema.org/name",
+                                                "langRegex" : null,
+                                                "valueRegex" : "Jane Smith"
+                                              } ]
+                                            },
+                                            "nodeIsEffect" : false
+                                          } ],
+                                          "startsIn" : {
+                                            "type" : "WholeGraph"
+                                          }
                                         }
                                       }
                                     }

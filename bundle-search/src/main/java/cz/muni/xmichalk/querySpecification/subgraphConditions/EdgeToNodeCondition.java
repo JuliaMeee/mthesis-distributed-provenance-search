@@ -24,7 +24,7 @@ public class EdgeToNodeCondition implements ICondition<EdgeToNode> {
         IEdge edge = edgeToNode == null ? null : edgeToNode.edge;
 
 
-        if (edgeCondition != null && !edgeCondition.test(edge)) {
+        if (edgeCondition != null && edge != null && !edgeCondition.test(edge)) { // skip if edge is null (start node)
             return false;
         }
 
@@ -32,7 +32,7 @@ public class EdgeToNodeCondition implements ICondition<EdgeToNode> {
             return false;
         }
 
-        if (nodeIsEffect != null) {
+        if (nodeIsEffect != null && edge != null) { // skip if edge is null (start node)
             INode effectNode = edge == null ? null : edge.getEffect();
             if (node == null || effectNode == null) {
                 return false;

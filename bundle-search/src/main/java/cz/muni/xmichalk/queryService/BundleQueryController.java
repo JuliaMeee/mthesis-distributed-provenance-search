@@ -39,7 +39,76 @@ public class BundleQueryController {
                     schema = @Schema(implementation = QueryParams.class),
                     examples = {
                             @ExampleObject(
-                                    name = "Get all person nodes in the bundle",
+                                    name = "Get subgraph of Derivation/Specialization relations going backward from the start node",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                                "localPart": "ProcessingBundle_V1"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "ProcessedSampleCon"
+                                              },
+                                              "querySpecification": {
+                                                 "type" : "GetSubgraphs",
+                                                 "subgraph" : {
+                                                   "type" : "DerivationPathFromStartNode",
+                                                   "backward" : true
+                                                }
+                                              }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Find a subgraph of Usage/Generation/Specialization relations going forward from the start node, Specialization going both directions",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                                "localPart": "ProcessingBundle_V0"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "querySpecification": {
+                                                "type" : "GetSubgraphs",
+                                                "subgraph" : {
+                                                  "type" : "FilteredSubgraphs",
+                                                  "filter" : {
+                                                    "type" : "AnyTrue",
+                                                    "conditions" : [ {
+                                                      "type" : "EdgeToNodeCondition",
+                                                      "edgeCondition" : {
+                                                        "type" : "AnyTrue",
+                                                        "conditions" : [ {
+                                                          "type" : "IsRelation",
+                                                          "relation" : "PROV_USAGE"
+                                                        }, {
+                                                          "type" : "IsRelation",
+                                                          "relation" : "PROV_GENERATION"
+                                                        } ]
+                                                      },
+                                                      "nodeIsEffect" : true
+                                                    }, {
+                                                      "type" : "EdgeToNodeCondition",
+                                                      "edgeCondition" : {
+                                                        "type" : "IsRelation",
+                                                        "relation" : "PROV_SPECIALIZATION"
+                                                      }
+                                                    } ]
+                                                  },
+                                                  "startsIn" : {
+                                                    "type" : "StartNode"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Get actions associated with Jane Smith",
                                     value = """
                                             {
                                               "bundleId": {
@@ -52,12 +121,43 @@ public class BundleQueryController {
                                               },
                                               "querySpecification": {
                                                 "type" : "GetNodes",
-                                                "nodeFinder" : {
-                                                  "type" : "FindFittingNodes",
+                                                "fromSubgraphs" : {
+                                                  "type" : "FittingNodes",
                                                   "nodeCondition" : {
-                                                    "type" : "HasAttrQualifiedNameValue",
-                                                    "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                    "uriRegex" : "https://schema.org/Person"
+                                                    "type" : "IsKind",
+                                                    "kind" : "PROV_ACTIVITY"
+                                                  },
+                                                  "startsIn" : {
+                                                    "type" : "FittingLinearSubgraphs",
+                                                    "graphParts" : [ {
+                                                      "type" : "EdgeToNodeCondition",
+                                                      "nodeCondition" : {
+                                                        "type" : "IsKind",
+                                                        "kind" : "PROV_ACTIVITY"
+                                                      }
+                                                    }, {
+                                                      "type" : "EdgeToNodeCondition",
+                                                      "edgeCondition" : {
+                                                        "type" : "IsRelation",
+                                                        "relation" : "PROV_ASSOCIATION"
+                                                      },
+                                                      "nodeCondition" : {
+                                                        "type" : "AllTrue",
+                                                        "conditions" : [ {
+                                                          "type" : "HasAttrQualifiedNameValue",
+                                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                          "valueUriRegex" : "https://schema.org/Person"
+                                                        }, {
+                                                          "type" : "HasAttrLangStringValue",
+                                                          "attributeNameUri" : "https://schema.org/name",
+                                                          "valueRegex" : "Jane Smith"
+                                                        } ]
+                                                      },
+                                                      "nodeIsEffect" : false
+                                                    } ],
+                                                    "startsIn" : {
+                                                      "type" : "WholeGraph"
+                                                    }
                                                   }
                                                 }
                                               }
@@ -65,191 +165,101 @@ public class BundleQueryController {
                                             """
                             ),
                             @ExampleObject(
-                                    name = "Get subgraph formed by only Derivation and Specialization relations going in both directions from the start node",
+                                    name = "Get main activity id",
                                     value = """
                                             {
                                               "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                                "localPart": "SamplingBundle_V1"
+                                                "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                                "localPart": "SpeciesIdentificationBundle_V0"
                                               },
                                               "startNodeId": {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
-                                                "localPart": "StoredSampleCon_r1"
+                                                "localPart": "IdentifiedSpeciesCon"
                                               },
                                               "querySpecification": {
-                                                "type" : "GetFilteredSubgraph",
-                                                "pathCondition": {
-                                                  "type": "DerivationPathCondition",
-                                                  "backward": null
+                                                "type" : "GetNodeIds",
+                                                  "fromSubgraphs" : {
+                                                  "type" : "FittingNodes",
+                                                  "nodeCondition" : {
+                                                    "type" : "HasAttrQualifiedNameValue",
+                                                    "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                    "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                                  }
                                                 }
                                               }
                                             }
                                             """
                             ),
                             @ExampleObject(
-                                    name = "Get all mainActivity and connector nodes on path formed by Derivation, Usage or Generation relations going in backward direction from the start node",
+                                    name = "Get backward connectors that the start connector was derived from",
                                     value = """
                                             {
                                               "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                                "localPart": "SamplingBundle_V1"
+                                                "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                                "localPart": "SpeciesIdentificationBundle_V0"
                                               },
                                               "startNodeId": {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
-                                                "localPart": "StoredSampleCon_r1"
-                                              },
-                                              "querySpecification": {
-                                                 "type" : "GetNodes",
-                                                 "nodeFinder" : {
-                                                   "type" : "FindFittingNodes",
-                                                   "nodeCondition" : null,
-                                                   "pathCondition" : {
-                                                     "type" : "EdgeToNodeCondition",
-                                                     "edgeCondition" : {
-                                                       "type" : "AnyTrue",
-                                                       "conditions" : [ {
-                                                         "type" : "IsRelation",
-                                                         "relation" : "PROV_DERIVATION"
-                                                       }, {
-                                                         "type" : "IsRelation",
-                                                         "relation" : "PROV_USAGE"
-                                                       }, {
-                                                         "type" : "IsRelation",
-                                                         "relation" : "PROV_GENERATION"
-                                                       } ]
-                                                     },
-                                                     "nodeCondition" : null,
-                                                     "nodeIsEffect" : null
-                                                   }
-                                                 }
-                                               }
-                                            }
-                                            """
-                            ),
-                            @ExampleObject(
-                                    name = "Get all forward connectors in the bundle",
-                                    value = """
-                                            {
-                                              "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                                "localPart": "SamplingBundle_V1"
-                                              },
-                                              "startNodeId": {
-                                                "nameSpaceUri": "https://openprovenance.org/blank/",
-                                                "localPart": "StoredSampleCon_r1"
+                                                "localPart": "IdentifiedSpeciesCon"
                                               },
                                               "querySpecification": {
                                                 "type" : "GetConnectors",
-                                                "backward" : false
-                                              }
-                                            }
-                                            """
-                            ),
-                            @ExampleObject(
-                                    name = "Get forward connectors derived from a specific connector",
-                                    value = """
-                                            {
-                                              "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                                "localPart": "SamplingBundle_V1"
-                                              },
-                                              "startNodeId": {
-                                                "nameSpaceUri": "https://openprovenance.org/blank/",
-                                                "localPart": "StoredSampleCon_r1"
-                                              },
-                                              "querySpecification": {
-                                                "type" : "GetConnectors",
-                                                "backward" : false,
-                                                "pathCondition": {
-                                                  "type": "DerivationPathCondition",
-                                                  "backward": false
+                                                "backward" : true,
+                                                "fromSubgraphs" : {
+                                                  "type" : "DerivationPathFromStartNode",
+                                                  "backward" : true
                                                 }
                                               }
                                             }
                                             """
                             ),
                             @ExampleObject(
-                                    name = "Test if bundle has exactly one main activity",
+                                    name = "Get all connectors",
                                     value = """
                                             {
                                               "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                                "localPart": "SamplingBundle_V1"
+                                                "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
+                                                "localPart": "SpeciesIdentificationBundle_V0"
                                               },
                                               "startNodeId": {
                                                 "nameSpaceUri": "https://openprovenance.org/blank/",
                                                 "localPart": "StoredSampleCon_r1"
                                               },
                                               "querySpecification": {
-                                                "type": "TestBundleFits",
-                                                "condition": {
-                                                  "type" : "CountCondition",
-                                                  "findableInDocument" : {
-                                                    "type" : "FindFittingNodes",
+                                                "type" : "GetConnectors"
+                                              }
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Test whether bundle has exactly one main activity",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/",
+                                                "localPart": "ProcessingBundle_V0"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r1"
+                                              },
+                                              "querySpecification": {
+                                                "type" : "TestBundleFits",
+                                                "condition" : {
+                                                  "type" : "CountComparisonCondition",
+                                                  "first" : {
+                                                    "type" : "FittingNodes",
                                                     "nodeCondition" : {
                                                       "type" : "HasAttrQualifiedNameValue",
                                                       "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                      "uriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
+                                                      "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/mainActivity"
                                                     }
                                                   },
                                                   "comparisonResult" : "EQUALS",
-                                                  "count" : 1
-                                                }
-                                              }
-                                            }
-                                            """
-                            ),
-                            @ExampleObject(
-                                    name = "Get all activities Jane Smith was responsible for",
-                                    value = """
-                                            {
-                                              "bundleId": {
-                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                                "localPart": "SamplingBundle_V1"
-                                              },
-                                              "startNodeId": {
-                                                "nameSpaceUri": "https://openprovenance.org/blank/",
-                                                "localPart": "StoredSampleCon_r1"
-                                              },
-                                              "querySpecification": {
-                                                "type": "GetSubgraphs",
-                                                "subgraphFinder": {
-                                                  "type": "FindFittingLinearSubgraphs",
-                                                  "graphParts": [
-                                                    {
-                                                      "type": "EdgeToNodeCondition",
-                                                      "edgeCondition": null,
-                                                      "nodeCondition": {
-                                                        "type": "AllTrue",
-                                                        "conditions": [
-                                                          {
-                                                            "type": "HasAttrQualifiedNameValue",
-                                                            "attributeNameUri": "http://www.w3.org/ns/prov#type",
-                                                            "uriRegex": "https://schema.org/Person"
-                                                          },
-                                                          {
-                                                            "type": "HasAttrLangStringValue",
-                                                            "attributeNameUri": "https://schema.org/name",
-                                                            "langRegex": null,
-                                                            "valueRegex": "Jane Smith"
-                                                          }
-                                                        ]
-                                                      },
-                                                      "nodeIsEffect": null
-                                                    },
-                                                    {
-                                                      "type": "EdgeToNodeCondition",
-                                                      "edgeCondition": {
-                                                        "type": "IsRelation",
-                                                        "relation": "PROV_ASSOCIATION"
-                                                      },
-                                                      "nodeCondition": {
-                                                        "type": "IsKind",
-                                                        "kind": "PROV_ACTIVITY"
-                                                      },
-                                                      "nodeIsEffect": null
-                                                    }
-                                                  ]
+                                                  "second" : {
+                                                    "type" : "CountConstant",
+                                                    "count" : 1
+                                                  }
                                                 }
                                               }
                                             }

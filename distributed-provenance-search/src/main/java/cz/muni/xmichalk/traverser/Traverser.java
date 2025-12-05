@@ -248,7 +248,13 @@ public class Traverser {
 
     private ResultFromBundle convertToNewResult(ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult, boolean integrity, Map<EValidityCheck, Boolean> validityChecks) {
         if (queryResult == null || queryResult.result == null || queryResult.result.isNull()) {
-            log.warn("Query result for bundle {} is null", itemTraversed.bundleId.getUri());
+            log.info("Query result for bundle {} is null", itemTraversed.bundleId.getUri());
+            return null;
+        }
+
+        if (queryResult.result.isObject() && queryResult.result.isEmpty()
+                || queryResult.result.isArray() && queryResult.result.isEmpty()) {
+            log.info("Query result for bundle {} is empty", itemTraversed.bundleId.getUri());
             return null;
         }
 

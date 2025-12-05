@@ -17,7 +17,7 @@ public class AllTrue<T> implements ICondition<T> {
     @Override
     public boolean test(T target) {
         if (conditions == null || conditions.isEmpty()) {
-            return true;
+            throw new IllegalStateException("Value of conditions cannot be null in " + this.getClass().getSimpleName());
         }
         return conditions.stream().allMatch(condition -> condition.test(target));
     }

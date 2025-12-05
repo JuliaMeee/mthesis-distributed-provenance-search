@@ -17,8 +17,11 @@ public class Either<T> implements ICondition<T> {
     @Override
     public boolean test(T item) {
 
-        if (first == null || second == null) {
-            throw new IllegalStateException("Either operation must have both 'first' and 'second' specified.");
+        if (first == null) {
+            throw new IllegalStateException("Value of first cannot be null in " + this.getClass().getSimpleName());
+        }
+        if (second == null) {
+            throw new IllegalStateException("Value of second cannot be null in " + this.getClass().getSimpleName());
         }
 
         return first.test(item) ^ second.test(item);

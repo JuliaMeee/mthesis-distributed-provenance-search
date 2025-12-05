@@ -3,33 +3,44 @@ package cz.muni.xmichalk.queries;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
-import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
+import cz.muni.xmichalk.models.SubgraphWrapper;
+import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GetNodeIds implements IQuery<List<QualifiedNameData>> {
-    public IFindableInDocument<INode> nodeFinder;
+    public IFindableSubgraph fromSubgraphs;
 
     public GetNodeIds() {
     }
 
-    public GetNodeIds(IFindableInDocument<INode> nodeFinder) {
-        this.nodeFinder = nodeFinder;
+    public GetNodeIds(IFindableSubgraph fromSubgraphs) {
+        this.fromSubgraphs = fromSubgraphs;
     }
 
     @Override
     public List<QualifiedNameData> evaluate(BundleStart input) {
-        if (nodeFinder == null) {
-            return null;
+        if (fromSubgraphs == null) {
+            throw new IllegalStateException("Value of fromSubgraphs cannot be null in " + this.getClass().getName());
         }
-        List<INode> foundNodes = nodeFinder.find(input.bundle, input.startNode);
 
-        return transformNodesToIds(foundNodes);
+        List<SubgraphWrapper> nodeSubgraphs = fromSubgraphs.find(input);
+
+        return transformToNodeIds(nodeSubgraphs);
     }
 
-    private List<QualifiedNameData> transformNodesToIds(List<INode> nodes) {
-        if (nodes == null || nodes.isEmpty()) {
-            return null;
+    private List<QualifiedNameData> transformToNodeIds(List<SubgraphWrapper> nodeSubgraphs) {
+        if (nodeSubgraphs == null || nodeSubgraphs.isEmpty()) {
+            return List.of();
+        }
+
+        Set<INode> nodes = nodeSubgraphs.stream()
+                .flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
+
+        if (nodes.isEmpty()) {
+            return List.of();
         }
 
         return nodes.stream()

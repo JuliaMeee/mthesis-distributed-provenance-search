@@ -18,7 +18,7 @@ public class AllNodes implements ICondition<BundleStart> {
     @Override
     public boolean test(BundleStart target) {
         if (condition == null) {
-            throw new IllegalStateException("Condition must be non-null");
+            throw new IllegalStateException("Value of condition  " + this.getClass().getSimpleName());
         }
         return target.bundle.getNodes().stream().allMatch(node -> condition.test(node));
     }

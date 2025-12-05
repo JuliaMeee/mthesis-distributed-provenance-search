@@ -76,9 +76,9 @@ public class ProvServiceAPI {
                             {
                               "type": "GetConnectors",
                               "backward": %s,
-                              "pathCondition": {
-                                "type": "DerivationPathCondition",
-                                "backward": %s
+                              "fromSubgraphs" : {
+                                "type" : "DerivationPathFromStartNode",
+                                "backward" : %s
                               }
                             }
                         """.formatted(backward, backward)

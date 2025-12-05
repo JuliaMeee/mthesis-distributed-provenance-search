@@ -1,62 +1,57 @@
 package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.muni.fi.cpm.model.IEdge;
-import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.BundleStart;
-import cz.muni.xmichalk.models.EdgeToNode;
-import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
-import cz.muni.xmichalk.util.ProvDocumentUtils;
+import cz.muni.xmichalk.models.SubgraphWrapper;
+import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
+import cz.muni.xmichalk.util.ResultsTransformationUtils;
 import org.openprovenance.prov.model.Document;
-import org.openprovenance.prov.model.interop.Formats;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class GetSubgraphs implements IQuery<List<JsonNode>> {
-    public IFindableInDocument<List<EdgeToNode>> subgraphFinder;
+    public IFindableSubgraph subgraph;
 
     public GetSubgraphs() {
     }
 
-    public GetSubgraphs(IFindableInDocument<List<EdgeToNode>> subgraphFinder) {
-        this.subgraphFinder = subgraphFinder;
+    public GetSubgraphs(IFindableSubgraph subgraph) {
+
+        this.subgraph = subgraph;
     }
 
     @Override
     public List<JsonNode> evaluate(BundleStart input) {
-        if (subgraphFinder == null) {
-            return null;
+        if (subgraph == null) {
+            throw new IllegalStateException("Value of subgraph cannot be null  in " + this.getClass().getName());
         }
 
-        List<List<EdgeToNode>> foundSubgraphs = subgraphFinder.find(input.bundle, input.startNode);
+        List<SubgraphWrapper> foundSubgraphs = subgraph.find(input);
 
-        if (foundSubgraphs == null || foundSubgraphs.isEmpty()) {
-            return null;
-        }
-
-        return foundSubgraphs.stream().map(subgraph -> transformSubgraphToDocJson(subgraph)).collect(Collectors.toList());
+        return transformToDocJsonList(foundSubgraphs);
     }
 
-    private JsonNode transformSubgraphToDocJson(Collection<EdgeToNode> subgraph) {
-        if (subgraph == null || subgraph.isEmpty()) {
-            return null;
+    private List<JsonNode> transformToDocJsonList(List<SubgraphWrapper> subgraphs) {
+        if (subgraphs == null || subgraphs.isEmpty()) {
+            List.of();
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        return subgraphs.stream()
+                .map(this::transformSubgraphToDocJson)
+                .collect(Collectors.toList());
+    }
 
-        List<INode> nodes = subgraph.stream().map(edgeToNode -> edgeToNode.node).toList();
-        List<IEdge> edges = subgraph.stream().map(edgeToNode -> edgeToNode.edge).toList();
-
-        Document subgraphDocument = ProvDocumentUtils.encapsulateInDocument(nodes, edges);
-        String jsonString = ProvDocumentUtils.serialize(subgraphDocument, Formats.ProvFormat.JSON);
-        try {
-            return objectMapper.readTree(jsonString);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to convert subgraph document to JsonNode", e);
+    private JsonNode transformSubgraphToDocJson(SubgraphWrapper subgraph) {
+        if (subgraph == null || subgraph.getNodes() == null) {
+            List.of();
         }
+
+        Document encapsulatigDocument = ResultsTransformationUtils.encapsulateInDocument(
+                subgraph.getNodes(),
+                subgraph.getEdges()
+        );
+
+        return ResultsTransformationUtils.transformToJsonNode(encapsulatigDocument);
     }
 }

@@ -16,9 +16,9 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
     public GetPreferredVersion() {
     }
 
-    public GetPreferredVersion(IDocumentLoader documentLoader, EVersionPreference versionPreference) {
-        this.documentLoader = documentLoader;
+    public GetPreferredVersion(EVersionPreference versionPreference, IDocumentLoader documentLoader) {
         this.versionPreference = versionPreference;
+        this.documentLoader = documentLoader;
     }
 
     public GetPreferredVersion(EVersionPreference versionPreference) {
@@ -28,6 +28,10 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
 
     @Override
     public QualifiedNameData evaluate(BundleStart input) {
+        if (versionPreference == null) {
+            throw new IllegalStateException("Value of versionPreference cannot be null in " + this.getClass().getName());
+        }
+
         IVersionPicker versionPicker = null;
 
         switch (this.versionPreference) {

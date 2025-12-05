@@ -6,12 +6,12 @@ import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
 import cz.muni.xmichalk.util.AttributeUtils;
-import cz.muni.xmichalk.util.BundleTraverser;
 import cz.muni.xmichalk.util.CpmUtils;
+import cz.muni.xmichalk.util.GraphTraverser;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
 
-import java.util.List;
+import java.util.Set;
 
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_VERSION;
@@ -28,6 +28,9 @@ public class LatestVersionPicker implements IVersionPicker {
     public QualifiedName apply(CpmDocument bundle) {
         if (bundle == null) {
             throw new RuntimeException("Bundle document is null");
+        }
+        if (documentLoader == null) {
+            throw new RuntimeException("Document loader is null");
         }
 
         QualifiedName metaBundleId = CpmUtils.getMetaBundleId(bundle);
@@ -49,10 +52,9 @@ public class LatestVersionPicker implements IVersionPicker {
 
     public static INode pickLatestVersionNode(CpmDocument metaDocument) {
 
-        List<INode> versionNodes = BundleTraverser.traverseAndFindNodes(
+        Set<INode> versionNodes = GraphTraverser.traverseAndFindNodes(
                 metaDocument.getNodes().getFirst(),
-                (node) -> hasProvTypeBundle(node) && hasVersionAttribute(node),
-                null
+                (node) -> hasProvTypeBundle(node) && hasVersionAttribute(node)
         );
 
         if (versionNodes == null || versionNodes.isEmpty()) {

@@ -1,49 +1,50 @@
 package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.BundleStart;
-import cz.muni.xmichalk.querySpecification.findable.IFindableInDocument;
-import cz.muni.xmichalk.util.ProvDocumentUtils;
+import cz.muni.xmichalk.models.SubgraphWrapper;
+import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
+import cz.muni.xmichalk.util.ResultsTransformationUtils;
 import org.openprovenance.prov.model.Document;
-import org.openprovenance.prov.model.interop.Formats;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GetNodes implements IQuery<JsonNode> {
-    public IFindableInDocument<INode> nodeFinder;
+    public IFindableSubgraph fromSubgraphs;
 
     public GetNodes() {
     }
 
-    public GetNodes(IFindableInDocument<INode> nodeFinder) {
-        this.nodeFinder = nodeFinder;
+    public GetNodes(IFindableSubgraph fromSubgraphs) {
+        this.fromSubgraphs = fromSubgraphs;
     }
 
     @Override
     public JsonNode evaluate(BundleStart input) {
-        if (nodeFinder == null) {
-            return null;
+        if (fromSubgraphs == null) {
+            throw new IllegalStateException("Value of fromSubgraphs cannot be null in " + this.getClass().getName());
         }
-        List<INode> foundNodes = nodeFinder.find(input.bundle, input.startNode);
+        List<SubgraphWrapper> nodeSubgraphs = fromSubgraphs.find(input);
 
-        return transformNodesToDocJson(foundNodes);
+        return transformToNodesDocJson(nodeSubgraphs);
     }
 
-    private JsonNode transformNodesToDocJson(List<INode> nodes) {
-        if (nodes == null || nodes.isEmpty()) {
+    private JsonNode transformToNodesDocJson(List<SubgraphWrapper> subgraphs) {
+        if (subgraphs == null || subgraphs.isEmpty()) {
             return null;
         }
 
-        Document resultsDocument = ProvDocumentUtils.encapsulateInDocument(nodes, null);
-        String jsonString = ProvDocumentUtils.serialize(resultsDocument, Formats.ProvFormat.JSON);
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readTree(jsonString);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to convert results document to JSON", e);
+        Set<INode> nodes = subgraphs.stream()
+                .flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
+
+        if (nodes.isEmpty()) {
+            return null;
         }
+
+        Document encapsulatingDocument = ResultsTransformationUtils.encapsulateInDocument(nodes, null);
+        return ResultsTransformationUtils.transformToJsonNode(encapsulatingDocument);
     }
 }
