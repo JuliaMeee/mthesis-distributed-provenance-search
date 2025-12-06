@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.xmichalk.dto.BundleQueryResultDTO;
 import cz.muni.xmichalk.dto.ConnectorDTO;
-import cz.muni.xmichalk.integrity.StorageDocumentIntegrityVerifier;
+import cz.muni.xmichalk.integrity.IIntegrityVerifier;
 import cz.muni.xmichalk.models.*;
-import cz.muni.xmichalk.provServiceAPI.ProvServiceAPI;
+import cz.muni.xmichalk.provServiceAPI.IProvServiceAPI;
 import cz.muni.xmichalk.provServiceTable.IProvServiceTable;
 import cz.muni.xmichalk.traversalPriority.ETraversalPriority;
 import cz.muni.xmichalk.traversalPriority.UnsupportedTraversalPriorityException;
@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 public class Traverser {
     private final IProvServiceTable provServiceTable;
+    private final IProvServiceAPI provServiceAPI;
+    private final IIntegrityVerifier integrityVerifier;
     private final Map<EValidityCheck, IValidityVerifier> validityVerifiers;
     private final Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators;
     private static final Logger log = LoggerFactory.getLogger(Traverser.class);
@@ -32,16 +34,21 @@ public class Traverser {
 
     public Traverser(
             IProvServiceTable traverserTable,
+            IProvServiceAPI provServiceAPI,
+            IIntegrityVerifier integrityVerifier,
             int concurrencyDegree,
             boolean preferProvServiceFromConnectors,
             Map<EValidityCheck, IValidityVerifier> validityCheckers,
             Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
         this.provServiceTable = traverserTable;
+        this.provServiceAPI = provServiceAPI;
+        this.integrityVerifier = integrityVerifier;
         this.concurrencyDegree = concurrencyDegree;
         this.preferProvServiceFromConnectors = preferProvServiceFromConnectors;
         this.validityVerifiers = validityCheckers;
         this.traversalPriorityComparators = traversalPriorityComparators;
-        log.info("Instantiated traverser with concurrency degree: {}, preferProvServiceFromConnectors: {}", concurrencyDegree, preferProvServiceFromConnectors);
+        log.info("Instantiated traverser with concurrency degree: {}, preferProvServiceFromConnectors: {}",
+                concurrencyDegree, preferProvServiceFromConnectors);
     }
 
     public Map<EValidityCheck, IValidityVerifier> getValidityVerifiers() {
@@ -52,10 +59,13 @@ public class Traverser {
         return traversalPriorityComparators;
     }
 
-    public TraversalResults traverseChain(QualifiedName startBundleId, QualifiedName startNodeId, TraversalParams traversalParams) {
-        Comparator<ItemToTraverse> traversalPriorityComparator = traversalPriorityComparators.get(traversalParams.traversalPriority);
+    public TraversalResults traverseChain(QualifiedName startBundleId, QualifiedName startNodeId,
+                                          TraversalParams traversalParams) {
+        Comparator<ItemToTraverse> traversalPriorityComparator =
+                traversalPriorityComparators.get(traversalParams.traversalPriority);
         if (traversalPriorityComparator == null) {
-            String errorMessage = "No traversal priority comparator registered for: " + traversalParams.traversalPriority;
+            String errorMessage =
+                    "No traversal priority comparator registered for: " + traversalParams.traversalPriority;
             log.error(errorMessage);
             throw new UnsupportedTraversalPriorityException(errorMessage);
         }
@@ -75,9 +85,8 @@ public class Traverser {
                         startNodeId,
                         provServiceTable.getServiceUri(startBundleId.getUri()),
                         true,
-                        new LinkedHashMap<>(traversalParams.validityChecks.stream().collect(Collectors.toMap(
-                                check -> check, check -> true))
-                        )
+                        new ArrayList<>(traversalParams.validityChecks.stream().map((EValidityCheck check) ->
+                                new AbstractMap.SimpleImmutableEntry<EValidityCheck, Boolean>(check, true)).toList())
                 )
         );
 
@@ -133,28 +142,32 @@ public class Traverser {
     private void traverseItem(ItemToTraverse itemToTraverse,
                               TraversalState traversalState,
                               TraversalParams traversalParams) {
-        log.info("Started processing bundle {} from connector {}", itemToTraverse.bundleId.getUri(), itemToTraverse.connectorId.getUri());
+        log.info("Started processing bundle {} from connector {}", itemToTraverse.bundleId.getUri(),
+                itemToTraverse.connectorId.getUri());
 
         try {
-            BundleQueryResultDTO queryResult = ProvServiceAPI.fetchBundleQueryResult(
-                    itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, traversalParams.querySpecification);
+            BundleQueryResultDTO queryResult = provServiceAPI.fetchBundleQueryResult(
+                    itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
+                    traversalParams.querySpecification);
 
-            BundleQueryResultDTO findConnectorsResult = ProvServiceAPI.fetchBundleConnectors(
+            BundleQueryResultDTO findConnectorsResult = provServiceAPI.fetchBundleConnectors(
                     itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
                     traversalParams.traverseBackwards);
 
             boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
 
-            LinkedHashMap<EValidityCheck, Boolean> validityChecks = evaluateValidityChecks(
+            List<Map.Entry<EValidityCheck, Boolean>> validityChecks = evaluateValidityChecks(
                     traversalParams.validityChecks, itemToTraverse, queryResult);
 
             ResultFromBundle newResult = convertToNewResult(itemToTraverse, queryResult, hasIntegrity, validityChecks);
             if (newResult != null) {
                 traversalState.results.add(newResult);
-                log.info("In bundle {} found query result: {}", itemToTraverse.bundleId.getUri(), newResult.result.toString());
+                log.info("In bundle {} found query result: {}", itemToTraverse.bundleId.getUri(),
+                        newResult.result.toString());
             }
 
-            List<ItemToTraverse> newItemsToTraverse = convertToNewItemsToTraverse(itemToTraverse, findConnectorsResult, hasIntegrity, validityChecks);
+            List<ItemToTraverse> newItemsToTraverse =
+                    convertToNewItemsToTraverse(itemToTraverse, findConnectorsResult, hasIntegrity, validityChecks);
             traversalState.toTraverseQueue.addAll(newItemsToTraverse);
             log.info("In bundle {} found connections to: {}", itemToTraverse.bundleId.getUri(),
                     newItemsToTraverse.stream().map(item -> item.bundleId.getUri())
@@ -162,7 +175,8 @@ public class Traverser {
 
 
         } catch (Exception e) {
-            String errorMessage = "Error while processing bundle: " + itemToTraverse.bundleId.getUri() + ", error: " + e.getMessage();
+            String errorMessage =
+                    "Error while processing bundle: " + itemToTraverse.bundleId.getUri() + ", error: " + e.getMessage();
             log.error(errorMessage);
             traversalState.errors.add(errorMessage);
         } finally {
@@ -186,10 +200,14 @@ public class Traverser {
 
     private ItemToTraverse transformToPreferredVersion(ItemToTraverse itemToTraverse, String versionPreference) {
         try {
-            log.info("Fetching preferred version for bundle: {} with preference: {}", itemToTraverse.bundleId.getUri(), versionPreference);
-            QualifiedName preferredVersion = ProvServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, versionPreference);
+            log.info("Fetching preferred version for bundle: {} with preference: {}", itemToTraverse.bundleId.getUri(),
+                    versionPreference);
+            QualifiedName preferredVersion =
+                    provServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId,
+                            itemToTraverse.connectorId, versionPreference);
             if (preferredVersion != null) {
-                log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(), preferredVersion.getUri());
+                log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(),
+                        preferredVersion.getUri());
                 itemToTraverse.bundleId = preferredVersion;
             } else {
                 log.warn("Fetch preferred version for bundle: {} returned null", itemToTraverse.bundleId.getUri());
@@ -216,27 +234,30 @@ public class Traverser {
         return false;
     }
 
-    private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult, BundleQueryResultDTO findConnectorsResult) {
+    private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult,
+                                 BundleQueryResultDTO findConnectorsResult) {
         if (queryResult == null && findConnectorsResult == null) {
             return false;
         }
         if (queryResult == null) {
-            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, findConnectorsResult.token);
+            return integrityVerifier.verifyIntegrity(bundleId, findConnectorsResult.token);
         }
         if (findConnectorsResult == null) {
-            return StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, queryResult.token);
+            return integrityVerifier.verifyIntegrity(bundleId, queryResult.token);
         }
         return queryResult.token.equals(findConnectorsResult.token)
-                && StorageDocumentIntegrityVerifier.verifyIntegrity(bundleId, queryResult.token);
+                && integrityVerifier.verifyIntegrity(bundleId, queryResult.token);
     }
 
-    private LinkedHashMap<EValidityCheck, Boolean> evaluateValidityChecks(List<EValidityCheck> validityChecks, ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult) {
-        LinkedHashMap<EValidityCheck, Boolean> validityCheckValues = new LinkedHashMap<>();
+    private List<Map.Entry<EValidityCheck, Boolean>> evaluateValidityChecks(List<EValidityCheck> validityChecks,
+                                                                            ItemToTraverse itemTraversed,
+                                                                            BundleQueryResultDTO queryResult) {
+        List<Map.Entry<EValidityCheck, Boolean>> validityCheckValues = new ArrayList<>();
         for (EValidityCheck validityCheck : validityChecks) {
             IValidityVerifier verifier = validityVerifiers.get(validityCheck);
             if (verifier != null) {
                 boolean result = verifier.verify(itemTraversed, queryResult);
-                validityCheckValues.put(validityCheck, result);
+                validityCheckValues.add(new AbstractMap.SimpleImmutableEntry<>(validityCheck, result));
             } else {
                 String errorMessage = "No validity checker registered for: " + validityCheck;
                 log.error(errorMessage);
@@ -246,7 +267,9 @@ public class Traverser {
         return validityCheckValues;
     }
 
-    private ResultFromBundle convertToNewResult(ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult, boolean integrity, Map<EValidityCheck, Boolean> validityChecks) {
+    private ResultFromBundle convertToNewResult(ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult,
+                                                boolean integrity,
+                                                List<Map.Entry<EValidityCheck, Boolean>> validityChecks) {
         if (queryResult == null || queryResult.result == null || queryResult.result.isNull()) {
             log.info("Query result for bundle {} is null", itemTraversed.bundleId.getUri());
             return null;
@@ -267,7 +290,10 @@ public class Traverser {
                 itemTraversed.pathValidityChecks);
     }
 
-    private List<ItemToTraverse> convertToNewItemsToTraverse(ItemToTraverse itemTraversed, BundleQueryResultDTO findConnectorsResult, boolean integrity, LinkedHashMap<EValidityCheck, Boolean> validityChecks) {
+    private List<ItemToTraverse> convertToNewItemsToTraverse(ItemToTraverse itemTraversed,
+                                                             BundleQueryResultDTO findConnectorsResult,
+                                                             boolean integrity,
+                                                             List<Map.Entry<EValidityCheck, Boolean>> validityChecks) {
         if (findConnectorsResult == null || findConnectorsResult.result == null || findConnectorsResult.result.isNull()) {
             log.warn("Find connectors in bundle {} returned null", itemTraversed.bundleId.getUri());
             return new ArrayList<>();
@@ -302,7 +328,8 @@ public class Traverser {
         return newItemsToTraverse;
     }
 
-    private String getProvServiceUri(ConnectorDTO connector, IProvServiceTable provServiceTable, boolean preferProvServiceFromConnectors) {
+    private String getProvServiceUri(ConnectorDTO connector, IProvServiceTable provServiceTable,
+                                     boolean preferProvServiceFromConnectors) {
         String fromTable = provServiceTable.getServiceUri(connector.referencedBundleId.toQN().getUri());
         String fromConnector = connector.provenanceServiceUri;
 
@@ -313,12 +340,19 @@ public class Traverser {
         }
     }
 
-    private LinkedHashMap<EValidityCheck, Boolean> combineValidityChecks(LinkedHashMap<EValidityCheck, Boolean> first, LinkedHashMap<EValidityCheck, Boolean> second) {
-        LinkedHashMap<EValidityCheck, Boolean> combined = new LinkedHashMap<>();
-        for (EValidityCheck key : first.sequencedKeySet()) {
-            boolean firstValue = first.getOrDefault(key, false);
-            boolean secondValue = second.getOrDefault(key, false);
-            combined.put(key, firstValue && secondValue);
+    private List<Map.Entry<EValidityCheck, Boolean>> combineValidityChecks(
+            List<Map.Entry<EValidityCheck, Boolean>> first, List<Map.Entry<EValidityCheck, Boolean>> second) {
+        List<Map.Entry<EValidityCheck, Boolean>> combined = new ArrayList<>();
+
+        for (Map.Entry<EValidityCheck, Boolean> firstCheck : first) {
+            EValidityCheck key = firstCheck.getKey();
+            Boolean firstValue = firstCheck.getValue();
+            Boolean secondValue = second.stream().filter(entry -> entry.getKey() == firstCheck.getKey())
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .orElse(false); // default to false if not found
+
+            combined.add(new AbstractMap.SimpleImmutableEntry<>(key, firstValue && secondValue));
         }
         return combined;
     }

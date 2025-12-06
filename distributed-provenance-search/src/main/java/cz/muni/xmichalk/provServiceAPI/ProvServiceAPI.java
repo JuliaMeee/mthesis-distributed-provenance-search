@@ -15,11 +15,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
-public class ProvServiceAPI {
+public class ProvServiceAPI implements IProvServiceAPI {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static BundleQueryResultDTO fetchBundleQueryResult(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, JsonNode querySpecification) throws IOException {
+    public BundleQueryResultDTO fetchBundleQueryResult(
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, JsonNode querySpecification) {
         BundleQueryDTO queryParams = new BundleQueryDTO(bundleId, connectorId, querySpecification);
 
         if (serviceUri == null) {
@@ -38,23 +38,30 @@ public class ProvServiceAPI {
                 url, request, BundleQueryResultDTO.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new IOException("Bundle query API call failed with status: " + response.getStatusCode());
+            throw new RuntimeException("Bundle query API call failed with status: " + response.getStatusCode());
         }
 
         return response.getBody();
     }
 
-    public static QualifiedName fetchPreferredBundleVersion(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String versionPreference) throws IOException {
+    public QualifiedName fetchPreferredBundleVersion(
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String versionPreference) {
+        JsonNode query = null;
+        try {
+            query = objectMapper.readTree("""
+                        {
+                          "type": "GetPreferredVersion",
+                          "versionPreference": "%s"
+                        }
+                    """.formatted(versionPreference)
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create GetPreferredVersion query JSON.", e);
+        }
+
+
         BundleQueryResultDTO queryResult = fetchBundleQueryResult(
-                serviceUri, bundleId, connectorId,
-                objectMapper.readTree("""
-                            {
-                              "type": "GetPreferredVersion",
-                              "versionPreference": "%s"
-                            }
-                        """.formatted(versionPreference)
-                )
+                serviceUri, bundleId, connectorId, query
         );
 
         if (queryResult == null || queryResult.result == null) {
@@ -67,22 +74,24 @@ public class ProvServiceAPI {
         return pickedBundleIdDto.toQN();
     }
 
-    public static BundleQueryResultDTO fetchBundleConnectors(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, boolean backward) throws IOException {
+    public BundleQueryResultDTO fetchBundleConnectors(
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, boolean backward) {
+        JsonNode query = null;
+        try {
+            query = objectMapper.readTree("""
+                        {
+                          "type": "GetConnectors",
+                          "backward": %s,
+                          "fromSubgraphs" : {
+                            "type" : "DerivationPathFromStartNode",
+                            "backward" : %s
+                          }
+                        }
+                    """.formatted(backward, backward));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create GetConnectors query JSON.", e);
+        }
 
-        return fetchBundleQueryResult(
-                serviceUri, bundleId, connectorId,
-                objectMapper.readTree("""
-                            {
-                              "type": "GetConnectors",
-                              "backward": %s,
-                              "fromSubgraphs" : {
-                                "type" : "DerivationPathFromStartNode",
-                                "backward" : %s
-                              }
-                            }
-                        """.formatted(backward, backward)
-                )
-        );
+        return fetchBundleQueryResult(serviceUri, bundleId, connectorId, query);
     }
 }

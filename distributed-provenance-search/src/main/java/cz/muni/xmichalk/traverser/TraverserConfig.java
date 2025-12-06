@@ -1,6 +1,10 @@
 package cz.muni.xmichalk.traverser;
 
+import cz.muni.xmichalk.integrity.IIntegrityVerifier;
+import cz.muni.xmichalk.integrity.StorageDocumentIntegrityVerifier;
 import cz.muni.xmichalk.models.ItemToTraverse;
+import cz.muni.xmichalk.provServiceAPI.IProvServiceAPI;
+import cz.muni.xmichalk.provServiceAPI.ProvServiceAPI;
 import cz.muni.xmichalk.provServiceTable.IProvServiceTable;
 import cz.muni.xmichalk.provServiceTable.ProvServiceTable;
 import cz.muni.xmichalk.traversalPriority.ETraversalPriority;
@@ -53,7 +57,17 @@ public class TraverserConfig {
     }
 
     @Bean
-    public Map<EValidityCheck, IValidityVerifier> validityVerifiers(IProvServiceTable provServiceTable) throws IOException {
+    public IProvServiceAPI provServiceAPI() {
+        return new ProvServiceAPI();
+    }
+
+    @Bean
+    public IIntegrityVerifier integrityVerifier() {
+        return new StorageDocumentIntegrityVerifier();
+    }
+
+    @Bean
+    public Map<EValidityCheck, IValidityVerifier> validityVerifiers(IProvServiceAPI provServiceAPI) throws IOException {
         ClassPathResource simpleSemanticResource =
                 new ClassPathResource("validitySpecifications" + File.separator + "simpleSemanticConstraints.json");
         ClassPathResource isSamplingBundleResource =
@@ -62,9 +76,9 @@ public class TraverserConfig {
                 new ClassPathResource("validitySpecifications" + File.separator + "isProcessingBundle.json");
 
         return Map.of(
-                EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, new DemoValidityVerifier(provServiceTable, simpleSemanticResource.getInputStream()),
-                EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, new DemoValidityVerifier(provServiceTable, isSamplingBundleResource.getInputStream()),
-                EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, new DemoValidityVerifier(provServiceTable, isProcessingBundleResource.getInputStream())
+                EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, new DemoValidityVerifier(provServiceAPI, simpleSemanticResource.getInputStream()),
+                EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, new DemoValidityVerifier(provServiceAPI, isSamplingBundleResource.getInputStream()),
+                EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, new DemoValidityVerifier(provServiceAPI, isProcessingBundleResource.getInputStream())
         );
     }
 
@@ -78,8 +92,17 @@ public class TraverserConfig {
     @Bean
     public Traverser traverser(
             IProvServiceTable provServiceTable,
+            IProvServiceAPI provServiceAPI,
+            IIntegrityVerifier integrityVerifier,
             Map<EValidityCheck, IValidityVerifier> validityVerifiers,
             Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
-        return new Traverser(provServiceTable, traverserConcurrencyDegree, preferProvServiceFromConnectors, validityVerifiers, traversalPriorityComparators);
+        return new Traverser(
+                provServiceTable,
+                provServiceAPI,
+                integrityVerifier,
+                traverserConcurrencyDegree,
+                preferProvServiceFromConnectors,
+                validityVerifiers,
+                traversalPriorityComparators);
     }
 }
