@@ -31,6 +31,7 @@ public class Traverser {
     private static final Logger log = LoggerFactory.getLogger(Traverser.class);
     private final int concurrencyDegree;
     private final boolean preferProvServiceFromConnectors;
+    private final boolean omitEmptyResults;
 
     public Traverser(
             IProvServiceTable traverserTable,
@@ -38,6 +39,7 @@ public class Traverser {
             IIntegrityVerifier integrityVerifier,
             int concurrencyDegree,
             boolean preferProvServiceFromConnectors,
+            boolean omitEmptyResults,
             Map<EValidityCheck, IValidityVerifier> validityCheckers,
             Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
         this.provServiceTable = traverserTable;
@@ -45,6 +47,7 @@ public class Traverser {
         this.integrityVerifier = integrityVerifier;
         this.concurrencyDegree = concurrencyDegree;
         this.preferProvServiceFromConnectors = preferProvServiceFromConnectors;
+        this.omitEmptyResults = omitEmptyResults;
         this.validityVerifiers = validityCheckers;
         this.traversalPriorityComparators = traversalPriorityComparators;
         log.info("Instantiated traverser with concurrency degree: {}, preferProvServiceFromConnectors: {}",
@@ -297,15 +300,17 @@ public class Traverser {
     private ResultFromBundle convertToNewResult(ItemToTraverse itemTraversed, BundleQueryResultDTO queryResult,
                                                 boolean integrity,
                                                 List<Map.Entry<EValidityCheck, Boolean>> validityChecks) {
-        if (queryResult == null || queryResult.result == null || queryResult.result.isNull()) {
-            log.info("Query result for bundle {} is null", itemTraversed.bundleId.getUri());
-            return null;
-        }
+        if (omitEmptyResults) {
+            if (queryResult == null || queryResult.result == null || queryResult.result.isNull()) {
+                log.info("Omitted null result from {}", itemTraversed.bundleId.getUri());
+                return null;
+            }
 
-        if (queryResult.result.isObject() && queryResult.result.isEmpty()
-                || queryResult.result.isArray() && queryResult.result.isEmpty()) {
-            log.info("Query result for bundle {} is empty", itemTraversed.bundleId.getUri());
-            return null;
+            if (queryResult.result.isObject() && queryResult.result.isEmpty()
+                    || queryResult.result.isArray() && queryResult.result.isEmpty()) {
+                log.info("Omitted empty result from {}", itemTraversed.bundleId.getUri());
+                return null;
+            }
         }
 
         return new ResultFromBundle(

@@ -41,8 +41,11 @@ public class TraverserConfig {
     @Value("${traverser.concurrencyDegree:10}")
     private int traverserConcurrencyDegree;
 
-    @Value("${traverser.preferProvServiceFromConnectors}")
+    @Value("${traverser.preferProvServiceFromConnectors:false}")
     private boolean preferProvServiceFromConnectors;
+
+    @Value("${traverser.omitEmptyResults:false}")
+    private boolean omitEmptyResults;
 
     @Bean
     public IProvServiceTable provServiceTable() {
@@ -105,6 +108,7 @@ public class TraverserConfig {
                 integrityVerifier,
                 traverserConcurrencyDegree,
                 preferProvServiceFromConnectors,
+                omitEmptyResults,
                 validityVerifiers,
                 traversalPriorityComparators);
     }
