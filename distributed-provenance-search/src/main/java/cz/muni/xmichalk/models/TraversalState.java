@@ -8,20 +8,23 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class TraversalState {
-    public Set<QualifiedName> visited;
-    public Set<QualifiedName> referencedVisited;
-    public ConcurrentMap<QualifiedName, ItemToTraverse> processing;
+    public Set<QualifiedName> visitedPreferred;
+    public Set<QualifiedName> visitedReferenced;
+    public ConcurrentMap<QualifiedName, ItemToTraverse> traversingPreferred;
+    public ConcurrentMap<QualifiedName, ItemToTraverse> traversingReferenced;
     public PriorityBlockingQueue<ItemToTraverse> toTraverseQueue;
     public ConcurrentLinkedQueue<ResultFromBundle> results;
     public ConcurrentLinkedQueue<String> errors;
 
-    public TraversalState(Set<QualifiedName> visited, Set<QualifiedName> referenced,
-                          ConcurrentMap<QualifiedName, ItemToTraverse> processing,
+    public TraversalState(Set<QualifiedName> visitedPreferred, Set<QualifiedName> visitedReferenced,
+                          ConcurrentMap<QualifiedName, ItemToTraverse> traversingPreferred,
+                          ConcurrentMap<QualifiedName, ItemToTraverse> traversingReferenced,
                           PriorityBlockingQueue<ItemToTraverse> toTraverseQueue,
                           ConcurrentLinkedQueue<ResultFromBundle> results, ConcurrentLinkedQueue<String> errors) {
-        this.visited = visited;
-        this.referencedVisited = referenced;
-        this.processing = processing;
+        this.visitedPreferred = visitedPreferred;
+        this.visitedReferenced = visitedReferenced;
+        this.traversingPreferred = traversingPreferred;
+        this.traversingReferenced = traversingReferenced;
         this.toTraverseQueue = toTraverseQueue;
         this.results = results;
         this.errors = errors;
