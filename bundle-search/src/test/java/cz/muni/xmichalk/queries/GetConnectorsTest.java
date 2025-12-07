@@ -14,16 +14,21 @@ public class GetConnectorsTest {
 
     static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V0, TestDocumentProvider.samplingBundle_V0.getForwardConnectors().getFirst(), 0, 2},
-                new Object[]{TestDocumentProvider.samplingBundle_V1, TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst(), 0, 6},
-                new Object[]{TestDocumentProvider.processingBundle_V0, TestDocumentProvider.processingBundle_V0.getForwardConnectors().getFirst(), 1, 1},
-                new Object[]{TestDocumentProvider.processingBundle_V1, TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst(), 1, 2}
+                new Object[]{TestDocumentProvider.samplingBundle_V0,
+                        TestDocumentProvider.samplingBundle_V0.getForwardConnectors().getFirst(), 0, 2},
+                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst(), 0, 6},
+                new Object[]{TestDocumentProvider.processingBundle_V0,
+                        TestDocumentProvider.processingBundle_V0.getForwardConnectors().getFirst(), 1, 1},
+                new Object[]{TestDocumentProvider.processingBundle_V1,
+                        TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst(), 1, 2}
         );
     }
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetConnectors_backward_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors, int forwardConnectors) {
+    public void testGetConnectors_backward_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors,
+                                                      int forwardConnectors) {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 true,
                 (g, n) -> List.of(g)
@@ -43,7 +48,8 @@ public class GetConnectorsTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetConnectors_forward_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors, int forwardConnectors) {
+    public void testGetConnectors_forward_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors,
+                                                     int forwardConnectors) {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 false,
                 (g, n) -> List.of(g)
@@ -63,7 +69,8 @@ public class GetConnectorsTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetConnectors_all_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors, int forwardConnectors) {
+    public void testGetConnectors_all_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors,
+                                                 int forwardConnectors) {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 null,
                 (g, n) -> List.of(g)
@@ -78,7 +85,8 @@ public class GetConnectorsTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetConnectors_all_filteredToNothing(CpmDocument cpmDocument, INode startNode, int backwardConnectors, int forwardConnectors) {
+    public void testGetConnectors_all_filteredToNothing(CpmDocument cpmDocument, INode startNode,
+                                                        int backwardConnectors, int forwardConnectors) {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 null,
                 (g, n) -> List.of()

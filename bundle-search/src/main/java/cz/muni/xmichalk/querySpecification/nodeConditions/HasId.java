@@ -16,9 +16,10 @@ public class HasId implements ICondition<INode> {
     @Override
     public boolean test(INode node) {
         if (idUriRegex == null) {
-            throw new IllegalStateException("Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
         }
-        
+
         return node.getId().getUri().matches(idUriRegex);
     }
 }

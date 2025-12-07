@@ -12,15 +12,19 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class LinearSubgraphFinder {
-    public static List<SubgraphWrapper> findSubgraphsFrom(INode startNode, List<Predicate<EdgeToNode>> subgraphSpecification) {
+    public static List<SubgraphWrapper> findSubgraphsFrom(INode startNode,
+                                                          List<Predicate<EdgeToNode>> subgraphSpecification) {
         List<SubgraphWrapper> results = new ArrayList<>();
 
-        recursiveFindSubgraph(new EdgeToNode(null, startNode), new SubgraphWrapper(), subgraphSpecification, new HashSet<>(), results);
+        recursiveFindSubgraph(new EdgeToNode(null, startNode), new SubgraphWrapper(), subgraphSpecification,
+                new HashSet<>(), results);
 
         return results;
     }
 
-    private static void recursiveFindSubgraph(EdgeToNode current, SubgraphWrapper foundPart, List<Predicate<EdgeToNode>> specification, Set<INode> visited, List<SubgraphWrapper> results) {
+    private static void recursiveFindSubgraph(EdgeToNode current, SubgraphWrapper foundPart,
+                                              List<Predicate<EdgeToNode>> specification, Set<INode> visited,
+                                              List<SubgraphWrapper> results) {
         if (current == null) return;
         if (foundPart == null) foundPart = new SubgraphWrapper();
 

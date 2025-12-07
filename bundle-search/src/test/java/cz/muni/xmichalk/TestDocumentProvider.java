@@ -33,13 +33,17 @@ public class TestDocumentProvider {
     public static CpmDocument samplingBundle_V1 = loadCpmDocument(dataFolder + "dataset1/SamplingBundle_V1.json");
     public static CpmDocument processingBundle_V0 = loadCpmDocument(dataFolder + "dataset2/ProcessingBundle_V0.json");
     public static CpmDocument processingBundle_V1 = loadCpmDocument(dataFolder + "dataset2/ProcessingBundle_V1.json");
-    public static CpmDocument speciesIdentificationBundle_V0 = loadCpmDocument(dataFolder + "dataset3/SpeciesIdentificationBundle_V0.json");
-    public static CpmDocument dnaSequencingBundle_V0 = loadCpmDocument(dataFolder + "dataset4/DnaSequencingBundle_V0.json");
+    public static CpmDocument speciesIdentificationBundle_V0 =
+            loadCpmDocument(dataFolder + "dataset3/SpeciesIdentificationBundle_V0.json");
+    public static CpmDocument dnaSequencingBundle_V0 =
+            loadCpmDocument(dataFolder + "dataset4/DnaSequencingBundle_V0.json");
 
     public static CpmDocument samplingBundle_V0_meta = loadCpmDocument(dataFolder + "SamplingBundle_V0_meta.json");
     public static CpmDocument processingBundle_V0_meta = loadCpmDocument(dataFolder + "ProcessingBundle_V0_meta.json");
-    public static CpmDocument speciesIdentificationBundle_V0_meta = loadCpmDocument(dataFolder + "SpeciesIdentificationBundle_V0_meta.json");
-    public static CpmDocument dnaSequencingBundle_V0_meta = loadCpmDocument(dataFolder + "DnaSequencingBundle_V0_meta.json");
+    public static CpmDocument speciesIdentificationBundle_V0_meta =
+            loadCpmDocument(dataFolder + "SpeciesIdentificationBundle_V0_meta.json");
+    public static CpmDocument dnaSequencingBundle_V0_meta =
+            loadCpmDocument(dataFolder + "DnaSequencingBundle_V0_meta.json");
 
     public static CpmDocument getTestDocument1() {
         QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(

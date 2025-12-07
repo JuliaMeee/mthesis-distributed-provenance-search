@@ -25,9 +25,11 @@ public class FilteredSubgraphsTest {
     public void testFind_fromStartNode_derivation() {
         CpmDocument cpmDocument = TestDocumentProvider.speciesIdentificationBundle_V0;
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", "blank");
         INode startNode = cpmDocument.getNode(startNodeId);
-        Predicate<IEdge> edgeCondition = (edge) -> edge == null || isRelation(edge, StatementOrBundle.Kind.PROV_DERIVATION);
+        Predicate<IEdge> edgeCondition =
+                (edge) -> edge == null || isRelation(edge, StatementOrBundle.Kind.PROV_DERIVATION);
         FilteredSubgraphs filteredSubgraphs = new FilteredSubgraphs(
                 (edgeToNode) -> edgeCondition.test(edgeToNode.edge),
                 (g, n) -> List.of(new SubgraphWrapper(List.of(n), List.of()))
@@ -46,7 +48,8 @@ public class FilteredSubgraphsTest {
     public void testFind_fromForwardConnectors_ConnectorSpecializations() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", "blank");
         INode startNode = cpmDocument.getNode(startNodeId);
         Predicate<IEdge> isSpecialization = (edge) -> isRelation(edge, StatementOrBundle.Kind.PROV_SPECIALIZATION);
         Predicate<IEdge> edgeCondition = (edge) -> edge == null || isSpecialization.test(edge);

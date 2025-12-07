@@ -76,9 +76,12 @@ public class TraverserConfig {
                 new ClassPathResource("validitySpecifications" + File.separator + "isProcessingBundle.json");
 
         return Map.of(
-                EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, new DemoValidityVerifier(provServiceAPI, simpleSemanticResource.getInputStream()),
-                EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, new DemoValidityVerifier(provServiceAPI, isSamplingBundleResource.getInputStream()),
-                EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, new DemoValidityVerifier(provServiceAPI, isProcessingBundleResource.getInputStream())
+                EValidityCheck.DEMO_SIMPLE_CONSTRAINTS,
+                new DemoValidityVerifier(provServiceAPI, simpleSemanticResource.getInputStream()),
+                EValidityCheck.DEMO_IS_SAMPLING_BUNDLE,
+                new DemoValidityVerifier(provServiceAPI, isSamplingBundleResource.getInputStream()),
+                EValidityCheck.DEMO_IS_PROCESSING_BUNDLE,
+                new DemoValidityVerifier(provServiceAPI, isProcessingBundleResource.getInputStream())
         );
     }
 

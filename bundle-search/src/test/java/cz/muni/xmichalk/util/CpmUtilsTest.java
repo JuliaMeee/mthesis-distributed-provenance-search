@@ -23,8 +23,10 @@ public class CpmUtilsTest {
 
     static Stream<Object[]> getMetaBundleIdParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V0, "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"},
-                new Object[]{TestDocumentProvider.processingBundle_V1, "http://prov-storage-2:8000/api/v1/documents/meta/ProcessingBundle_V0_meta"}
+                new Object[]{TestDocumentProvider.samplingBundle_V0,
+                        "http://prov-storage-1:8000/api/v1/documents/meta/SamplingBundle_V0_meta"},
+                new Object[]{TestDocumentProvider.processingBundle_V1,
+                        "http://prov-storage-2:8000/api/v1/documents/meta/ProcessingBundle_V0_meta"}
         );
     }
 
@@ -41,11 +43,21 @@ public class CpmUtilsTest {
 
     static Stream<Object[]> getGeneralConnectorIdParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V1, new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null), BLANK_URI + "StoredSampleCon_r1"},
-                new Object[]{TestDocumentProvider.samplingBundle_V1, new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r2_3um_Spec", null), BLANK_URI + "StoredSampleCon_r2_3um"},
-                new Object[]{TestDocumentProvider.samplingBundle_V1, new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesConSpec", null), BLANK_URI + "IdentifiedSpeciesCon"},
-                new Object[]{TestDocumentProvider.processingBundle_V1, new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", null), BLANK_URI + "ProcessedSampleCon"},
-                new Object[]{TestDocumentProvider.processingBundle_V1, new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null), BLANK_URI + "StoredSampleCon_r1"} // backward connector
+                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null),
+                        BLANK_URI + "StoredSampleCon_r1"},
+                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r2_3um_Spec",
+                                null), BLANK_URI + "StoredSampleCon_r2_3um"},
+                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesConSpec", null),
+                        BLANK_URI + "IdentifiedSpeciesCon"},
+                new Object[]{TestDocumentProvider.processingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", null),
+                        BLANK_URI + "ProcessedSampleCon"},
+                new Object[]{TestDocumentProvider.processingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null),
+                        BLANK_URI + "StoredSampleCon_r1"} // backward connector
         );
     }
 

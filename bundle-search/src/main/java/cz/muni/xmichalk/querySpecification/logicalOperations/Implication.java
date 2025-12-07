@@ -20,7 +20,8 @@ public class Implication<T> implements ICondition<T> {
             throw new IllegalStateException("Value of premise cannot be null in " + this.getClass().getSimpleName());
         }
         if (consequence == null) {
-            throw new IllegalStateException("Value of consequence cannot be null in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Value of consequence cannot be null in " + this.getClass().getSimpleName());
         }
 
 

@@ -34,7 +34,8 @@ public class ResultsTransformationUtils {
 
         Namespace ns = pf.newNamespace();
 
-        Bundle bundle = pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
+        Bundle bundle =
+                pf.newNamedBundle(pf.newQualifiedName(BLANK_URI, "anonymous_encapsulating_bundle", "blank"), null);
 
         if (nodes == null) {
             nodes = List.of();

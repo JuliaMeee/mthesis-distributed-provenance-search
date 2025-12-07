@@ -44,7 +44,8 @@ public class DerivationPathConditionTest {
 
         boolean result = derivationPathCondition.test(edgeToNode);
 
-        assert result == (edgeKind == StatementOrBundle.Kind.PROV_SPECIALIZATION || edgeKind == StatementOrBundle.Kind.PROV_DERIVATION);
+        assert result == (edgeKind == StatementOrBundle.Kind.PROV_SPECIALIZATION ||
+                edgeKind == StatementOrBundle.Kind.PROV_DERIVATION);
     }
 
     @Test
@@ -58,7 +59,8 @@ public class DerivationPathConditionTest {
 
     @Test
     public void testDerivationPathCondition_isEffectTrue() {
-        EdgeToNode edgeToNode = new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node2);
+        EdgeToNode edgeToNode =
+                new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node2);
 
         DerivationPathCondition derivationPathCondition = new DerivationPathCondition(false);
 
@@ -67,7 +69,8 @@ public class DerivationPathConditionTest {
 
     @Test
     public void testDerivationPathCondition_isEffectFalse() {
-        EdgeToNode edgeToNode = new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node1);
+        EdgeToNode edgeToNode =
+                new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node1);
 
         DerivationPathCondition derivationPathCondition = new DerivationPathCondition(false);
 
@@ -76,7 +79,8 @@ public class DerivationPathConditionTest {
 
     @Test
     public void testDerivationPathCondition_isNotEffectTrue() {
-        EdgeToNode edgeToNode = new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node1);
+        EdgeToNode edgeToNode =
+                new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node1);
 
         DerivationPathCondition derivationPathCondition = new DerivationPathCondition(true);
 
@@ -85,7 +89,8 @@ public class DerivationPathConditionTest {
 
     @Test
     public void testDerivationPathCondition_isNotEffectFalse() {
-        EdgeToNode edgeToNode = new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node2);
+        EdgeToNode edgeToNode =
+                new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node2);
 
         DerivationPathCondition derivationPathCondition = new DerivationPathCondition(true);
 

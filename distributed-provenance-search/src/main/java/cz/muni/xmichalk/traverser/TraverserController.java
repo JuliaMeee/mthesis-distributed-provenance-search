@@ -44,7 +44,8 @@ public class TraverserController {
         return ResponseEntity.ok(checks);
     }
 
-    @Operation(summary = "List available traversal priority options", description = "Returns all defined traversal priority options.")
+    @Operation(summary = "List available traversal priority options",
+            description = "Returns all defined traversal priority options.")
     @GetMapping(value = "/api/getTraversalPriorities", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Set<ETraversalPriority>> getAvailableTraversalPriorities() {
         Set<ETraversalPriority> options = traverser.getTraversalPriorityComparators().keySet();
@@ -60,83 +61,85 @@ public class TraverserController {
             content = @Content(
                     schema = @Schema(implementation = TraversalParamsDTO.class),
                     examples = {
-                            @ExampleObject(name = "Get storing activities on the usage/generation path going backwards (via undirected Specializations, backward Generations and Usages)", value = """
-                                    {
-                                      "bundleId": {
-                                        "nameSpaceUri": "http://prov-storage-4:8000/api/v1/organizations/ORG4/documents/",
-                                        "localPart": "DnaSequencingBundle_V0"
-                                      },
-                                      "startNodeId": {
-                                        "nameSpaceUri": "https://openprovenance.org/blank/",
-                                        "localPart": "FilteredSequencesCon"
-                                      },
-                                      "versionPreference": "SPECIFIED",
-                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
-                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "querySpecification": {
-                                        "type" : "GetNodes",
-                                        "fromSubgraphs" : {
-                                          "type" : "FittingNodes",
-                                          "nodeCondition" : {
-                                            "type" : "AllTrue",
-                                            "conditions" : [ {
-                                              "type" : "IsKind",
-                                              "kind" : "PROV_ACTIVITY"
-                                            }, {
-                                              "type" : "HasAttrLangStringValue",
-                                              "attributeNameUri" : "http://purl.org/dc/terms/type",
-                                              "valueRegex" : "(?i).*storing.*"
-                                            } ]
-                                          },
-                                          "startsIn" : {
-                                            "type" : "FilteredSubgraphs",
-                                            "filter" : {
-                                              "type" : "AnyTrue",
-                                              "conditions" : [ {
-                                                "type" : "EdgeToNodeCondition",
-                                                "edgeCondition" : {
-                                                  "type" : "AnyTrue",
-                                                  "conditions" : [ {
-                                                    "type" : "IsRelation",
-                                                    "relation" : "PROV_USAGE"
-                                                  }, {
-                                                    "type" : "IsRelation",
-                                                    "relation" : "PROV_GENERATION"
-                                                  } ]
-                                                },
-                                                "nodeIsEffect" : false
-                                              }, {
-                                                "type" : "EdgeToNodeCondition",
-                                                "edgeCondition" : {
-                                                  "type" : "IsRelation",
-                                                  "relation" : "PROV_SPECIALIZATION"
-                                                }
-                                              } ]
-                                            },
-                                            "startsIn" : {
-                                              "type" : "FilteredSubgraphs",
-                                              "filter" : {
-                                                "type" : "EdgeToNodeCondition",
-                                                "edgeCondition" : {
-                                                  "type" : "IsRelation",
-                                                  "relation" : "PROV_DERIVATION"
-                                                },
-                                                "nodeCondition" : {
-                                                  "type" : "HasAttrQualifiedNameValue",
-                                                  "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                  "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/forwardConnector"
-                                                },
-                                                "nodeIsEffect" : false
+                            @ExampleObject(
+                                    name = "Get storing activities on the usage/generation path going backwards (via undirected Specializations, backward Generations and Usages)",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-4:8000/api/v1/organizations/ORG4/documents/",
+                                                "localPart": "DnaSequencingBundle_V0"
                                               },
-                                              "startsIn" : {
-                                                "type" : "StartNode"
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "FilteredSequencesCon"
+                                              },
+                                              "versionPreference": "SPECIFIED",
+                                              "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                              "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                              "querySpecification": {
+                                                "type" : "GetNodes",
+                                                "fromSubgraphs" : {
+                                                  "type" : "FittingNodes",
+                                                  "nodeCondition" : {
+                                                    "type" : "AllTrue",
+                                                    "conditions" : [ {
+                                                      "type" : "IsKind",
+                                                      "kind" : "PROV_ACTIVITY"
+                                                    }, {
+                                                      "type" : "HasAttrLangStringValue",
+                                                      "attributeNameUri" : "http://purl.org/dc/terms/type",
+                                                      "valueRegex" : "(?i).*storing.*"
+                                                    } ]
+                                                  },
+                                                  "startsIn" : {
+                                                    "type" : "FilteredSubgraphs",
+                                                    "filter" : {
+                                                      "type" : "AnyTrue",
+                                                      "conditions" : [ {
+                                                        "type" : "EdgeToNodeCondition",
+                                                        "edgeCondition" : {
+                                                          "type" : "AnyTrue",
+                                                          "conditions" : [ {
+                                                            "type" : "IsRelation",
+                                                            "relation" : "PROV_USAGE"
+                                                          }, {
+                                                            "type" : "IsRelation",
+                                                            "relation" : "PROV_GENERATION"
+                                                          } ]
+                                                        },
+                                                        "nodeIsEffect" : false
+                                                      }, {
+                                                        "type" : "EdgeToNodeCondition",
+                                                        "edgeCondition" : {
+                                                          "type" : "IsRelation",
+                                                          "relation" : "PROV_SPECIALIZATION"
+                                                        }
+                                                      } ]
+                                                    },
+                                                    "startsIn" : {
+                                                      "type" : "FilteredSubgraphs",
+                                                      "filter" : {
+                                                        "type" : "EdgeToNodeCondition",
+                                                        "edgeCondition" : {
+                                                          "type" : "IsRelation",
+                                                          "relation" : "PROV_DERIVATION"
+                                                        },
+                                                        "nodeCondition" : {
+                                                          "type" : "HasAttrQualifiedNameValue",
+                                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                          "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/forwardConnector"
+                                                        },
+                                                        "nodeIsEffect" : false
+                                                      },
+                                                      "startsIn" : {
+                                                        "type" : "StartNode"
+                                                      }
+                                                    }
+                                                  }
+                                                }
                                               }
                                             }
-                                          }
-                                        }
-                                      }
-                                    }
-                                    """),
+                                            """),
                             @ExampleObject(name = "Get all backward connectors", value = """
                                     {
                                       "bundleId": {
@@ -199,59 +202,61 @@ public class TraverserController {
                                        }
                                     }
                                     """),
-                            @ExampleObject(name = "Find subgraphs of Jane Smith and activities they were responsible for", value = """
-                                    {
-                                      "bundleId": {
-                                        "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
-                                        "localPart": "SamplingBundle_V0"
-                                      },
-                                      "startNodeId": {
-                                        "nameSpaceUri": "https://openprovenance.org/blank/",
-                                        "localPart": "StoredSampleCon_r2_3um"
-                                      },
-                                      "versionPreference": "LATEST",
-                                      "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
-                                      "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
-                                      "querySpecification": {
-                                        "type" : "GetSubgraphs",
-                                        "subgraph" : {
-                                          "type" : "FittingLinearSubgraphs",
-                                          "graphParts" : [ {
-                                            "type" : "EdgeToNodeCondition",
-                                            "edgeCondition" : null,
-                                            "nodeCondition" : {
-                                              "type" : "IsKind",
-                                              "kind" : "PROV_ACTIVITY"
-                                            },
-                                            "nodeIsEffect" : null
-                                          }, {
-                                            "type" : "EdgeToNodeCondition",
-                                            "edgeCondition" : {
-                                              "type" : "IsRelation",
-                                              "relation" : "PROV_ASSOCIATION"
-                                            },
-                                            "nodeCondition" : {
-                                              "type" : "AllTrue",
-                                              "conditions" : [ {
-                                                "type" : "HasAttrQualifiedNameValue",
-                                                "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                                "valueUriRegex" : "https://schema.org/Person"
-                                              }, {
-                                                "type" : "HasAttrLangStringValue",
-                                                "attributeNameUri" : "https://schema.org/name",
-                                                "langRegex" : null,
-                                                "valueRegex" : "Jane Smith"
-                                              } ]
-                                            },
-                                            "nodeIsEffect" : false
-                                          } ],
-                                          "startsIn" : {
-                                            "type" : "WholeGraph"
-                                          }
-                                        }
-                                      }
-                                    }
-                                    """)
+                            @ExampleObject(
+                                    name = "Find subgraphs of Jane Smith and activities they were responsible for",
+                                    value = """
+                                            {
+                                              "bundleId": {
+                                                "nameSpaceUri": "http://prov-storage-1:8000/api/v1/organizations/ORG1/documents/",
+                                                "localPart": "SamplingBundle_V0"
+                                              },
+                                              "startNodeId": {
+                                                "nameSpaceUri": "https://openprovenance.org/blank/",
+                                                "localPart": "StoredSampleCon_r2_3um"
+                                              },
+                                              "versionPreference": "LATEST",
+                                              "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
+                                              "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
+                                              "querySpecification": {
+                                                "type" : "GetSubgraphs",
+                                                "subgraph" : {
+                                                  "type" : "FittingLinearSubgraphs",
+                                                  "graphParts" : [ {
+                                                    "type" : "EdgeToNodeCondition",
+                                                    "edgeCondition" : null,
+                                                    "nodeCondition" : {
+                                                      "type" : "IsKind",
+                                                      "kind" : "PROV_ACTIVITY"
+                                                    },
+                                                    "nodeIsEffect" : null
+                                                  }, {
+                                                    "type" : "EdgeToNodeCondition",
+                                                    "edgeCondition" : {
+                                                      "type" : "IsRelation",
+                                                      "relation" : "PROV_ASSOCIATION"
+                                                    },
+                                                    "nodeCondition" : {
+                                                      "type" : "AllTrue",
+                                                      "conditions" : [ {
+                                                        "type" : "HasAttrQualifiedNameValue",
+                                                        "attributeNameUri" : "http://www.w3.org/ns/prov#type",
+                                                        "valueUriRegex" : "https://schema.org/Person"
+                                                      }, {
+                                                        "type" : "HasAttrLangStringValue",
+                                                        "attributeNameUri" : "https://schema.org/name",
+                                                        "langRegex" : null,
+                                                        "valueRegex" : "Jane Smith"
+                                                      } ]
+                                                    },
+                                                    "nodeIsEffect" : false
+                                                  } ],
+                                                  "startsIn" : {
+                                                    "type" : "WholeGraph"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                            """)
                     }
             )
     )
@@ -279,7 +284,8 @@ public class TraverserController {
                     new TraversalParams(
                             traverseBackwards,
                             traversalParams.versionPreference,
-                            traversalParams.traversalPriority != null ? traversalParams.traversalPriority : ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
+                            traversalParams.traversalPriority != null ? traversalParams.traversalPriority :
+                                    ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                             traversalParams.validityChecks != null ? traversalParams.validityChecks : new ArrayList<>(),
                             traversalParams.querySpecification
                     )

@@ -26,7 +26,8 @@ public class CountComparisonConditionTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testCountComparisonCondition(int first, EComparisonResult comparisonResult, int second, boolean expectedResult) {
+    public void testCountComparisonCondition(int first, EComparisonResult comparisonResult, int second,
+                                             boolean expectedResult) {
         CountComparisonCondition<Object> countComparisonCondition = new CountComparisonCondition<Object>(
                 _ -> first,
                 comparisonResult,

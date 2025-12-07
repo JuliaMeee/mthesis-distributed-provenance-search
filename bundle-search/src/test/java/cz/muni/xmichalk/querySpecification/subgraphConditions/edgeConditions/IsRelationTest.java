@@ -20,9 +20,10 @@ public class IsRelationTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testIsRelation(StatementOrBundle.Kind actualRelation, StatementOrBundle.Kind comparedRelation, boolean expectedResult) {
+    public void testIsRelation(StatementOrBundle.Kind actualRelation, StatementOrBundle.Kind comparedRelation,
+                               boolean expectedResult) {
         IEdge edge = new MergedEdge(() -> actualRelation);
-        
+
         IsRelation isRelationCondition = new IsRelation(comparedRelation);
 
         assert isRelationCondition.test(edge) == expectedResult;

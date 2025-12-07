@@ -26,8 +26,10 @@ public class GetSubgraphsTest {
 
     static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V1, TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst()},
-                new Object[]{TestDocumentProvider.processingBundle_V1, TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst()}
+                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst()},
+                new Object[]{TestDocumentProvider.processingBundle_V1,
+                        TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst()}
         );
     }
 

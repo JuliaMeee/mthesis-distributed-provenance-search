@@ -29,7 +29,8 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
     @Override
     public QualifiedNameData evaluate(BundleStart input) {
         if (versionPreference == null) {
-            throw new IllegalStateException("Value of versionPreference cannot be null in " + this.getClass().getName());
+            throw new IllegalStateException(
+                    "Value of versionPreference cannot be null in " + this.getClass().getName());
         }
 
         IVersionPicker versionPicker = null;

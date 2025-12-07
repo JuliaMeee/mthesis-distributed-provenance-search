@@ -30,7 +30,8 @@ public class BundleQueryController {
         this.bundleQueryService = bundleQueryService;
     }
 
-    @Operation(summary = "Answer a given query about a given bundle", description = "Traverse the bundle from the specified node to answer the query. Can also use the metadata of the bundle to answer the query.")
+    @Operation(summary = "Answer a given query about a given bundle",
+            description = "Traverse the bundle from the specified node to answer the query. Can also use the metadata of the bundle to answer the query.")
     @PostMapping(value = "/api/bundleQuery", produces = MediaType.APPLICATION_JSON_VALUE)
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Query Params",
@@ -301,11 +302,15 @@ public class BundleQueryController {
             QualifiedName bundleId = queryParams.bundleId.toQN();
             QualifiedName connectorId = queryParams.startNodeId.toQN();
 
-            log.info("Received bundle query request for bundleId: {}, startNodeId: {}, query type: {}", bundleId, connectorId, queryParams.querySpecification.getClass().getName());
+            log.info("Received bundle query request for bundleId: {}, startNodeId: {}, query type: {}", bundleId,
+                    connectorId, queryParams.querySpecification.getClass().getName());
 
-            QueryResult queryResult = bundleQueryService.evaluateBundleQuery(bundleId, connectorId, queryParams.querySpecification);
+            QueryResult queryResult =
+                    bundleQueryService.evaluateBundleQuery(bundleId, connectorId, queryParams.querySpecification);
 
-            log.info("Answering bundle query request for bundleId: {}, startNodeId: {}, query type: {}, with result: {}", bundleId, connectorId, queryParams.querySpecification.getClass().getName(), queryResult.result);
+            log.info(
+                    "Answering bundle query request for bundleId: {}, startNodeId: {}, query type: {}, with result: {}",
+                    bundleId, connectorId, queryParams.querySpecification.getClass().getName(), queryResult.result);
             return ResponseEntity.ok(queryResult);
         } catch (Exception e) {
             return ResponseEntity

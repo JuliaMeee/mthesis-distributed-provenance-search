@@ -75,7 +75,8 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
         connectorData.id = new QualifiedNameData().from(node.getId());
 
         INode referencedConnector = CpmUtils.getGeneralConnectorId(node);
-        QualifiedName referencedConnectorIdValue = referencedConnector != null ? referencedConnector.getId() : node.getId();
+        QualifiedName referencedConnectorIdValue =
+                referencedConnector != null ? referencedConnector.getId() : node.getId();
         connectorData.referencedConnectorId = new QualifiedNameData().from(referencedConnectorIdValue);
 
         Object referencedBundleIdValue = AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
@@ -87,10 +88,12 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
                 new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
 
         Object provServiceUriValue = AttributeUtils.getAttributeValue(node, ATTR_PROVENANCE_SERVICE_URI);
-        connectorData.provenanceServiceUri = provServiceUriValue == null ? null : ((LangString) provServiceUriValue).getValue();
+        connectorData.provenanceServiceUri =
+                provServiceUriValue == null ? null : ((LangString) provServiceUriValue).getValue();
 
 
-        LangString bundleHashValueObj = (LangString) AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
+        LangString bundleHashValueObj =
+                (LangString) AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_HASH_VALUE);
         connectorData.referencedBundleHashValue = bundleHashValueObj != null ? bundleHashValueObj.getValue() : null;
 
         LangString hashAlgObj = (LangString) AttributeUtils.getAttributeValue(node, ATTR_HASH_ALG);

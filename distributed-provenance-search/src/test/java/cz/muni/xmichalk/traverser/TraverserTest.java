@@ -1,5 +1,8 @@
 package cz.muni.xmichalk.traverser;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.xmichalk.TestBundleData;
@@ -17,10 +20,13 @@ import cz.muni.xmichalk.traversalPriority.ETraversalPriority;
 import cz.muni.xmichalk.traversalPriority.IntegrityThenOrderedValidity;
 import cz.muni.xmichalk.validity.EValidityCheck;
 import cz.muni.xmichalk.validity.IValidityVerifier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.openprovenance.prov.model.QualifiedName;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -257,6 +263,11 @@ public class TraverserTest {
         assert results.results.stream().allMatch(r -> r.pathIntegrity);
         assert results.results.stream().allMatch(r -> r.pathValidityChecks.stream().allMatch(Map.Entry::getValue));
         assert results.errors.isEmpty();
+
+        // Access captured logs
+        List<ILoggingEvent> logs = logAppender.getLogs();
+        logs.forEach(log -> System.out.println(log.getFormattedMessage()));
+
     }
 
     @Test
@@ -362,5 +373,29 @@ public class TraverserTest {
         assert results.results.stream().filter(r -> r.pathValidityChecks.stream().allMatch(Map.Entry::getValue))
                 .count() == 3;
         assert results.errors.isEmpty();
+    }
+
+    private TestLogAppender logAppender;
+    private Logger traverserLogger;
+
+    static class TestLogAppender extends AppenderBase<ILoggingEvent> {
+        private final List<ILoggingEvent> logs = new ArrayList<>();
+
+        @Override
+        protected void append(ILoggingEvent eventObject) {
+            logs.add(eventObject);
+        }
+
+        public List<ILoggingEvent> getLogs() {
+            return logs;
+        }
+    }
+
+    @BeforeEach
+    void setupLogger() {
+        traverserLogger = (Logger) LoggerFactory.getLogger("cz.muni.xmichalk.traverser.Traverser");
+        logAppender = new TestLogAppender();
+        logAppender.start();
+        traverserLogger.addAppender(logAppender);
     }
 }

@@ -17,7 +17,8 @@ public class TraversalParams {
 
     }
 
-    public TraversalParams(boolean traverseBackwards, String versionPreference, ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks, JsonNode querySpecification) {
+    public TraversalParams(boolean traverseBackwards, String versionPreference, ETraversalPriority traversalPriority,
+                           List<EValidityCheck> validityChecks, JsonNode querySpecification) {
         this.traverseBackwards = traverseBackwards;
         this.versionPreference = versionPreference;
         this.traversalPriority = traversalPriority;

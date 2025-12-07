@@ -20,7 +20,8 @@ public class HasAttrQualifiedNameValue implements ICondition<INode> {
     @Override
     public boolean test(INode node) {
         if (attributeNameUri == null) {
-            throw new IllegalStateException("Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
         }
         if (valueUriRegex == null) {
             throw new IllegalStateException("Value of uriRegex cannot be null in " + this.getClass().getSimpleName());

@@ -23,11 +23,13 @@ public class GraphTraverser {
         return results;
     }
 
-    public static void traverseFrom(INode startNode, Consumer<EdgeToNode> traversedConsumer, Predicate<EdgeToNode> pathFilter) {
+    public static void traverseFrom(INode startNode, Consumer<EdgeToNode> traversedConsumer,
+                                    Predicate<EdgeToNode> pathFilter) {
         traverseRecursive(new EdgeToNode(null, startNode), pathFilter, new HashSet<>(), traversedConsumer);
     }
 
-    private static void traverseRecursive(EdgeToNode current, Predicate<EdgeToNode> pathFilter, Set<INode> visited, Consumer<EdgeToNode> traversedConsumer) {
+    private static void traverseRecursive(EdgeToNode current, Predicate<EdgeToNode> pathFilter, Set<INode> visited,
+                                          Consumer<EdgeToNode> traversedConsumer) {
         if (current == null) return;
 
         IEdge edge = current.edge;

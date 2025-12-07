@@ -50,7 +50,8 @@ public class AttributeUtilsTest {
                 BLANK_URI, "entity1", "blank");
         Entity entity = cPF.getProvFactory().newEntity(entityId);
         QualifiedName typeValue = pF.newQualifiedName(BLANK_URI, "MyType", "blank");
-        Type typeAttr = pF.newType(typeValue, new org.openprovenance.prov.vanilla.QualifiedName(PROV_URI, "QUALIFIED_NAME", "prov"));
+        Type typeAttr = pF.newType(typeValue,
+                new org.openprovenance.prov.vanilla.QualifiedName(PROV_URI, "QUALIFIED_NAME", "prov"));
         entity.getType().add(typeAttr);
 
 

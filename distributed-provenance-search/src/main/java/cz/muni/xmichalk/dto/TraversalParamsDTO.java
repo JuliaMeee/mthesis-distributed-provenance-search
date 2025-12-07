@@ -18,7 +18,9 @@ public class TraversalParamsDTO {
 
     }
 
-    public TraversalParamsDTO(QualifiedNameDTO bundleId, QualifiedNameDTO connectorId, String versionPreference, ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks, JsonNode querySpecification) {
+    public TraversalParamsDTO(QualifiedNameDTO bundleId, QualifiedNameDTO connectorId, String versionPreference,
+                              ETraversalPriority traversalPriority, List<EValidityCheck> validityChecks,
+                              JsonNode querySpecification) {
         this.bundleId = bundleId;
         this.startNodeId = connectorId;
         this.versionPreference = versionPreference;

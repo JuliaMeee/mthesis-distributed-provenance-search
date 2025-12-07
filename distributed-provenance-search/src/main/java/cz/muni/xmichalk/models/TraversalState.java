@@ -15,7 +15,10 @@ public class TraversalState {
     public ConcurrentLinkedQueue<ResultFromBundle> results;
     public ConcurrentLinkedQueue<String> errors;
 
-    public TraversalState(Set<QualifiedName> visited, Set<QualifiedName> referenced, ConcurrentMap<QualifiedName, ItemToTraverse> processing, PriorityBlockingQueue<ItemToTraverse> toTraverseQueue, ConcurrentLinkedQueue<ResultFromBundle> results, ConcurrentLinkedQueue<String> errors) {
+    public TraversalState(Set<QualifiedName> visited, Set<QualifiedName> referenced,
+                          ConcurrentMap<QualifiedName, ItemToTraverse> processing,
+                          PriorityBlockingQueue<ItemToTraverse> toTraverseQueue,
+                          ConcurrentLinkedQueue<ResultFromBundle> results, ConcurrentLinkedQueue<String> errors) {
         this.visited = visited;
         this.referencedVisited = referenced;
         this.processing = processing;

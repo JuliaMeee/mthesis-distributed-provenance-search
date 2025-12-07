@@ -32,7 +32,8 @@ public class CpmUtils {
             return null;
         }
 
-        return (QualifiedName) AttributeUtils.getAttributeValue(mainActivities.stream().findFirst().get(), ATTR_REFERENCED_META_BUNDLE_ID);
+        return (QualifiedName) AttributeUtils.getAttributeValue(mainActivities.stream().findFirst().get(),
+                ATTR_REFERENCED_META_BUNDLE_ID);
     }
 
     public static INode getGeneralConnectorId(INode connectorNode) {
@@ -42,20 +43,25 @@ public class CpmUtils {
         if (provType == null) {
             return null;
         }
-        if (AttributeUtils.isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "backwardConnector"))) {
+        if (AttributeUtils.isTargetValue(provType, QualifiedName.class,
+                qn -> qn.getUri().equals(CPM_URI + "backwardConnector"))) {
             return connectorNode;
         }
-        if (AttributeUtils.isTargetValue(provType, QualifiedName.class, qn -> qn.getUri().equals(CPM_URI + "forwardConnector"))) {
+        if (AttributeUtils.isTargetValue(provType, QualifiedName.class,
+                qn -> qn.getUri().equals(CPM_URI + "forwardConnector"))) {
             ArrayList<Predicate<EdgeToNode>> subgraphConstraints = new ArrayList<Predicate<EdgeToNode>>();
             subgraphConstraints.add(edgeToNode -> edgeToNode.node.equals(connectorNode));
             subgraphConstraints.add(edgeToNode -> {
-                boolean isSpecialization = edgeToNode.edge.getRelations().stream().anyMatch((relation) -> relation.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION);
+                boolean isSpecialization = edgeToNode.edge.getRelations().stream()
+                        .anyMatch((relation) -> relation.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION);
                 boolean isGeneralEntity = edgeToNode.edge.getCause() == edgeToNode.node;
-                boolean isForwardConnector = AttributeUtils.hasAttributeTargetValue(edgeToNode.node, ATTR_PROV_TYPE, QualifiedName.class,
-                        qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
+                boolean isForwardConnector =
+                        AttributeUtils.hasAttributeTargetValue(edgeToNode.node, ATTR_PROV_TYPE, QualifiedName.class,
+                                qn -> qn.getUri().equals(CPM_URI + "forwardConnector"));
                 return isSpecialization && isGeneralEntity && isForwardConnector;
             });
-            List<SubgraphWrapper> subgraphs = LinearSubgraphFinder.findSubgraphsFrom(connectorNode, subgraphConstraints);
+            List<SubgraphWrapper> subgraphs =
+                    LinearSubgraphFinder.findSubgraphsFrom(connectorNode, subgraphConstraints);
             if (subgraphs.isEmpty() || subgraphs.getFirst().getNodes().size() != 2) {
                 return null;
             }

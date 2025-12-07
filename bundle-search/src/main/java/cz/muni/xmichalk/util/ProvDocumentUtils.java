@@ -25,7 +25,8 @@ public class ProvDocumentUtils {
         return finalizeAfterSerialization(serialized, format);
     }
 
-    public static void serializeIntoFile(Path filePath, Document document, Formats.ProvFormat format) throws IOException {
+    public static void serializeIntoFile(Path filePath, Document document, Formats.ProvFormat format)
+            throws IOException {
         String string = serialize(document, format);
         Files.writeString(filePath, string, charset);
     }
@@ -41,7 +42,8 @@ public class ProvDocumentUtils {
     public static Document deserialize(String serialized, Formats.ProvFormat format) throws IOException {
         serialized = prepareForDeserialization(serialized, format);
         InteropFramework interop = new InteropFramework();
-        InputStream inputStream = new ByteArrayInputStream(serialized.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        InputStream inputStream =
+                new ByteArrayInputStream(serialized.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         return interop.readDocument(inputStream, format);
     }
 

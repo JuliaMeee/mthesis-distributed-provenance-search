@@ -21,7 +21,8 @@ public class CountComparisonCondition<T> implements ICondition<T> {
             throw new IllegalStateException("Value of first cannot be null in " + this.getClass().getSimpleName());
         }
         if (comparisonResult == null) {
-            throw new IllegalStateException("Value of comparisonResult cannot be null in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Value of comparisonResult cannot be null in " + this.getClass().getSimpleName());
         }
         if (second == null) {
             throw new IllegalStateException("Value of second cannot be null in " + this.getClass().getSimpleName());

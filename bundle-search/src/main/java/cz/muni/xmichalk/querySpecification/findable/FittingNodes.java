@@ -28,7 +28,8 @@ public class FittingNodes implements IFindableSubgraph {
     @Override
     public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
         if (nodeCondition == null) {
-            throw new IllegalStateException("Value of nodeCondition cannot be null in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Value of nodeCondition cannot be null in " + this.getClass().getSimpleName());
         }
         if (startsIn == null) {
             throw new IllegalStateException("Value of startsIn cannot be null in " + this.getClass().getSimpleName());

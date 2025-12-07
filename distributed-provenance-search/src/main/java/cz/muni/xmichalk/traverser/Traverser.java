@@ -294,7 +294,8 @@ public class Traverser {
                                                              BundleQueryResultDTO findConnectorsResult,
                                                              boolean integrity,
                                                              List<Map.Entry<EValidityCheck, Boolean>> validityChecks) {
-        if (findConnectorsResult == null || findConnectorsResult.result == null || findConnectorsResult.result.isNull()) {
+        if (findConnectorsResult == null || findConnectorsResult.result == null ||
+                findConnectorsResult.result.isNull()) {
             log.warn("Find connectors in bundle {} returned null", itemTraversed.bundleId.getUri());
             return new ArrayList<>();
         }

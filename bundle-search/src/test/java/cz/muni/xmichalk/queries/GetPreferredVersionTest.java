@@ -40,7 +40,8 @@ public class GetPreferredVersionTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetPreferredVersion(CpmDocument document, INode startNode, EVersionPreference preference, QualifiedName expectedBundleId) {
+    public void testGetPreferredVersion(CpmDocument document, INode startNode, EVersionPreference preference,
+                                        QualifiedName expectedBundleId) {
         GetPreferredVersion query = new GetPreferredVersion(
                 preference,
                 new MockedDocumentLoader()

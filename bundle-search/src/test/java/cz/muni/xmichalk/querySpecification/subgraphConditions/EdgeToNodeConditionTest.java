@@ -28,7 +28,8 @@ public class EdgeToNodeConditionTest {
             )
     );
 
-    private static final IEdge specializationEdge = new MergedEdge(() -> StatementOrBundle.Kind.PROV_SPECIALIZATION, specificEntityNode, genericEntityNode);
+    private static final IEdge specializationEdge =
+            new MergedEdge(() -> StatementOrBundle.Kind.PROV_SPECIALIZATION, specificEntityNode, genericEntityNode);
 
     @Test
     public void testEdgeToNodeCondition_allTrue() {

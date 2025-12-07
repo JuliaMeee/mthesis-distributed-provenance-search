@@ -41,7 +41,8 @@ public class HasAttrLangStringValueTest {
 
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testHasAttrLangStringValue(String attrName, String valueRegex, String langRegex, boolean expectedResult) {
+    public void testHasAttrLangStringValue(String attrName, String valueRegex, String langRegex,
+                                           boolean expectedResult) {
 
         HasAttrLangStringValue hasAttrLangStringValue = new HasAttrLangStringValue(
                 attrName,

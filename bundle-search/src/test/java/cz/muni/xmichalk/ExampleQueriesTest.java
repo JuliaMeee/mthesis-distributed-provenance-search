@@ -46,7 +46,8 @@ public class ExampleQueriesTest {
     @Test
     public void findDerivationSubgraph() throws IOException {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
 
         IQuery<?> query = new GetSubgraphs(
                 new DerivationPathFromStartNode()
@@ -71,14 +72,16 @@ public class ExampleQueriesTest {
         assert subgraphCpmDoc.getEdges().size() == 4;
 
         for (IEdge edge : subgraphCpmDoc.getEdges()) {
-            assert edge.getKind() == StatementOrBundle.Kind.PROV_DERIVATION || edge.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION;
+            assert edge.getKind() == StatementOrBundle.Kind.PROV_DERIVATION ||
+                    edge.getKind() == StatementOrBundle.Kind.PROV_SPECIALIZATION;
         }
     }
 
     @Test
     public void findMainActivityId() {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         IQuery<List<QualifiedNameData>> query = new GetNodeIds(
                 new FittingNodes(
                         new HasAttrQualifiedNameValue(
@@ -88,8 +91,9 @@ public class ExampleQueriesTest {
                 )
         );
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
 
@@ -104,7 +108,8 @@ public class ExampleQueriesTest {
     @Test
     public void findIdsOfDsConnectorSpecialization() {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         IQuery<List<QualifiedNameData>> query = new GetNodeIds(
                 new FittingNodes(
                         new Negation<>(
@@ -124,8 +129,9 @@ public class ExampleQueriesTest {
                 )
         );
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
 
@@ -138,7 +144,8 @@ public class ExampleQueriesTest {
     @Test
     public void findStoringActivitiesOnUsagePathBackward() throws IOException {
         CpmDocument cpmDoc = TestDocumentProvider.dnaSequencingBundle_V0;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "FilteredSequencesCon", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "FilteredSequencesCon", "blank");
         IQuery<?> query = new GetNodes(
                 new FittingNodes(
                         new AllTrue<>(List.of(
@@ -197,7 +204,8 @@ public class ExampleQueriesTest {
     @Test
     public void findActivitiesAssociatedWithJaneSmith() throws IOException {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new GetNodes(
                 new FittingNodes(
                         new IsKind(StatementOrBundle.Kind.PROV_ACTIVITY),
@@ -245,7 +253,8 @@ public class ExampleQueriesTest {
     @Test
     public void findSenderReceiverNodesConnectedToDerivationPath() throws IOException {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
         IQuery<?> query = new GetNodes(
                 new FittingNodes(
                         new HasAttrQualifiedNameValue(
@@ -274,8 +283,9 @@ public class ExampleQueriesTest {
                 )
         );
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
 
@@ -292,7 +302,8 @@ public class ExampleQueriesTest {
     @Test
     public void findUsageGenerationSpecializationSubgraph() throws IOException {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
         IQuery<?> query = new GetSubgraphs(
                 new FilteredSubgraphs(
                         new AnyTrue<>(List.of(
@@ -336,7 +347,8 @@ public class ExampleQueriesTest {
     @Test
     public void findFLeeAssociatedActivitiesSubgraphs() throws IOException {
         CpmDocument cpmDoc = TestDocumentProvider.dnaSequencingBundle_V0;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", "blank");
         IQuery<?> query = new GetSubgraphs(
                 new FittingLinearSubgraphs(
                         List.of(
@@ -387,7 +399,8 @@ public class ExampleQueriesTest {
     @Test
     public void testFitsSimpleValidityCheck() {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         ICondition<INode> isMainActivity = new HasAttrQualifiedNameValue(
                 ATTR_PROV_TYPE.getUri(),
                 CPM_URI + "mainActivity"
@@ -431,8 +444,9 @@ public class ExampleQueriesTest {
                 )
         );
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
         assert result != null;
@@ -444,7 +458,8 @@ public class ExampleQueriesTest {
     @Test
     public void testFitsIsSamplingBundle() {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         IQuery<?> query = new TestBundleFits(
                 new CountComparisonCondition<>(
                         new FittingNodes(
@@ -464,8 +479,9 @@ public class ExampleQueriesTest {
                 )
         );
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
 
@@ -478,11 +494,13 @@ public class ExampleQueriesTest {
     @Test
     public void findDerivationpathBackwardConnectors() {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
         IQuery<?> query = new GetConnectors(true, new DerivationPathFromStartNode(true));
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
 
@@ -499,11 +517,13 @@ public class ExampleQueriesTest {
     public void findDerivationPathForwardConnectors() {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
         IQuery<?> query = new GetConnectors(false, new DerivationPathFromStartNode(false));
         JsonNode serializedSpecification = objectMapper.valueToTree(query);
-        IQuery<?> deserializedQuery = objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
-        });
+        IQuery<?> deserializedQuery =
+                objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
+                });
 
         Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
 

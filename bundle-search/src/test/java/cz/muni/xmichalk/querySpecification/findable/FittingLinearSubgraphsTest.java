@@ -22,7 +22,8 @@ public class FittingLinearSubgraphsTest {
     @Test
     public void testFind_fromStartNode_length2() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null);
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null);
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
         INode startNode = cpmDocument.getNode(startNodeId);
         List<ICondition<EdgeToNode>> subgraphParts = List.of(

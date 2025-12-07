@@ -33,7 +33,8 @@ public class DemoValidityVerifier implements IValidityVerifier {
                 provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, validitySpecification);
 
         if (result == null) {
-            throw new RuntimeException("Fetch TEST_FITS result for bundle: " + itemToTraverse.bundleId.getUri() + " returned null.");
+            throw new RuntimeException(
+                    "Fetch TEST_FITS result for bundle: " + itemToTraverse.bundleId.getUri() + " returned null.");
         }
 
         ObjectMapper objectMapper = new ObjectMapper();

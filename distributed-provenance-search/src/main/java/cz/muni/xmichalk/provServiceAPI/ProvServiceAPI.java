@@ -68,8 +68,9 @@ public class ProvServiceAPI implements IProvServiceAPI {
             return null;
         }
 
-        QualifiedNameDTO pickedBundleIdDto = objectMapper.convertValue(queryResult.result, new TypeReference<QualifiedNameDTO>() {
-        });
+        QualifiedNameDTO pickedBundleIdDto =
+                objectMapper.convertValue(queryResult.result, new TypeReference<QualifiedNameDTO>() {
+                });
 
         return pickedBundleIdDto.toQN();
     }

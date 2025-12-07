@@ -36,7 +36,8 @@ public class LatestVersionPicker implements IVersionPicker {
         QualifiedName metaBundleId = CpmUtils.getMetaBundleId(bundle);
 
         if (metaBundleId == null) {
-            throw new RuntimeException("Failed to find meta bundle reference in bundle: " + bundle.getBundleId().getUri());
+            throw new RuntimeException(
+                    "Failed to find meta bundle reference in bundle: " + bundle.getBundleId().getUri());
         }
 
         StorageCpmDocument metaDocument = documentLoader.loadMetaCpmDocument(metaBundleId.getUri());

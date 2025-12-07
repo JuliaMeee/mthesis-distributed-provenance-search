@@ -38,8 +38,9 @@ public class ResultsTransformationUtilsTest {
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testDocuments")
     public void testEncapsulateInDocument(CpmDocument cpmDocument) {
-        
-        Document newDocument = ResultsTransformationUtils.encapsulateInDocument(cpmDocument.getNodes(), cpmDocument.getEdges());
+
+        Document newDocument =
+                ResultsTransformationUtils.encapsulateInDocument(cpmDocument.getNodes(), cpmDocument.getEdges());
 
         CpmDocument newCpmDocument = new CpmDocument(newDocument, pF, cPF, cF);
         assert (newCpmDocument.getNodes().size() == cpmDocument.getNodes().size());

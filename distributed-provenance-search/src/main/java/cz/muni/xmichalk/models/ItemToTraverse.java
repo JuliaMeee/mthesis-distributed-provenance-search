@@ -13,7 +13,8 @@ public class ItemToTraverse {
     public boolean pathIntegrity;
     public List<Map.Entry<EValidityCheck, Boolean>> pathValidityChecks;
 
-    public ItemToTraverse(QualifiedName bundleId, QualifiedName connectorId, String provServiceUri, boolean pathIntegrity, List<Map.Entry<EValidityCheck, Boolean>> pathValidityChecks) {
+    public ItemToTraverse(QualifiedName bundleId, QualifiedName connectorId, String provServiceUri,
+                          boolean pathIntegrity, List<Map.Entry<EValidityCheck, Boolean>> pathValidityChecks) {
         this.bundleId = bundleId;
         this.connectorId = connectorId;
         this.provServiceUri = provServiceUri;

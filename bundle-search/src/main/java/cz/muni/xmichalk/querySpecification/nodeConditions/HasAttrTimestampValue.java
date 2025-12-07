@@ -27,15 +27,18 @@ public class HasAttrTimestampValue implements ICondition<INode> {
     @Override
     public boolean test(INode node) {
         if (attributeNameUri == null) {
-            throw new IllegalStateException("Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
         }
         if (isEqual == null && isBefore == null && isAfter == null) {
-            throw new IllegalStateException("At least one of isEqual, isBefore or isAfter must be set in " + this.getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "At least one of isEqual, isBefore or isAfter must be set in " + this.getClass().getSimpleName());
         }
 
 
         try {
-            XMLGregorianCalendar value = (XMLGregorianCalendar) AttributeUtils.getAttributeValue(node, attributeNameUri);
+            XMLGregorianCalendar value =
+                    (XMLGregorianCalendar) AttributeUtils.getAttributeValue(node, attributeNameUri);
             if (value == null) {
                 return false;
             }
