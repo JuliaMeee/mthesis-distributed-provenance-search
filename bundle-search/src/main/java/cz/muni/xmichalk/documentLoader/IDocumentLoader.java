@@ -1,11 +1,7 @@
 package cz.muni.xmichalk.documentLoader;
 
 public interface IDocumentLoader {
-    StorageDocument loadDocument(String uri);
-
-    StorageCpmDocument loadCpmDocument(String uri);
-
-    StorageDocument loadMetaDocument(String uri);
+    StorageCpmDocument loadCpmDocument(String uri, EBundlePart part);
 
     StorageCpmDocument loadMetaCpmDocument(String uri);
 }

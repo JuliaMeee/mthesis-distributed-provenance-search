@@ -2,6 +2,7 @@ package cz.muni.xmichalk.queryService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
+import cz.muni.xmichalk.documentLoader.EBundlePart;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
 import cz.muni.xmichalk.models.BundleStart;
@@ -11,14 +12,15 @@ import cz.muni.xmichalk.queries.IRequiresDocumentLoader;
 import org.openprovenance.prov.model.QualifiedName;
 
 public class BundleQueryService {
-    private final IDocumentLoader documentLoader;
+    public final IDocumentLoader documentLoader;
 
     public BundleQueryService(IDocumentLoader documentLoader) {
         this.documentLoader = documentLoader;
     }
 
     public QueryResult evaluateBundleQuery(QualifiedName bundleId, QualifiedName startNodeId, IQuery<?> query) {
-        StorageCpmDocument retrievedDocument = documentLoader.loadCpmDocument(bundleId.getUri());
+        EBundlePart requiredBundlePart = query.decideRequiredBundlePart();
+        StorageCpmDocument retrievedDocument = documentLoader.loadCpmDocument(bundleId.getUri(), requiredBundlePart);
         CpmDocument document = retrievedDocument.document;
         injectDependencies(query);
         Object result = query.evaluate(new BundleStart(document, document.getNode(startNodeId)));

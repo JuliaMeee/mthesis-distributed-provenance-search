@@ -1,6 +1,7 @@
 package cz.muni.xmichalk.queries;
 
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.documentLoader.EBundlePart;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
 import cz.muni.xmichalk.models.QualifiedNameData;
@@ -66,6 +67,11 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
         return connectors.stream()
                 .map(this::transformToConnectorData)
                 .toList();
+    }
+
+    @Override
+    public EBundlePart decideRequiredBundlePart() {
+        return EBundlePart.TraversalInformation;
     }
 
     private ConnectorData transformToConnectorData(INode node) {

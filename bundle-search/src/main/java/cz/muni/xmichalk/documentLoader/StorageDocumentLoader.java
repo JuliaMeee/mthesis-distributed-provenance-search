@@ -35,7 +35,7 @@ public class StorageDocumentLoader implements IDocumentLoader {
         this.cpmProvFactory = cpmProvFactory;
     }
 
-    @Override
+
     public StorageDocument loadDocument(String uri) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
@@ -51,11 +51,12 @@ public class StorageDocumentLoader implements IDocumentLoader {
     }
 
     @Override
-    public StorageCpmDocument loadCpmDocument(String uri) {
+    public StorageCpmDocument loadCpmDocument(String uri, EBundlePart part) {
+        if (part == EBundlePart.DomainSpecific) uri += "/domain-specific";
+        else if (part == EBundlePart.TraversalInformation) uri += "/backbone";
         return toCpmDocument(loadDocument(uri));
     }
-
-    @Override
+    
     public StorageDocument loadMetaDocument(String uri) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;

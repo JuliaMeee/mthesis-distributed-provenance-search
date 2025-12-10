@@ -4,6 +4,7 @@ import cz.muni.xmichalk.bundleVersionPicker.EVersionPreference;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.LatestVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.SpecifiedVersionPicker;
+import cz.muni.xmichalk.documentLoader.EBundlePart;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
@@ -53,6 +54,11 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
         }
 
         return null;
+    }
+
+    @Override
+    public EBundlePart decideRequiredBundlePart() {
+        return EBundlePart.TraversalInformation;
     }
 
     @Override

@@ -5,9 +5,9 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
+import cz.muni.xmichalk.documentLoader.EBundlePart;
 import cz.muni.xmichalk.documentLoader.IDocumentLoader;
 import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
-import cz.muni.xmichalk.documentLoader.StorageDocument;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.interop.Formats;
@@ -21,23 +21,10 @@ public class MockedDocumentLoader implements IDocumentLoader {
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
 
-
     @Override
-    public StorageDocument loadDocument(final String uri) {
-        Document document = getFromFile(uri);
-        return new StorageDocument(document, null);
-    }
-
-    @Override
-    public StorageCpmDocument loadCpmDocument(final String uri) {
+    public StorageCpmDocument loadCpmDocument(final String uri, EBundlePart part) {
         Document document = getFromFile(uri);
         return new StorageCpmDocument(new CpmDocument(document, pF, cPF, cF), null);
-    }
-
-    @Override
-    public StorageDocument loadMetaDocument(final String uri) {
-        Document document = getFromFile(uri);
-        return new StorageDocument(document, null);
     }
 
     @Override

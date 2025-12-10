@@ -266,17 +266,11 @@ public class Traverser {
 
     private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult,
                                  BundleQueryResultDTO findConnectorsResult) {
-        if (queryResult == null && findConnectorsResult == null) {
+        if (queryResult == null || findConnectorsResult == null) {
             return false;
         }
-        if (queryResult == null) {
-            return integrityVerifier.verifyIntegrity(bundleId, findConnectorsResult.token);
-        }
-        if (findConnectorsResult == null) {
-            return integrityVerifier.verifyIntegrity(bundleId, queryResult.token);
-        }
-        return queryResult.token.equals(findConnectorsResult.token)
-                && integrityVerifier.verifyIntegrity(bundleId, queryResult.token);
+        return integrityVerifier.verifyIntegrity(bundleId, queryResult.token) &&
+                integrityVerifier.verifyIntegrity(bundleId, findConnectorsResult.token);
     }
 
     private List<Map.Entry<EValidityCheck, Boolean>> evaluateValidityChecks(List<EValidityCheck> validityChecks,

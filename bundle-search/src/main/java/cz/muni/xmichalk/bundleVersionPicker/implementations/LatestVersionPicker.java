@@ -66,7 +66,7 @@ public class LatestVersionPicker implements IVersionPicker {
         INode latestVersionNode = null;
 
         for (INode node : versionNodes) {
-            String versionString = ((LangString) AttributeUtils.getAttributeValue(node, ATTR_VERSION)).getValue();
+            String versionString = ((String) AttributeUtils.getAttributeValue(node, ATTR_VERSION));
             double version = Double.parseDouble(versionString);
 
             if (version > latestVersion) {
@@ -81,11 +81,13 @@ public class LatestVersionPicker implements IVersionPicker {
 
     private static boolean hasProvTypeBundle(INode node) {
         return AttributeUtils.hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class, qn ->
-                qn.getUri().equals(PROV_URI + "bundle")
+                qn.getUri().equals(PROV_URI + "bundle")) || AttributeUtils.hasAttributeTargetValue(node,
+                ATTR_PROV_TYPE, LangString.class, langString ->
+                        langString.getValue().equals("prov:bundle")
         );
     }
 
     private static boolean hasVersionAttribute(INode node) {
-        return AttributeUtils.hasAttributeTargetValue(node, ATTR_VERSION, LangString.class, v -> true);
+        return AttributeUtils.hasAttributeTargetValue(node, ATTR_VERSION, String.class, v -> true);
     }
 }

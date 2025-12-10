@@ -2,6 +2,7 @@ package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import cz.muni.xmichalk.documentLoader.EBundlePart;
 import cz.muni.xmichalk.models.BundleStart;
 
 
@@ -16,4 +17,9 @@ import cz.muni.xmichalk.models.BundleStart;
 })
 public interface IQuery<T> {
     T evaluate(BundleStart input);
+
+    default EBundlePart decideRequiredBundlePart() {
+        return EBundlePart.Whole;
+    }
+
 }
