@@ -39,21 +39,24 @@ public class TraverserTest {
     private static final QualifiedName bundleD = getExampleQN("bundleD");
 
 
+    private static final QualifiedName connA = getExampleQN("connA");
     private static final QualifiedName connA1 = getExampleQN("connA1");
     private static final QualifiedName connA2 = getExampleQN("connA2");
-    private static final QualifiedName connA3 = getExampleQN("connA3");
+    private static final QualifiedName connB = getExampleQN("connB");
     private static final QualifiedName connB1 = getExampleQN("connB1");
-    private static final QualifiedName connB2 = getExampleQN("connB2");
+    private static final QualifiedName connC = getExampleQN("connC");
     private static final QualifiedName connC1 = getExampleQN("connC1");
-    private static final QualifiedName connD1 = getExampleQN("connD1");
+    private static final QualifiedName connD = getExampleQN("connD");
 
-    private static final Map<String, TestBundleData> testDataSet1 = Map.of(
+    private static final Map<String, TestBundleData> testDataSet1 = Map.of( // Diamond branching, 2 versions of bundle A
             bundleA.getUri(), new TestBundleData(
                     bundleA,
                     bundleA_new,
                     objectMapper.valueToTree("bundleA_result"),
                     List.of(),
-                    List.of()
+                    List.of(
+                            getConnectorData(connA, connA, null)
+                    )
             ),
             bundleA_new.getUri(), new TestBundleData(
                     bundleA_new,
@@ -61,8 +64,9 @@ public class TraverserTest {
                     objectMapper.valueToTree("bundleA_new_result"),
                     List.of(),
                     List.of(
-                            getConnectorData(connA1, bundleB),
-                            getConnectorData(connA2, bundleC)
+                            getConnectorData(connA, connA, null),
+                            getConnectorData(connA1, connA, bundleB),
+                            getConnectorData(connA2, connA, bundleC)
                     )
             ),
             bundleB.getUri(), new TestBundleData(
@@ -70,10 +74,11 @@ public class TraverserTest {
                     bundleB,
                     objectMapper.valueToTree("bundleB_result"),
                     List.of(
-                            getConnectorData(connA1, bundleA)
+                            getConnectorData(connA, connA, bundleA)
                     ),
                     List.of(
-                            getConnectorData(connB1, bundleD)
+                            getConnectorData(connB, connB, null),
+                            getConnectorData(connB1, connB, bundleD)
                     )
             ),
             bundleC.getUri(), new TestBundleData(
@@ -81,10 +86,11 @@ public class TraverserTest {
                     bundleC,
                     objectMapper.valueToTree("bundleC_result"),
                     List.of(
-                            getConnectorData(connA2, bundleA)
+                            getConnectorData(connA, connA, bundleA)
                     ),
                     List.of(
-                            getConnectorData(connC1, bundleD)
+                            getConnectorData(connC, connC, null),
+                            getConnectorData(connC1, connC, bundleD)
                     )
             ),
             bundleD.getUri(), new TestBundleData(
@@ -92,10 +98,62 @@ public class TraverserTest {
                     bundleD,
                     objectMapper.valueToTree("bundleD_result"),
                     List.of(
-                            getConnectorData(connB1, bundleB),
-                            getConnectorData(connC1, bundleC)
+                            getConnectorData(connB, connB, bundleB),
+                            getConnectorData(connC, connC, bundleC)
                     ),
-                    List.of()
+                    List.of(
+                            getConnectorData(connD, connD, null)
+                    )
+            )
+    );
+
+    private static final Map<String, TestBundleData> testDataSet2 = Map.of( // linear with jump connector from B to D
+            bundleA.getUri(), new TestBundleData(
+                    bundleA,
+                    bundleA,
+                    objectMapper.valueToTree("bundleA_result"),
+                    List.of(),
+                    List.of(
+                            getConnectorData(connA, connA, null),
+                            getConnectorData(connA1, connA, bundleB)
+                    )
+            ),
+            bundleB.getUri(), new TestBundleData(
+                    bundleB,
+                    bundleB,
+                    objectMapper.valueToTree("bundleB_result"),
+                    List.of(
+                            getConnectorData(connA, connA, bundleA)
+                    ),
+                    List.of(
+                            getConnectorData(connB, connB, null),
+                            getConnectorData(connB1, connB, bundleC),
+                            getConnectorData(connC, connC, null),
+                            getConnectorData(connC1, connC, bundleD)
+                    )
+            ),
+            bundleC.getUri(), new TestBundleData(
+                    bundleC,
+                    bundleC,
+                    objectMapper.valueToTree("bundleC_result"),
+                    List.of(
+                            getConnectorData(connB, connB, bundleB)
+                    ),
+                    List.of(
+                            getConnectorData(connC, connC, null),
+                            getConnectorData(connC1, connC, bundleD)
+                    )
+            ),
+            bundleD.getUri(), new TestBundleData(
+                    bundleD,
+                    bundleD,
+                    objectMapper.valueToTree("bundleD_result"),
+                    List.of(
+                            getConnectorData(connC, connC, bundleC)
+                    ),
+                    List.of(
+                            getConnectorData(connD, connD, null)
+                    )
             )
     );
 
@@ -103,15 +161,17 @@ public class TraverserTest {
         return new org.openprovenance.prov.vanilla.QualifiedName(EXAMPLE_NAMESPACE_URI, localName, EXAMPLE_PREFIX);
     }
 
-    private static ConnectorDTO getConnectorData(QualifiedName connId, QualifiedName referencedBundleId) {
+    private static ConnectorDTO getConnectorData(QualifiedName connId, QualifiedName referencedConnId,
+                                                 QualifiedName referencedBundleId) {
         return new ConnectorDTO(
                 new QualifiedNameDTO().from(connId),
-                new QualifiedNameDTO().from(connId),
+                new QualifiedNameDTO().from(referencedConnId),
                 new QualifiedNameDTO().from(referencedBundleId),
-                new QualifiedNameDTO().from(getExampleQN("meta_" + referencedBundleId.getLocalPart())),
+                referencedBundleId == null ? null :
+                        new QualifiedNameDTO().from(getExampleQN("meta_" + referencedBundleId.getLocalPart())),
                 "hashA",
                 "SHA-256",
-                "http://provservice.com/" + referencedBundleId.getLocalPart()
+                "http://provservice.com/"
         );
     }
 
@@ -181,14 +241,14 @@ public class TraverserTest {
 
     static Stream<Object[]> bothDirectionsPrams() {
         return Stream.of(
-                new Object[]{true, bundleD, connD1, "LATEST", 4},
-                new Object[]{false, bundleA, connA1, "LATEST", 4},
+                new Object[]{true, bundleD, connD, "LATEST", 4},
+                new Object[]{false, bundleA, connA1, "LATEST", 5}, // D is searched from 2 different connectors
 
-                new Object[]{true, bundleD, connD1, "SPECIFIED", 4},
+                new Object[]{true, bundleD, connD, "SPECIFIED", 4},
                 new Object[]{false, bundleA, connA1, "SPECIFIED", 1},
 
-                new Object[]{false, bundleB, connB1, "LATEST", 2},
-                new Object[]{true, bundleC, connC1, "SPECIFIED", 2}
+                new Object[]{true, bundleC, connC, "SPECIFIED", 2},
+                new Object[]{false, bundleB, connB1, "LATEST", 2}
         );
     }
 
@@ -232,8 +292,8 @@ public class TraverserTest {
 
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
-                getMockedProvServiceAPI(testDataSet1),
-                getMockedIntegrityVerifier(List.of(bundleB)),
+                getMockedProvServiceAPI(testDataSet2),
+                getMockedIntegrityVerifier(List.of(bundleC)),
                 10,
                 true,
                 true,
@@ -266,8 +326,8 @@ public class TraverserTest {
 
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
-                getMockedProvServiceAPI(testDataSet1),
-                getMockedIntegrityVerifier(List.of(bundleB, bundleC)),
+                getMockedProvServiceAPI(testDataSet2),
+                getMockedIntegrityVerifier(List.of(bundleB)),
                 10,
                 true,
                 true,
@@ -288,9 +348,9 @@ public class TraverserTest {
         );
 
         assert results.results.size() == 4;
-        assert results.results.stream().filter(r -> r.integrity).count() == 2;
+        assert results.results.stream().filter(r -> r.integrity).count() == 3;
         assert results.results.stream().allMatch(r -> r.validityChecks.stream().allMatch(Map.Entry::getValue));
-        assert results.results.stream().filter(r -> r.pathIntegrity).count() == 3;
+        assert results.results.stream().filter(r -> r.pathIntegrity).count() == 2;
         assert results.results.stream().allMatch(r -> r.pathValidityChecks.stream().allMatch(Map.Entry::getValue));
         assert results.errors.isEmpty();
     }
@@ -312,7 +372,7 @@ public class TraverserTest {
 
         TraversalResults results = traverser.traverseChain(
                 bundleD,
-                connD1,
+                connD,
                 new TraversalParams(
                         true,
                         "LATEST",
@@ -349,7 +409,7 @@ public class TraverserTest {
 
         TraversalResults results = traverser.traverseChain(
                 bundleD,
-                connD1,
+                connD,
                 new TraversalParams(
                         true,
                         "LATEST",

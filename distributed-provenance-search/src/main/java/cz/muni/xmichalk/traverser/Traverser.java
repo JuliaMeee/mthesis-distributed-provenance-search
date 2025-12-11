@@ -138,7 +138,10 @@ public class Traverser {
                 finalNext.bundleId = preferredBundleId;
                 if (tryMarkAsProcessing(finalNext, traversalState, true)) {
                     traverseItem(finalNext, traversalState, traversalParams);
-                    markFinishedTraversing(referencedBundleId, preferredBundleId, traversalState);
+                    markFinishedTraversing(
+                            new Connection(referencedBundleId, finalNext.connectorId),
+                            new Connection(preferredBundleId, finalNext.connectorId),
+                            traversalState);
                 }
                 return null;
             });
@@ -236,16 +239,17 @@ public class Traverser {
 
     private boolean tryMarkAsProcessing(ItemToTraverse itemToTraverse, TraversalState traversalState,
                                         boolean isPreferredVersion) {
-        Map<QualifiedName, ItemToTraverse> traversing =
+        Map<Connection, ItemToTraverse> traversing =
                 isPreferredVersion ? traversalState.traversingPreferred : traversalState.traversingReferenced;
-        Set<QualifiedName> visited =
-                isPreferredVersion ? traversalState.visitedPreferred : traversalState.visitedReferenced;
+        Set<Connection> visited =
+                isPreferredVersion ? traversalState.traversedPreferred : traversalState.traversedReferenced;
         String messageExtension = isPreferredVersion ? "" : "preferred version of ";
-        if (traversing.putIfAbsent(itemToTraverse.bundleId, itemToTraverse) == null) {
-            if (!visited.contains(itemToTraverse.bundleId)) {
+        Connection connection = new Connection(itemToTraverse.bundleId, itemToTraverse.connectorId);
+        if (traversing.putIfAbsent(connection, itemToTraverse) == null) {
+            if (!visited.contains(connection)) {
                 return true;
             } else {
-                traversing.remove(itemToTraverse.bundleId, itemToTraverse);
+                traversing.remove(connection, itemToTraverse);
                 log.info("Already traversed {}bundle: {}", messageExtension,
                         itemToTraverse.bundleId.getUri());
             }
@@ -256,12 +260,12 @@ public class Traverser {
         return false;
     }
 
-    private void markFinishedTraversing(QualifiedName referencedBundleId, QualifiedName preferredBundleId,
+    private void markFinishedTraversing(Connection referencedConnection, Connection preferredConnection,
                                         TraversalState traversalState) {
-        traversalState.visitedReferenced.add(referencedBundleId);
-        traversalState.visitedPreferred.add(preferredBundleId);
-        traversalState.traversingReferenced.remove(referencedBundleId);
-        traversalState.traversingPreferred.remove(preferredBundleId);
+        traversalState.traversedReferenced.add(referencedConnection);
+        traversalState.traversedPreferred.add(preferredConnection);
+        traversalState.traversingReferenced.remove(referencedConnection);
+        traversalState.traversingPreferred.remove(preferredConnection);
     }
 
     private boolean hasIntegrity(QualifiedName bundleId, BundleQueryResultDTO queryResult,
@@ -309,6 +313,7 @@ public class Traverser {
 
         return new ResultFromBundle(
                 itemTraversed.bundleId,
+                itemTraversed.connectorId,
                 queryResult.result,
                 integrity,
                 validityChecks,

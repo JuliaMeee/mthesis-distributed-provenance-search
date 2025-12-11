@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class FoundResultDTO {
     public QualifiedNameDTO bundleId;
+    public QualifiedNameDTO fromConnectorId;
     public boolean integrity;
     public List<Map.Entry<EValidityCheck, Boolean>> validityChecks;
     public boolean pathIntegrity;
@@ -21,10 +22,11 @@ public class FoundResultDTO {
 
     }
 
-    public FoundResultDTO(QualifiedNameDTO bundleId, boolean integrity,
+    public FoundResultDTO(QualifiedNameDTO bundleId, QualifiedNameDTO fromConnectorId, boolean integrity,
                           List<Map.Entry<EValidityCheck, Boolean>> validityChecks, boolean pathIntegrity,
                           List<Map.Entry<EValidityCheck, Boolean>> pathValidityChecks, JsonNode result) {
         this.bundleId = bundleId;
+        this.fromConnectorId = fromConnectorId;
         this.integrity = integrity;
         this.validityChecks = validityChecks;
         this.pathIntegrity = pathIntegrity;
@@ -37,6 +39,7 @@ public class FoundResultDTO {
             return null;
         }
         this.bundleId = new QualifiedNameDTO().from(domainModel.bundleId);
+        this.fromConnectorId = new QualifiedNameDTO().from(domainModel.fromConnectorId);
         this.result = domainModel.result;
         this.integrity = domainModel.integrity;
         this.validityChecks = new ArrayList<>(domainModel.validityChecks);
