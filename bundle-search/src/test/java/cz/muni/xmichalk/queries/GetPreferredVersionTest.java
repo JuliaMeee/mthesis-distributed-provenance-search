@@ -21,37 +21,44 @@ public class GetPreferredVersionTest {
                         TestDocumentProvider.samplingBundle_V0.getForwardConnectors().getFirst(),
                         TestDocumentProvider.samplingBundle_V0_meta,
                         EVersionPreference.SPECIFIED,
-                        TestDocumentProvider.samplingBundle_V0.getBundleId()},
-                new Object[]{
+                        TestDocumentProvider.samplingBundle_V0.getBundleId()
+                }, new Object[]{
                         TestDocumentProvider.samplingBundle_V0,
                         TestDocumentProvider.samplingBundle_V0.getForwardConnectors().getFirst(),
                         TestDocumentProvider.samplingBundle_V0_meta,
                         EVersionPreference.LATEST,
-                        TestDocumentProvider.samplingBundle_V1.getBundleId()},
-                new Object[]{
+                        TestDocumentProvider.samplingBundle_V1.getBundleId()
+                }, new Object[]{
                         TestDocumentProvider.processingBundle_V0,
                         TestDocumentProvider.processingBundle_V0.getForwardConnectors().getFirst(),
                         TestDocumentProvider.processingBundle_V0_meta,
                         EVersionPreference.SPECIFIED,
-                        TestDocumentProvider.processingBundle_V0.getBundleId()},
-                new Object[]{
+                        TestDocumentProvider.processingBundle_V0.getBundleId()
+                }, new Object[]{
                         TestDocumentProvider.processingBundle_V0,
                         TestDocumentProvider.processingBundle_V0.getForwardConnectors().getFirst(),
                         TestDocumentProvider.processingBundle_V0_meta,
                         EVersionPreference.LATEST,
-                        TestDocumentProvider.processingBundle_V1.getBundleId()}
+                        TestDocumentProvider.processingBundle_V1.getBundleId()
+                }
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetPreferredVersion(CpmDocument document, INode startNode,
-                                        CpmDocument meta, EVersionPreference preference,
-                                        QualifiedName expectedBundleId) throws AccessDeniedException {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
+    public void testGetPreferredVersion(
+            CpmDocument document,
+            INode startNode,
+            CpmDocument meta,
+            EVersionPreference preference,
+            QualifiedName expectedBundleId
+    ) throws AccessDeniedException {
         GetPreferredVersion query = new GetPreferredVersion(preference);
-        QueryContext context =
-                new QueryContext(document.getBundleId(), startNode.getId(), MockedStorage.authTokenFullAccess,
-                        new MockedStorage());
+        QueryContext context = new QueryContext(
+                document.getBundleId(),
+                                                startNode.getId(),
+                                                MockedStorage.authTokenFullAccess,
+                                                new MockedStorage()
+        );
 
 
         QualifiedNameData resultBundleId = query.evaluate(context).result;
@@ -60,15 +67,21 @@ public class GetPreferredVersionTest {
 
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testGetPreferredVersionWithMetaUri(CpmDocument document, INode startNode, CpmDocument meta,
-                                                   EVersionPreference preference, QualifiedName expectedBundleId)
-            throws AccessDeniedException {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
+    public void testGetPreferredVersionWithMetaUri(
+            CpmDocument document,
+            INode startNode,
+            CpmDocument meta,
+            EVersionPreference preference,
+            QualifiedName expectedBundleId
+    ) throws AccessDeniedException {
         GetPreferredVersion query = new GetPreferredVersion(preference, meta.getBundleId().getUri());
-        QueryContext context =
-                new QueryContext(document.getBundleId(), startNode.getId(), MockedStorage.authTokenFullAccess,
-                        new MockedStorage());
+        QueryContext context = new QueryContext(
+                document.getBundleId(),
+                                                startNode.getId(),
+                                                MockedStorage.authTokenFullAccess,
+                                                new MockedStorage()
+        );
 
 
         QualifiedNameData resultBundleId = query.evaluate(context).result;

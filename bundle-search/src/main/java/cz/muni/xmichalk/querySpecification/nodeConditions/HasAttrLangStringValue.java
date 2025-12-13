@@ -19,8 +19,7 @@ public class HasAttrLangStringValue implements ICondition<INode> {
         this.valueRegex = valueRegex;
     }
 
-    @Override
-    public boolean test(INode node) {
+    @Override public boolean test(INode node) {
         if (attributeNameUri == null) {
             throw new IllegalStateException(
                     "Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
@@ -31,12 +30,13 @@ public class HasAttrLangStringValue implements ICondition<INode> {
         }
 
         try {
-            return AttributeUtils.hasAttributeTargetValue(node, attributeNameUri, LangString.class, (langString)
-                    -> {
-                boolean langMatch = langRegex == null || langString.getLang().matches(langRegex);
-                boolean valueMatch = valueRegex == null || langString.getValue().matches(valueRegex);
-                return langMatch && valueMatch;
-            });
+            return AttributeUtils.hasAttributeTargetValue(
+                    node, attributeNameUri, LangString.class, (langString) -> {
+                        boolean langMatch = langRegex == null || langString.getLang().matches(langRegex);
+                        boolean valueMatch = valueRegex == null || langString.getValue().matches(valueRegex);
+                        return langMatch && valueMatch;
+                    }
+            );
         } catch (Exception e) {
             return false;
         }

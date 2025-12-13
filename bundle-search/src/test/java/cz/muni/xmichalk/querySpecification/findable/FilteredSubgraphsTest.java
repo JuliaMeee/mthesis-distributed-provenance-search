@@ -17,12 +17,10 @@ import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 public class FilteredSubgraphsTest {
 
     private boolean isRelation(IEdge edge, StatementOrBundle.Kind kind) {
-        return edge.getRelations().stream()
-                .anyMatch(relation -> relation.getKind().equals(kind));
+        return edge.getRelations().stream().anyMatch(relation -> relation.getKind().equals(kind));
     }
 
-    @Test
-    public void testFind_fromStartNode_derivation() {
+    @Test public void testFind_fromStartNode_derivation() {
         CpmDocument cpmDocument = TestDocumentProvider.speciesIdentificationBundle_V0;
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
         QualifiedName startNodeId =
@@ -44,8 +42,7 @@ public class FilteredSubgraphsTest {
         assert results.getFirst().getEdges().stream().allMatch(edge -> edge != null && edgeCondition.test(edge));
     }
 
-    @Test
-    public void testFind_fromForwardConnectors_ConnectorSpecializations() {
+    @Test public void testFind_fromForwardConnectors_ConnectorSpecializations() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
         QualifiedName startNodeId =

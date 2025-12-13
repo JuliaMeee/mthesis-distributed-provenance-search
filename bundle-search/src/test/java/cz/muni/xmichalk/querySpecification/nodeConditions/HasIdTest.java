@@ -10,12 +10,14 @@ import java.util.stream.Stream;
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
 public class HasIdTest {
-    private static final INode entityNode = new MergedNode(
-            new org.openprovenance.prov.vanilla.Entity(
-                    new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "entity1", "blank"),
-                    new ArrayList<>()
-            )
-    );
+    private static final INode entityNode =
+            new MergedNode(new org.openprovenance.prov.vanilla.Entity(
+                    new org.openprovenance.prov.vanilla.QualifiedName(
+                            BLANK_URI,
+                                                                      "entity1",
+                                                                      "blank"
+                    ), new ArrayList<>()
+            ));
 
     static Stream<Object[]> testParams() {
         return Stream.of(
@@ -26,8 +28,7 @@ public class HasIdTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testHasId(INode node, String idUriRegex, boolean expectedResult) {
         HasId hasIdCondition = new HasId(idUriRegex);
 

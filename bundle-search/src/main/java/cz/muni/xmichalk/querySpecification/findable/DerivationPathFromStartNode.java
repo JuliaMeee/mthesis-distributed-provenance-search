@@ -21,12 +21,8 @@ public class DerivationPathFromStartNode implements IFindableSubgraph {
         this.backward = backward;
     }
 
-    @Override
-    public List<SubgraphWrapper> find(final SubgraphWrapper graph, final INode startNode) {
-        IFindableSubgraph finder = new FilteredSubgraphs(
-                getDerivationPathCondition(backward),
-                new StartNode()
-        );
+    @Override public List<SubgraphWrapper> find(final SubgraphWrapper graph, final INode startNode) {
+        IFindableSubgraph finder = new FilteredSubgraphs(getDerivationPathCondition(backward), new StartNode());
 
         return finder.find(graph, startNode);
     }
@@ -37,12 +33,7 @@ public class DerivationPathFromStartNode implements IFindableSubgraph {
                         new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION),
                         null,
                         backward == null ? null : !backward
-                ),
-                new EdgeToNodeCondition(
-                        new IsRelation(StatementOrBundle.Kind.PROV_SPECIALIZATION),
-                        null,
-                        null
-                )
+                ), new EdgeToNodeCondition(new IsRelation(StatementOrBundle.Kind.PROV_SPECIALIZATION), null, null)
         ));
     }
 }

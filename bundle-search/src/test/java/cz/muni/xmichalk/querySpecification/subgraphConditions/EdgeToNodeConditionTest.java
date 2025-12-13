@@ -14,123 +14,85 @@ import java.util.ArrayList;
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
 public class EdgeToNodeConditionTest {
-    private static final INode genericEntityNode = new MergedNode(
-            new org.openprovenance.prov.vanilla.Entity(
-                    new QualifiedNameData(BLANK_URI, "entity1").toQN(),
-                    new ArrayList<>()
-            )
-    );
+    private static final INode genericEntityNode =
+            new MergedNode(new org.openprovenance.prov.vanilla.Entity(
+                    new QualifiedNameData(
+                            BLANK_URI,
+                                                                                            "entity1"
+            ).toQN(), new ArrayList<>()
+            ));
 
-    private static final INode specificEntityNode = new MergedNode(
-            new org.openprovenance.prov.vanilla.Entity(
-                    new QualifiedNameData(BLANK_URI, "entity2").toQN(),
-                    new ArrayList<>()
-            )
-    );
+    private static final INode specificEntityNode =
+            new MergedNode(new org.openprovenance.prov.vanilla.Entity(
+                    new QualifiedNameData(
+                            BLANK_URI,
+                                                                                            "entity2"
+            ).toQN(), new ArrayList<>()
+            ));
 
     private static final IEdge specializationEdge =
             new MergedEdge(() -> StatementOrBundle.Kind.PROV_SPECIALIZATION, specificEntityNode, genericEntityNode);
 
-    @Test
-    public void testEdgeToNodeCondition_allTrue() {
+    @Test public void testEdgeToNodeCondition_allTrue() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, specificEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> true,
-                node -> true,
-                null
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> true, node -> true, null);
 
         assert condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_edgeFalse() {
+    @Test public void testEdgeToNodeCondition_edgeFalse() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, specificEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> false,
-                node -> true,
-                null
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> false, node -> true, null);
 
         assert !condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_nodeFalse() {
+    @Test public void testEdgeToNodeCondition_nodeFalse() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, specificEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> false,
-                node -> true,
-                null
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> false, node -> true, null);
 
         assert !condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_isEffectTrue() {
+    @Test public void testEdgeToNodeCondition_isEffectTrue() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, specificEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> true,
-                node -> true,
-                true
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> true, node -> true, true);
 
         assert condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_isEffectFalse() {
+    @Test public void testEdgeToNodeCondition_isEffectFalse() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, genericEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> true,
-                node -> true,
-                true
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> true, node -> true, true);
 
         assert !condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_isNotEffectTrue() {
+    @Test public void testEdgeToNodeCondition_isNotEffectTrue() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, genericEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> true,
-                node -> true,
-                false
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> true, node -> true, false);
 
         assert condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_isNotEffectFalse() {
+    @Test public void testEdgeToNodeCondition_isNotEffectFalse() {
         EdgeToNode edgeToNode = new EdgeToNode(specializationEdge, specificEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> true,
-                node -> true,
-                false
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> true, node -> true, false);
 
         assert !condition.test(edgeToNode);
     }
 
-    @Test
-    public void testEdgeToNodeCondition_nullEdgeSkipped() {
+    @Test public void testEdgeToNodeCondition_nullEdgeSkipped() {
         EdgeToNode edgeToNode = new EdgeToNode(null, genericEntityNode);
 
-        EdgeToNodeCondition condition = new EdgeToNodeCondition(
-                edge -> false,
-                node -> true,
-                true
-        );
+        EdgeToNodeCondition condition = new EdgeToNodeCondition(edge -> false, node -> true, true);
 
         assert condition.test(edgeToNode);
     }

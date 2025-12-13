@@ -46,32 +46,35 @@ public class TestDocumentProvider {
             loadCpmDocument(dataFolder + "DnaSequencingBundle_V0_meta.json");
 
     public static CpmDocument getTestDocument1() {
-        QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "entity1", "blank");
+        QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "entity1", "blank");
         Entity entity = cPF.getProvFactory().newEntity(entityId);
 
-        QualifiedName agentId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "agent1", "blank");
+        QualifiedName agentId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "agent1", "blank");
         Agent agent = cPF.getProvFactory().newAgent(agentId);
 
-        QualifiedName activityId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "activity1", "blank");
+        QualifiedName activityId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "activity1", "blank");
         Activity activity = cPF.getProvFactory().newActivity(activityId);
         activity.setStartTime(pF.newISOTime("2025-08-16T10:00:00Z"));
         activity.setEndTime(pF.newISOTime("2025-08-16T11:00:00Z"));
 
-        Relation relation = cPF.getProvFactory().newWasAttributedTo(
-                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "attr", "blank"),
-                entityId,
-                agentId);
-        Relation relation2 = cPF.getProvFactory().newWasAssociatedWith(
-                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "assoc", "blank"),
-                activityId,
-                agentId);
-        Relation relation3 = cPF.getProvFactory().newWasGeneratedBy(
-                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "gen", "blank"),
-                entityId,
-                activityId);
+        Relation relation = cPF.getProvFactory()
+                .newWasAttributedTo(
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "attr", "blank"),
+                        entityId,
+                        agentId
+                );
+        Relation relation2 = cPF.getProvFactory()
+                .newWasAssociatedWith(
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "assoc", "blank"),
+                        activityId,
+                        agentId
+                );
+        Relation relation3 = cPF.getProvFactory()
+                .newWasGeneratedBy(
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "gen", "blank"),
+                        entityId,
+                        activityId
+                );
 
         QualifiedName bundleId = pF.newQualifiedName("www.example.com/", "bundleA", "ex");
 

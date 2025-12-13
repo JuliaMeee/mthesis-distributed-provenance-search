@@ -57,10 +57,7 @@ public class StorageDocumentIntegrityVerifier implements IIntegrityVerifier {
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<List<Token>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Token>>() {
+                url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Token>>() {
                 }
         );
 

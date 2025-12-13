@@ -79,13 +79,21 @@ public class AttributeUtils {
         return null;
     }
 
-    public static <T> boolean hasAttributeTargetValue(INode node, QualifiedName attributeName, Class<T> targetClass,
-                                                      Predicate<T> isTargetValue) {
+    public static <T> boolean hasAttributeTargetValue(
+            INode node,
+            QualifiedName attributeName,
+            Class<T> targetClass,
+            Predicate<T> isTargetValue
+    ) {
         return hasAttributeTargetValue(node, attributeName.getUri(), targetClass, isTargetValue);
     }
 
-    public static <T> boolean hasAttributeTargetValue(INode node, String attributeNameUri, Class<T> targetClass,
-                                                      Predicate<T> isTargetValue) {
+    public static <T> boolean hasAttributeTargetValue(
+            INode node,
+            String attributeNameUri,
+            Class<T> targetClass,
+            Predicate<T> isTargetValue
+    ) {
         Object value = getAttributeValue(node, attributeNameUri);
         return isTargetValue(value, targetClass, isTargetValue);
     }

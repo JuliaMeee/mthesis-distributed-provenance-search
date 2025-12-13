@@ -15,17 +15,13 @@ import java.util.stream.Stream;
 import static cz.muni.xmichalk.util.NameSpaceConstants.SCHEMA_URI;
 
 public class HasAttrLangStringValueTest {
-    private static final INode node = new MergedNode(
-            new Entity(
-                    new QualifiedNameData("example.org/", "entity1").toQN(),
-                    List.of(
-                            new Other(
-                                    new QualifiedName(SCHEMA_URI, "name", "schema"),
-                                    new QualifiedName("http://www.w3.org/2001/XMLSchema#", "string", "xsd"),
-                                    new LangString("Value", "Lang")
-                            )
-                    )
-            ));
+    private static final INode node = new MergedNode(new Entity(
+            new QualifiedNameData("example.org/", "entity1").toQN(), List.of(new Other(
+            new QualifiedName(SCHEMA_URI, "name", "schema"),
+            new QualifiedName("http://www.w3.org/2001/XMLSchema#", "string", "xsd"),
+            new LangString("Value", "Lang")
+    ))
+    ));
 
     private static Stream<Object[]> testParams() {
         return Stream.of(
@@ -39,16 +35,15 @@ public class HasAttrLangStringValueTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
-    public void testHasAttrLangStringValue(String attrName, String valueRegex, String langRegex,
-                                           boolean expectedResult) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
+    public void testHasAttrLangStringValue(
+            String attrName,
+            String valueRegex,
+            String langRegex,
+            boolean expectedResult
+    ) {
 
-        HasAttrLangStringValue hasAttrLangStringValue = new HasAttrLangStringValue(
-                attrName,
-                langRegex,
-                valueRegex
-        );
+        HasAttrLangStringValue hasAttrLangStringValue = new HasAttrLangStringValue(attrName, langRegex, valueRegex);
 
         assert hasAttrLangStringValue.test(node) == expectedResult;
 

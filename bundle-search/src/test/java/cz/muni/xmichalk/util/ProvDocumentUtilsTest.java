@@ -34,8 +34,7 @@ public class ProvDocumentUtilsTest {
         };
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("serializationRoundTripParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("serializationRoundTripParams")
     public void testSerializationRoundTrip(CpmDocument cpmDocument, Formats.ProvFormat format) throws IOException {
         QualifiedName bundleId = cpmDocument.getBundleId();
         String id = bundleId.getLocalPart();

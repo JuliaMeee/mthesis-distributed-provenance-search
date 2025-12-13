@@ -18,8 +18,7 @@ public class LatestVersionPicker implements IVersionPicker {
     public LatestVersionPicker() {
     }
 
-    @Override
-    public QualifiedName apply(QualifiedName bundleId, CpmDocument metaDocument) {
+    @Override public QualifiedName apply(QualifiedName bundleId, CpmDocument metaDocument) {
         if (metaDocument == null) {
             throw new RuntimeException("Meta document is null");
         }
@@ -33,7 +32,8 @@ public class LatestVersionPicker implements IVersionPicker {
 
         Set<INode> versionNodes = GraphTraverser.traverseAndFindNodes(
                 metaDocument.getNodes().getFirst(),
-                (node) -> hasProvTypeBundle(node) && hasVersionAttribute(node)
+                (node) -> hasProvTypeBundle(node) &&
+                        hasVersionAttribute(node)
         );
 
         if (versionNodes == null || versionNodes.isEmpty()) {
@@ -58,10 +58,16 @@ public class LatestVersionPicker implements IVersionPicker {
 
 
     private static boolean hasProvTypeBundle(INode node) {
-        return AttributeUtils.hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class, qn ->
-                qn.getUri().equals(PROV_URI + "bundle")) || AttributeUtils.hasAttributeTargetValue(node,
-                ATTR_PROV_TYPE, LangString.class, langString ->
-                        langString.getValue().equals("prov:bundle")
+        return AttributeUtils.hasAttributeTargetValue(
+                node,
+                ATTR_PROV_TYPE,
+                QualifiedName.class,
+                qn -> qn.getUri().equals(PROV_URI + "bundle")
+        ) || AttributeUtils.hasAttributeTargetValue(
+                node,
+                ATTR_PROV_TYPE,
+                LangString.class,
+                langString -> langString.getValue().equals("prov:bundle")
         );
     }
 

@@ -11,8 +11,7 @@ import java.util.stream.Stream;
 public class SpecifiedVersionPickerTest {
 
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("params")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("params")
     public void testApply(CpmDocument cpmDoc) {
 
         QualifiedName bundleId = new SpecifiedVersionPicker().apply(cpmDoc.getBundleId(), null);

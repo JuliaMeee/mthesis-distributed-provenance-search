@@ -9,11 +9,13 @@ import java.nio.file.AccessDeniedException;
 
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = FindSubgraphsQuery.class, name = "FindSubgraphsQuery"),
-        @JsonSubTypes.Type(value = TestBundleFits.class, name = "TestBundleFits"),
-        @JsonSubTypes.Type(value = GetPreferredVersion.class, name = "GetPreferredVersion"),
-})
+@JsonSubTypes(
+        {
+                @JsonSubTypes.Type(value = FindSubgraphsQuery.class, name = "FindSubgraphsQuery"),
+                @JsonSubTypes.Type(value = TestBundleFits.class, name = "TestBundleFits"),
+                @JsonSubTypes.Type(value = GetPreferredVersion.class, name = "GetPreferredVersion"),
+        }
+)
 public interface IQuery<T> {
     QueryResult<T> evaluate(QueryContext context) throws AccessDeniedException;
 }

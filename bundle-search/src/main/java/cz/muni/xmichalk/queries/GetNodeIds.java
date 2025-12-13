@@ -27,15 +27,13 @@ public class GetNodeIds extends FindSubgraphsQuery<List<QualifiedNameData>> {
             return List.of();
         }
 
-        Set<INode> nodes = subgraphs.stream()
-                .flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
+        Set<INode> nodes =
+                subgraphs.stream().flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
 
         if (nodes.isEmpty()) {
             return List.of();
         }
 
-        return nodes.stream()
-                .map(node -> new QualifiedNameData().from(node.getId()))
-                .toList();
+        return nodes.stream().map(node -> new QualifiedNameData().from(node.getId())).toList();
     }
 }

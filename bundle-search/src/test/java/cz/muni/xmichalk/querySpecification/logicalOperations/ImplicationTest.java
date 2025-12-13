@@ -8,27 +8,19 @@ import java.util.stream.Stream;
 public class ImplicationTest {
     private static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{"X",
-                        (ICondition<String>) x -> x.equals("X"),
-                        (ICondition<String>) x -> x.equals("X"),
-                        true},
-                new Object[]{"X",
-                        (ICondition<String>) x -> x.equals("Y"),
-                        (ICondition<String>) x -> x.equals("Y"),
-                        true},
-                new Object[]{"X",
-                        (ICondition<String>) x -> x.equals("Y"),
-                        (ICondition<String>) x -> x.equals("X"),
-                        true},
-                new Object[]{"X",
-                        (ICondition<String>) x -> x.equals("X"),
-                        (ICondition<String>) x -> x.equals("Y"),
-                        false}
+                new Object[]{
+                        "X", (ICondition<String>) x -> x.equals("X"), (ICondition<String>) x -> x.equals("X"), true
+                }, new Object[]{
+                        "X", (ICondition<String>) x -> x.equals("Y"), (ICondition<String>) x -> x.equals("Y"), true
+                }, new Object[]{
+                        "X", (ICondition<String>) x -> x.equals("Y"), (ICondition<String>) x -> x.equals("X"), true
+                }, new Object[]{
+                        "X", (ICondition<String>) x -> x.equals("X"), (ICondition<String>) x -> x.equals("Y"), false
+                }
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public <T> void test(T target, ICondition<T> first, ICondition<T> second, boolean expectedResult) {
         Implication<T> implication = new Implication<>(first, second);
 

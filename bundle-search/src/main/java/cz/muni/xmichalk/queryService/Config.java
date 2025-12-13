@@ -22,61 +22,43 @@ import java.io.File;
 import java.io.IOException;
 
 @Configuration
-@SecurityScheme(
-        name = "auth",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT"
-)
+@SecurityScheme(name = "auth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 @OpenAPIDefinition(
         info = @Info(
-                title = "Bundle query API",
-                version = "1.0.0",
+                title = "Bundle query API", version = "1.0.0",
                 description = "REST API for answering queries about bundles."
-        ),
-        externalDocs = @ExternalDocumentation(
-                description = "Query structure documentation",
-                url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search#query-structure"
-        )
+        ), externalDocs = @ExternalDocumentation(
+        description = "Query structure documentation",
+        url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search#query-structure"
+)
 )
 public class Config {
 
-    @Bean
-    public ProvFactory provFactory() {
+    @Bean public ProvFactory provFactory() {
         return new ProvFactory();
     }
 
-    @Bean
-    public ICpmFactory cpmFactory() {
+    @Bean public ICpmFactory cpmFactory() {
         return new CpmMergedFactory();
     }
 
-    @Bean
-    public ICpmProvFactory cpmProvFactory(ProvFactory provFactory) {
+    @Bean public ICpmProvFactory cpmProvFactory(ProvFactory provFactory) {
         return new CpmProvFactory(provFactory);
     }
 
     @Bean
-    public IStorage documentLoader(
-            ProvFactory provFactory,
-            ICpmFactory cpmFactory,
-            ICpmProvFactory cpmProvFactory
-    ) throws IOException {
+    public IStorage documentLoader(ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory)
+            throws IOException {
         IStorage storage = new Storage(provFactory, cpmFactory, cpmProvFactory);
 
         ObjectMapper mapper = new ObjectMapper();
-        MockedAuthConfig config = mapper.readValue(
-                new File("src/main/resources/mockedAuthorizationConfig.json"),
-                MockedAuthConfig.class
-        );
+        MockedAuthConfig config =
+                mapper.readValue(new File("src/main/resources/mockedAuthorizationConfig.json"), MockedAuthConfig.class);
 
         return new MockedAuthStorage(storage, config);
     }
 
-    @Bean
-    public BundleQueryService bundleQueryService(
-            IStorage documentLoader
-    ) {
+    @Bean public BundleQueryService bundleQueryService(IStorage documentLoader) {
         return new BundleQueryService(documentLoader);
     }
 }

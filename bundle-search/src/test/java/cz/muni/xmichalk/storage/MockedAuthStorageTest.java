@@ -29,26 +29,35 @@ public class MockedAuthStorageTest {
     );
     private static final MockedAuthConfig config2 = new MockedAuthConfig(
             true,
-            List.of(
-                    new AuthEntry(authHeader1, uri2, false),
-                    new AuthEntry(authHeader2, uri1, false)
-            )
+                                                                         List.of(
+                                                                                 new AuthEntry(
+                                                                                         authHeader1,
+                                                                                         uri2,
+                                                                                         false
+                                                                                 ), new AuthEntry(authHeader2, uri1, false)
+                                                                         )
     );
 
     private static final MockedAuthConfig config3 = new MockedAuthConfig(
             false,
-            List.of(
-                    new AuthEntry(authHeader1, metaUri1, true),
-                    new AuthEntry(authHeader2, metaUri2, true)
-            )
+                                                                         List.of(
+                                                                                 new AuthEntry(
+                                                                                         authHeader1,
+                                                                                         metaUri1,
+                                                                                         true
+                                                                                 ), new AuthEntry(authHeader2, metaUri2, true)
+                                                                         )
     );
 
     private static final MockedAuthConfig config4 = new MockedAuthConfig(
             true,
-            List.of(
-                    new AuthEntry(authHeader1, metaUri2, false),
-                    new AuthEntry(authHeader2, metaUri1, false)
-            )
+                                                                         List.of(
+                                                                                 new AuthEntry(
+                                                                                         authHeader1,
+                                                                                         metaUri2,
+                                                                                         false
+                                                                                 ), new AuthEntry(authHeader2, metaUri1, false)
+                                                                         )
     );
 
     static Stream<Object[]> loadCpmDocumentParams() {
@@ -70,10 +79,14 @@ public class MockedAuthStorageTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("loadCpmDocumentParams")
-    public void testLoadCpmDocument(String uri, EBundlePart part, String authorizationHeader, MockedAuthConfig config
-            , boolean shouldPass) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("loadCpmDocumentParams")
+    public void testLoadCpmDocument(
+            String uri,
+            EBundlePart part,
+            String authorizationHeader,
+            MockedAuthConfig config,
+            boolean shouldPass
+    ) {
         Boolean passed = null;
         StorageCpmDocument document = null;
         MockedAuthStorage storage = new MockedAuthStorage(new MockedStorage(), config);
@@ -107,11 +120,13 @@ public class MockedAuthStorageTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("loadMetaCpmDocumentParams")
-    public void testLoadMetaCpmDocument(String uri, String authorizationHeader,
-                                        MockedAuthConfig config
-            , boolean shouldPass) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("loadMetaCpmDocumentParams")
+    public void testLoadMetaCpmDocument(
+            String uri,
+            String authorizationHeader,
+            MockedAuthConfig config,
+            boolean shouldPass
+    ) {
         Boolean passed = null;
         StorageCpmDocument document = null;
         MockedAuthStorage storage = new MockedAuthStorage(new MockedStorage(), config);

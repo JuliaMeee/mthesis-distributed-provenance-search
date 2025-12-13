@@ -24,8 +24,7 @@ public class HasAttrTimestampValue implements ICondition<INode> {
         this.isAfter = isAfter;
     }
 
-    @Override
-    public boolean test(INode node) {
+    @Override public boolean test(INode node) {
         if (attributeNameUri == null) {
             throw new IllegalStateException(
                     "Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());

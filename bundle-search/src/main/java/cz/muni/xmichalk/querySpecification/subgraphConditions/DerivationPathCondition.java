@@ -24,17 +24,11 @@ public class DerivationPathCondition implements ICondition<EdgeToNode> {
                         new IsRelation(StatementOrBundle.Kind.PROV_DERIVATION),
                         null,
                         backward == null ? null : !backward
-                ),
-                new EdgeToNodeCondition(
-                        new IsRelation(StatementOrBundle.Kind.PROV_SPECIALIZATION),
-                        null,
-                        null
-                )
+                ), new EdgeToNodeCondition(new IsRelation(StatementOrBundle.Kind.PROV_SPECIALIZATION), null, null)
         ));
     }
 
-    @Override
-    public boolean test(final EdgeToNode target) {
+    @Override public boolean test(final EdgeToNode target) {
         return getCondition(backward).test(target);
     }
 }

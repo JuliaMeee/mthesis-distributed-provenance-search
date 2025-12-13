@@ -14,11 +14,15 @@ public class TraversalState {
     public ConcurrentLinkedQueue<ResultFromBundle> results;
     public ConcurrentLinkedQueue<String> errors;
 
-    public TraversalState(Set<Connection> traversedPreferred, Set<Connection> traversedReferenced,
-                          ConcurrentMap<Connection, ItemToTraverse> traversingPreferred,
-                          ConcurrentMap<Connection, ItemToTraverse> traversingReferenced,
-                          PriorityBlockingQueue<ItemToTraverse> toTraverseQueue,
-                          ConcurrentLinkedQueue<ResultFromBundle> results, ConcurrentLinkedQueue<String> errors) {
+    public TraversalState(
+            Set<Connection> traversedPreferred,
+            Set<Connection> traversedReferenced,
+            ConcurrentMap<Connection, ItemToTraverse> traversingPreferred,
+            ConcurrentMap<Connection, ItemToTraverse> traversingReferenced,
+            PriorityBlockingQueue<ItemToTraverse> toTraverseQueue,
+            ConcurrentLinkedQueue<ResultFromBundle> results,
+            ConcurrentLinkedQueue<String> errors
+    ) {
         this.traversedPreferred = traversedPreferred;
         this.traversedReferenced = traversedReferenced;
         this.traversingPreferred = traversingPreferred;

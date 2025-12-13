@@ -28,23 +28,25 @@ public class GetNodesTest {
 
     static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V0,
-                        TestDocumentProvider.samplingBundle_V0.getForwardConnectors().getFirst()},
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
-                        TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst()},
-                new Object[]{TestDocumentProvider.processingBundle_V0,
-                        TestDocumentProvider.processingBundle_V0.getForwardConnectors().getFirst()},
-                new Object[]{TestDocumentProvider.processingBundle_V1,
-                        TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst()}
+                new Object[]{
+                        TestDocumentProvider.samplingBundle_V0,
+                        TestDocumentProvider.samplingBundle_V0.getForwardConnectors().getFirst()
+                }, new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
+                        TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst()
+                }, new Object[]{
+                        TestDocumentProvider.processingBundle_V0,
+                        TestDocumentProvider.processingBundle_V0.getForwardConnectors().getFirst()
+                }, new Object[]{
+                        TestDocumentProvider.processingBundle_V1,
+                        TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst()
+                }
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetNodes_unfiltered(CpmDocument cpmDocument, INode startNode) throws IOException {
-        GetNodes getNodesQuery = new GetNodes(
-                (g, n) -> List.of(g)
-        );
+        GetNodes getNodesQuery = new GetNodes((g, n) -> List.of(g));
         QueryContext context =
                 new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
@@ -54,27 +56,17 @@ public class GetNodesTest {
         Document resultDocument = ProvDocumentUtils.deserialize(result.toString(), Formats.ProvFormat.JSON);
         CpmDocument resultCpmDocument = new CpmDocument(resultDocument, pF, cPF, cF);
         assert resultCpmDocument.getNodes().size() == cpmDocument.getNodes().size();
-        assert cpmDocument.getNodes().stream().allMatch(
-                node -> resultCpmDocument.getNodes().stream().anyMatch(
-                        resultNode -> resultNode.getId().getUri().equals(node.getId().getUri())
-                )
-        );
+        assert cpmDocument.getNodes().stream().allMatch(node -> resultCpmDocument.getNodes().stream()
+                .anyMatch(resultNode -> resultNode.getId().getUri().equals(node.getId().getUri())));
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetNodes_filteredTo1(CpmDocument cpmDocument, INode startNode) throws IOException {
         INode mainActivityNode = cpmDocument.getMainActivity();
 
-        IFindableSubgraph fromSubgraph = (g, n) -> List.of(
-                new SubgraphWrapper(
-                        List.of(mainActivityNode),
-                        List.of()
-                ));
+        IFindableSubgraph fromSubgraph = (g, n) -> List.of(new SubgraphWrapper(List.of(mainActivityNode), List.of()));
 
-        GetNodes getNodesQuery = new GetNodes(
-                fromSubgraph
-        );
+        GetNodes getNodesQuery = new GetNodes(fromSubgraph);
         QueryContext context =
                 new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
@@ -87,12 +79,9 @@ public class GetNodesTest {
         assert resultCpmDocument.getNodes().getFirst().getId().getUri().equals(mainActivityNode.getId().getUri());
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetNodes_filteredToNone(CpmDocument cpmDocument, INode startNode) throws IOException {
-        GetNodes getNodesQuery = new GetNodes(
-                (g, n) -> List.of()
-        );
+        GetNodes getNodesQuery = new GetNodes((g, n) -> List.of());
         QueryContext context =
                 new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 

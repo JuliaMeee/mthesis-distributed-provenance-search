@@ -14,8 +14,11 @@ public class DemoValidityVerifier implements IValidityVerifier {
     private final JsonNode validitySpecification;
     private final String authorizationHeader;
 
-    public DemoValidityVerifier(IProvServiceAPI provServiceAPI, InputStream validitySpecificationJson,
-                                String authorizationHeader) {
+    public DemoValidityVerifier(
+            IProvServiceAPI provServiceAPI,
+            InputStream validitySpecificationJson,
+            String authorizationHeader
+    ) {
         this.provServiceAPI = provServiceAPI;
         this.authorizationHeader = authorizationHeader;
         try {
@@ -28,13 +31,16 @@ public class DemoValidityVerifier implements IValidityVerifier {
     }
 
 
-    @Override
-    public boolean verify(ItemToTraverse itemToTraverse, BundleQueryResultDTO queryResult) {
+    @Override public boolean verify(ItemToTraverse itemToTraverse, BundleQueryResultDTO queryResult) {
         String provServiceUri = itemToTraverse.provServiceUri;
 
         BundleQueryResultDTO result = provServiceAPI.fetchBundleQueryResult(
-                provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, authorizationHeader,
-                validitySpecification);
+                provServiceUri,
+                itemToTraverse.bundleId,
+                itemToTraverse.connectorId,
+                authorizationHeader,
+                validitySpecification
+        );
 
         if (result == null) {
             throw new RuntimeException(

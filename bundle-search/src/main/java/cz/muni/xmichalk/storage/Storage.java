@@ -50,8 +50,7 @@ public class Storage implements IStorage {
         }
     }
 
-    @Override
-    public StorageCpmDocument loadCpmDocument(String uri, EBundlePart part, String authorizationHeader) {
+    @Override public StorageCpmDocument loadCpmDocument(String uri, EBundlePart part, String authorizationHeader) {
         if (part == EBundlePart.DomainSpecific) uri += "/domain-specific";
         else if (part == EBundlePart.TraversalInformation) uri += "/backbone";
         return toCpmDocument(loadDocument(uri, authorizationHeader));
@@ -71,8 +70,7 @@ public class Storage implements IStorage {
         }
     }
 
-    @Override
-    public StorageCpmDocument loadMetaCpmDocument(String uri, String authorizationHeader) {
+    @Override public StorageCpmDocument loadMetaCpmDocument(String uri, String authorizationHeader) {
         return toCpmDocument(loadMetaDocument(uri, authorizationHeader));
 
     }
@@ -86,8 +84,13 @@ public class Storage implements IStorage {
         }
 
         return new StorageCpmDocument(
-                new CpmDocument(storageDocument.document, provFactory, cpmProvFactory, cpmFactory),
-                storageDocument.token
+                new CpmDocument(
+                        storageDocument.document,
+                                                      provFactory,
+                                                      cpmProvFactory,
+                                                      cpmFactory
+        ),
+                                      storageDocument.token
         );
     }
 

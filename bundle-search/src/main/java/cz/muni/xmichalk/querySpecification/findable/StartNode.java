@@ -7,10 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StartNode implements IFindableSubgraph {
-    @Override
-    public List<SubgraphWrapper> find(final SubgraphWrapper graph, final INode startNode) {
-        return List.of(
-                new SubgraphWrapper(List.of(startNode), new ArrayList<>())
-        );
+    @Override public List<SubgraphWrapper> find(final SubgraphWrapper graph, final INode startNode) {
+        return List.of(new SubgraphWrapper(List.of(startNode), new ArrayList<>()));
     }
 }

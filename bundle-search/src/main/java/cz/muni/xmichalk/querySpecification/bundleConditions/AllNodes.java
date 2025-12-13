@@ -15,8 +15,7 @@ public class AllNodes implements ICondition<DocumentStart> {
         this.condition = condition;
     }
 
-    @Override
-    public boolean test(DocumentStart target) {
+    @Override public boolean test(DocumentStart target) {
         if (condition == null) {
             throw new IllegalStateException("Value of condition  " + this.getClass().getSimpleName());
         }

@@ -28,8 +28,7 @@ public class FittingLinearSubgraphs implements IFindableSubgraph {
         this.startsIn = startsIn;
     }
 
-    @Override
-    public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
+    @Override public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
         if (graphParts == null) {
             throw new IllegalStateException("Value of graphParts cannot be null in " + this.getClass().getSimpleName());
         }
@@ -37,16 +36,15 @@ public class FittingLinearSubgraphs implements IFindableSubgraph {
             throw new IllegalStateException("Value of startsIn cannot be null in " + this.getClass().getSimpleName());
         }
 
-        Set<INode> startingNodes = startsIn.find(graph, startNode).stream()
-                .flatMap(subgraph -> subgraph.getNodes().stream())
-                .collect(Collectors.toSet());
+        Set<INode> startingNodes =
+                startsIn.find(graph, startNode).stream().flatMap(subgraph -> subgraph.getNodes().stream())
+                        .collect(Collectors.toSet());
 
 
         List<Predicate<EdgeToNode>> graphSpecification = List.copyOf(graphParts);
 
         return startingNodes.stream()
                 .map(startingNode -> LinearSubgraphFinder.findSubgraphsFrom(startingNode, graphSpecification))
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .flatMap(List::stream).collect(Collectors.toList());
     }
 }

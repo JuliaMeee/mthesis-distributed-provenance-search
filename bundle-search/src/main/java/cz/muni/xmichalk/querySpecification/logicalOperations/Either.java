@@ -14,8 +14,7 @@ public class Either<T> implements ICondition<T> {
         this.second = second;
     }
 
-    @Override
-    public boolean test(T item) {
+    @Override public boolean test(T item) {
 
         if (first == null) {
             throw new IllegalStateException("Value of first cannot be null in " + this.getClass().getSimpleName());

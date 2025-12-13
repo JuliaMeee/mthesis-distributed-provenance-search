@@ -19,33 +19,29 @@ import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
 public class FittingLinearSubgraphsTest {
 
-    @Test
-    public void testFind_fromStartNode_length2() {
+    @Test public void testFind_fromStartNode_length2() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         QualifiedName startNodeId =
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null);
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
         INode startNode = cpmDocument.getNode(startNodeId);
-        List<ICondition<EdgeToNode>> subgraphParts = List.of(
-                _ -> true,
-                _ -> true
-        );
+        List<ICondition<EdgeToNode>> subgraphParts = List.of(_ -> true, _ -> true);
         FittingLinearSubgraphs fittingLinearSubgraphs = new FittingLinearSubgraphs(
                 subgraphParts,
-                (g, n) -> List.of(
-                        new SubgraphWrapper(List.of(n), new ArrayList<>()))
+                                                                                   (g, n) -> List.of(new SubgraphWrapper(
+                                                                                           List.of(n),
+                                                                                           new ArrayList<>()
+                                                                                   ))
         );
 
         List<SubgraphWrapper> results = fittingLinearSubgraphs.find(graph, startNode);
 
         assert results.size() == startNode.getAllEdges().size();
-        assert results.stream().allMatch(
-                subgraph -> subgraph.getNodes().size() == 2 && subgraph.getEdges().size() == 1
-        );
+        assert results.stream()
+                .allMatch(subgraph -> subgraph.getNodes().size() == 2 && subgraph.getEdges().size() == 1);
     }
 
-    @Test
-    public void testFind_anywhere_derivation3() {
+    @Test public void testFind_anywhere_derivation3() {
         CpmDocument cpmDocument = TestDocumentProvider.speciesIdentificationBundle_V0;
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
         INode startNode = cpmDocument.getMainActivity();
@@ -56,18 +52,14 @@ public class FittingLinearSubgraphsTest {
                 edgeToNode -> isDerivation.test(edgeToNode.edge),
                 edgeToNode -> isDerivation.test(edgeToNode.edge)
         );
-        FittingLinearSubgraphs fittingLinearSubgraphs = new FittingLinearSubgraphs(
-                subgraphParts,
-                (g, n) -> List.of(g)
-        );
+        FittingLinearSubgraphs fittingLinearSubgraphs = new FittingLinearSubgraphs(subgraphParts, (g, n) -> List.of(g));
 
         List<SubgraphWrapper> results = fittingLinearSubgraphs.find(graph, startNode);
 
         assert results.size() % 2 == 0; // same subgraph from both directions
         assert !results.isEmpty();
-        assert results.stream().allMatch(subgraph ->
-                subgraph.getNodes().size() == 3 && subgraph.getEdges().size() == 2
-                        && subgraph.getEdges().stream().allMatch(isDerivation)
-        );
+        assert results.stream()
+                .allMatch(subgraph -> subgraph.getNodes().size() == 3 && subgraph.getEdges().size() == 2 &&
+                        subgraph.getEdges().stream().allMatch(isDerivation));
     }
 }

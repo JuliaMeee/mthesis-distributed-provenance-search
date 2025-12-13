@@ -17,8 +17,7 @@ public class HasAttrQualifiedNameValue implements ICondition<INode> {
         this.valueUriRegex = regex;
     }
 
-    @Override
-    public boolean test(INode node) {
+    @Override public boolean test(INode node) {
         if (attributeNameUri == null) {
             throw new IllegalStateException(
                     "Value of attributeNameUri cannot be null in " + this.getClass().getSimpleName());
@@ -28,8 +27,12 @@ public class HasAttrQualifiedNameValue implements ICondition<INode> {
         }
 
         try {
-            return AttributeUtils.hasAttributeTargetValue(node, attributeNameUri, QualifiedName.class, (qn) ->
-                    qn.getUri().matches(valueUriRegex));
+            return AttributeUtils.hasAttributeTargetValue(
+                    node,
+                    attributeNameUri,
+                    QualifiedName.class,
+                    (qn) -> qn.getUri().matches(valueUriRegex)
+            );
         } catch (Exception e) {
             return false;
         }

@@ -17,18 +17,15 @@ import java.util.function.Predicate;
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
 public class LinearSubgraphFinderTest {
-    @Test
-    public void testFindFrom_found2() {
+    @Test public void testFindFrom_found2() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "StoredSampleCon_r1", null);
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null);
         INode startNode = cpmDocument.getNode(startNodeId);
         Predicate<IEdge> isSpecialization = (edge) -> edge.getRelations().stream()
                 .anyMatch(relation -> relation.getKind().equals(StatementOrBundle.Kind.PROV_SPECIALIZATION));
-        List<Predicate<EdgeToNode>> subgraph = List.of(
-                edgeToNode -> true,
-                edgeToNode -> isSpecialization.test(edgeToNode.edge)
-        );
+        List<Predicate<EdgeToNode>> subgraph =
+                List.of(edgeToNode -> true, edgeToNode -> isSpecialization.test(edgeToNode.edge));
 
         List<SubgraphWrapper> foundSubgraphs = LinearSubgraphFinder.findSubgraphsFrom(startNode, subgraph);
 
@@ -43,11 +40,10 @@ public class LinearSubgraphFinderTest {
         }
     }
 
-    @Test
-    public void testFindFrom_findLong() {
+    @Test public void testFindFrom_findLong() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "StoredSampleCon_r1", null);
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null);
         INode startNode = cpmDocument.getNode(startNodeId);
         List<Predicate<EdgeToNode>> subgraph = List.of(
                 edgeToNode -> true,
@@ -68,31 +64,21 @@ public class LinearSubgraphFinderTest {
         }
     }
 
-    @Test
-    public void testFindFrom_found0() {
+    @Test public void testFindFrom_found0() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
-        QualifiedName startNodeId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "StoredSampleCon_r1", null);
+        QualifiedName startNodeId =
+                new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null);
         INode startNode = cpmDocument.getNode(startNodeId);
-        List<Predicate<EdgeToNode>> subgraph = List.of(
-                edgeToNode -> false,
-                edgeToNode -> true,
-                edgeToNode -> true
-        );
+        List<Predicate<EdgeToNode>> subgraph = List.of(edgeToNode -> false, edgeToNode -> true, edgeToNode -> true);
 
         List<SubgraphWrapper> foundSubgraphs = LinearSubgraphFinder.findSubgraphsFrom(startNode, subgraph);
 
         assert foundSubgraphs.isEmpty();
     }
 
-    @Test
-    public void testFindFrom_nullNode() {
+    @Test public void testFindFrom_nullNode() {
         INode startNode = null;
-        List<Predicate<EdgeToNode>> subgraph = List.of(
-                edgeToNode -> true,
-                edgeToNode -> true,
-                edgeToNode -> true
-        );
+        List<Predicate<EdgeToNode>> subgraph = List.of(edgeToNode -> true, edgeToNode -> true, edgeToNode -> true);
 
         List<SubgraphWrapper> foundSubgraphs = LinearSubgraphFinder.findSubgraphsFrom(startNode, subgraph);
 

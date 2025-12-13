@@ -6,14 +6,26 @@ import org.openprovenance.prov.model.QualifiedName;
 
 public interface IProvServiceAPI {
     BundleQueryResultDTO fetchBundleQueryResult(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
-            JsonNode querySpecification);
+            String serviceUri,
+            QualifiedName bundleId,
+            QualifiedName connectorId,
+            String authorizationHeader,
+            JsonNode querySpecification
+    );
 
     QualifiedName fetchPreferredBundleVersion(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
-            String versionPreference);
+            String serviceUri,
+            QualifiedName bundleId,
+            QualifiedName connectorId,
+            String authorizationHeader,
+            String versionPreference
+    );
 
     BundleQueryResultDTO fetchBundleConnectors(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
-            boolean backward);
+            String serviceUri,
+            QualifiedName bundleId,
+            QualifiedName connectorId,
+            String authorizationHeader,
+            boolean backward
+    );
 }

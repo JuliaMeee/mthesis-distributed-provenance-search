@@ -20,57 +20,71 @@ public class IntegrityThenOrderedValidityTest {
     static Stream<Object[]> testParams() {
         return Stream.of(
                 new Object[]{
-                        "01",
-                        new ItemToTraverse(
-                                bundleA, connA, null, "http://prov-service.com/", true, List.of(
-                                Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true)
-                        )),
-                        new ItemToTraverse(
-                                bundleB, connB, null, "http://prov-service.com/", false, List.of(
-                                Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true)
-                        )),
-                        -1},
-                new Object[]{
-                        "02",
-                        new ItemToTraverse(
-                                bundleB, connB, null, "http://prov-service.com/", true, List.of(
-                                Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, false)
-                        )),
-                        new ItemToTraverse(
-                                bundleA, connA, null, "http://prov-service.com/", false, List.of(
-                                Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true)
-                        )),
-                        -1},
-                new Object[]{
-                        "03",
-                        new ItemToTraverse(
-                                bundleA, connA, null, "http://prov-service.com/", true, List.of(
-                                Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true)
-                        )),
-                        new ItemToTraverse(
-                                bundleB, connB, null, "http://prov-service.com/", false, List.of(
-                                Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, false)
-                        )),
-                        -1},
-                new Object[]{
-                        "04",
-                        new ItemToTraverse(
-                                bundleB, connB, null, "http://prov-service.com/", true, List.of(
-                                Map.entry(EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, true),
-                                Map.entry(EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, false)
-                        )),
-                        new ItemToTraverse(
-                                bundleA, connA, null, "http://prov-service.com/", true, List.of(
-                                Map.entry(EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, false),
-                                Map.entry(EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, true)
-                        )),
-                        -1}
+                        "01", new ItemToTraverse(
+                        bundleA,
+                        connA,
+                        null,
+                        "http://prov-service.com/",
+                        true,
+                        List.of(Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true))
+                ), new ItemToTraverse(
+                        bundleB,
+                        connB,
+                        null,
+                        "http://prov-service.com/",
+                        false,
+                        List.of(Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true))
+                ), -1
+                }, new Object[]{
+                        "02", new ItemToTraverse(
+                        bundleB,
+                        connB,
+                        null,
+                        "http://prov-service.com/",
+                        true,
+                        List.of(Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, false))
+                ), new ItemToTraverse(
+                        bundleA,
+                        connA,
+                        null,
+                        "http://prov-service.com/",
+                        false,
+                        List.of(Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true))
+                ), -1
+                }, new Object[]{
+                        "03", new ItemToTraverse(
+                        bundleA,
+                        connA,
+                        null,
+                        "http://prov-service.com/",
+                        true,
+                        List.of(Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, true))
+                ), new ItemToTraverse(
+                        bundleB,
+                        connB,
+                        null,
+                        "http://prov-service.com/",
+                        false,
+                        List.of(Map.entry(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, false))
+                ), -1
+                }, new Object[]{
+                        "04", new ItemToTraverse(
+                        bundleB, connB, null, "http://prov-service.com/", true, List.of(
+                        Map.entry(EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, true),
+                        Map.entry(EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, false)
+                )
+                ), new ItemToTraverse(
+                        bundleA, connA, null, "http://prov-service.com/", true, List.of(
+                        Map.entry(EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, false),
+                        Map.entry(EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, true)
+                )
+                ), -1
+                }
 
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("testParams")
+    @ParameterizedTest @MethodSource("testParams")
     public void testEnumValue(String id, ItemToTraverse a, ItemToTraverse b, int expectedResult) {
         Comparator<ItemToTraverse> comparator = new IntegrityThenOrderedValidity();
 

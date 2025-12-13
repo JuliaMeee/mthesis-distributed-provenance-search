@@ -31,8 +31,7 @@ public class MockedStorage implements IStorage {
         return new StorageCpmDocument(new CpmDocument(document, pF, cPF, cF), null);
     }
 
-    @Override
-    public StorageCpmDocument loadMetaCpmDocument(final String uri, String authorizationHeader) {
+    @Override public StorageCpmDocument loadMetaCpmDocument(final String uri, String authorizationHeader) {
         Document document = getFromFile(uri);
         return new StorageCpmDocument(new CpmDocument(document, pF, cPF, cF), null);
     }

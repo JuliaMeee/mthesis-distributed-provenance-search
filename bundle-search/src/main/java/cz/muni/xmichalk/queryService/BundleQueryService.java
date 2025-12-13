@@ -15,14 +15,13 @@ public class BundleQueryService {
         this.documentLoader = documentLoader;
     }
 
-    public <T> QueryResult<T> evaluateBundleQuery(QualifiedName bundleId, QualifiedName startNodeId, IQuery<T> query,
-                                                  String authorizationHeader) throws AccessDeniedException {
-        QueryContext context = new QueryContext(
-                bundleId,
-                startNodeId,
-                authorizationHeader,
-                this.documentLoader
-        );
+    public <T> QueryResult<T> evaluateBundleQuery(
+            QualifiedName bundleId,
+            QualifiedName startNodeId,
+            IQuery<T> query,
+            String authorizationHeader
+    ) throws AccessDeniedException {
+        QueryContext context = new QueryContext(bundleId, startNodeId, authorizationHeader, this.documentLoader);
         return query.evaluate(context);
     }
 }

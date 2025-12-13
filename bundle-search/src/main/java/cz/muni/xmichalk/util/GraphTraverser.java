@@ -14,22 +14,31 @@ public class GraphTraverser {
     public static Set<INode> traverseAndFindNodes(INode startNode, Predicate<INode> nodePredicate) {
         Set<INode> results = new HashSet<>();
 
-        traverseFrom(startNode, (edgeToNode -> {
-            if (nodePredicate.test(edgeToNode.node)) {
-                results.add(edgeToNode.node);
-            }
-        }), null);
+        traverseFrom(
+                startNode, (edgeToNode -> {
+                    if (nodePredicate.test(edgeToNode.node)) {
+                        results.add(edgeToNode.node);
+                    }
+                }), null
+        );
 
         return results;
     }
 
-    public static void traverseFrom(INode startNode, Consumer<EdgeToNode> traversedConsumer,
-                                    Predicate<EdgeToNode> pathFilter) {
+    public static void traverseFrom(
+            INode startNode,
+            Consumer<EdgeToNode> traversedConsumer,
+            Predicate<EdgeToNode> pathFilter
+    ) {
         traverseRecursive(new EdgeToNode(null, startNode), pathFilter, new HashSet<>(), traversedConsumer);
     }
 
-    private static void traverseRecursive(EdgeToNode current, Predicate<EdgeToNode> pathFilter, Set<INode> visited,
-                                          Consumer<EdgeToNode> traversedConsumer) {
+    private static void traverseRecursive(
+            EdgeToNode current,
+            Predicate<EdgeToNode> pathFilter,
+            Set<INode> visited,
+            Consumer<EdgeToNode> traversedConsumer
+    ) {
         if (current == null) return;
 
         IEdge edge = current.edge;
@@ -47,18 +56,10 @@ public class GraphTraverser {
         visited.add(node);
 
         for (IEdge e : node.getCauseEdges()) {
-            traverseRecursive(
-                    new EdgeToNode(e, e.getEffect()),
-                    pathFilter,
-                    visited,
-                    traversedConsumer);
+            traverseRecursive(new EdgeToNode(e, e.getEffect()), pathFilter, visited, traversedConsumer);
         }
         for (IEdge e : node.getEffectEdges()) {
-            traverseRecursive(
-                    new EdgeToNode(e, e.getCause()),
-                    pathFilter,
-                    visited,
-                    traversedConsumer);
+            traverseRecursive(new EdgeToNode(e, e.getCause()), pathFilter, visited, traversedConsumer);
         }
     }
 }

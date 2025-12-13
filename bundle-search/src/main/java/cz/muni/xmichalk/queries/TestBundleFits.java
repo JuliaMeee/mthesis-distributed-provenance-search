@@ -21,16 +21,17 @@ public class TestBundleFits implements IQuery<Boolean> {
         this.condition = condition;
     }
 
-    @Override
-    public QueryResult<Boolean> evaluate(QueryContext context) throws AccessDeniedException {
+    @Override public QueryResult<Boolean> evaluate(QueryContext context) throws AccessDeniedException {
 
         if (condition == null) {
             throw new IllegalStateException("Value of condition cannot be null in " + this.getClass().getName());
         }
 
-        StorageCpmDocument retrievedDocument =
-                context.documentLoader.loadCpmDocument(context.documentId.getUri(), EBundlePart.Whole,
-                        context.authorizationHeader);
+        StorageCpmDocument retrievedDocument = context.documentLoader.loadCpmDocument(
+                context.documentId.getUri(),
+                EBundlePart.Whole,
+                context.authorizationHeader
+        );
         CpmDocument document = retrievedDocument.document;
         INode startNode = document.getNode(context.startNodeId);
 

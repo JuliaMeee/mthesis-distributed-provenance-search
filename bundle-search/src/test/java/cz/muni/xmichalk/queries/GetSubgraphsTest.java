@@ -27,19 +27,19 @@ public class GetSubgraphsTest {
 
     static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
-                        TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst()},
-                new Object[]{TestDocumentProvider.processingBundle_V1,
-                        TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst()}
+                new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
+                        TestDocumentProvider.samplingBundle_V1.getForwardConnectors().getFirst()
+                }, new Object[]{
+                        TestDocumentProvider.processingBundle_V1,
+                        TestDocumentProvider.processingBundle_V1.getForwardConnectors().getFirst()
+                }
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testSubgraphs_wholeGraph(CpmDocument cpmDocument, INode startNode) throws IOException {
-        GetSubgraphs getSubgraphsQuery = new GetSubgraphs(
-                (g, n) -> List.of(g)
-        );
+        GetSubgraphs getSubgraphsQuery = new GetSubgraphs((g, n) -> List.of(g));
         QueryContext context =
                 new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
@@ -52,29 +52,17 @@ public class GetSubgraphsTest {
         CpmDocument resultCpmDocument = new CpmDocument(resultDocument, pF, cPF, cF);
         assert resultCpmDocument.getNodes().size() == cpmDocument.getNodes().size();
         assert resultCpmDocument.getEdges().size() == cpmDocument.getEdges().size();
-        assert cpmDocument.getNodes().stream().allMatch(
-                node -> resultCpmDocument.getNodes().stream().anyMatch(
-                        resultNode -> resultNode.getId().getUri().equals(node.getId().getUri())
-                )
-        );
+        assert cpmDocument.getNodes().stream().allMatch(node -> resultCpmDocument.getNodes().stream()
+                .anyMatch(resultNode -> resultNode.getId().getUri().equals(node.getId().getUri())));
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetSubgraphs_multiple(CpmDocument cpmDocument, INode startNode) throws IOException {
         INode mainActivityNode = cpmDocument.getMainActivity();
-        GetSubgraphs getSubgraphsQuery = new GetSubgraphs(
-                (g, n) -> List.of(
-                        new SubgraphWrapper(
-                                List.of(mainActivityNode),
-                                List.of()
-                        ),
-                        new SubgraphWrapper(
-                                cpmDocument.getNodes(),
-                                cpmDocument.getEdges()
-                        )
-                )
-        );
+        GetSubgraphs getSubgraphsQuery = new GetSubgraphs((g, n) -> List.of(
+                new SubgraphWrapper(List.of(mainActivityNode), List.of()),
+                new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges())
+        ));
         QueryContext context =
                 new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
@@ -83,12 +71,9 @@ public class GetSubgraphsTest {
         assert result.size() == 2;
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetSubgraphs_none(CpmDocument cpmDocument, INode startNode) throws IOException {
-        GetSubgraphs getSubgraphsQuery = new GetSubgraphs(
-                (g, n) -> List.of()
-        );
+        GetSubgraphs getSubgraphsQuery = new GetSubgraphs((g, n) -> List.of());
         QueryContext context =
                 new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 

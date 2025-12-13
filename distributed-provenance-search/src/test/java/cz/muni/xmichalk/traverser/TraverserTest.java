@@ -49,111 +49,69 @@ public class TraverserTest {
     private static final QualifiedName connD = getExampleQN("connD");
 
     private static final Map<String, TestBundleData> testDataSet1 = Map.of( // Diamond branching, 2 versions of bundle A
-            bundleA.getUri(), new TestBundleData(
+                                                                            bundleA.getUri(), new TestBundleData(
                     bundleA,
                     bundleA_new,
                     objectMapper.valueToTree("bundleA_result"),
                     List.of(),
-                    List.of(
-                            getConnectorData(connA, connA, null)
-                    )
-            ),
-            bundleA_new.getUri(), new TestBundleData(
-                    bundleA_new,
-                    bundleA_new,
-                    objectMapper.valueToTree("bundleA_new_result"),
-                    List.of(),
-                    List.of(
-                            getConnectorData(connA, connA, null),
-                            getConnectorData(connA1, connA, bundleB),
-                            getConnectorData(connA2, connA, bundleC)
-                    )
-            ),
-            bundleB.getUri(), new TestBundleData(
+                    List.of(getConnectorData(connA, connA, null))
+            ), bundleA_new.getUri(), new TestBundleData(
+                    bundleA_new, bundleA_new, objectMapper.valueToTree("bundleA_new_result"), List.of(), List.of(
+                    getConnectorData(connA, connA, null),
+                    getConnectorData(connA1, connA, bundleB),
+                    getConnectorData(connA2, connA, bundleC)
+            )
+            ), bundleB.getUri(), new TestBundleData(
                     bundleB,
                     bundleB,
                     objectMapper.valueToTree("bundleB_result"),
-                    List.of(
-                            getConnectorData(connA, connA, bundleA)
-                    ),
-                    List.of(
-                            getConnectorData(connB, connB, null),
-                            getConnectorData(connB1, connB, bundleD)
-                    )
-            ),
-            bundleC.getUri(), new TestBundleData(
+                    List.of(getConnectorData(connA, connA, bundleA)),
+                    List.of(getConnectorData(connB, connB, null), getConnectorData(connB1, connB, bundleD))
+            ), bundleC.getUri(), new TestBundleData(
                     bundleC,
                     bundleC,
                     objectMapper.valueToTree("bundleC_result"),
-                    List.of(
-                            getConnectorData(connA, connA, bundleA)
-                    ),
-                    List.of(
-                            getConnectorData(connC, connC, null),
-                            getConnectorData(connC1, connC, bundleD)
-                    )
-            ),
-            bundleD.getUri(), new TestBundleData(
+                    List.of(getConnectorData(connA, connA, bundleA)),
+                    List.of(getConnectorData(connC, connC, null), getConnectorData(connC1, connC, bundleD))
+            ), bundleD.getUri(), new TestBundleData(
                     bundleD,
                     bundleD,
                     objectMapper.valueToTree("bundleD_result"),
-                    List.of(
-                            getConnectorData(connB, connB, bundleB),
-                            getConnectorData(connC, connC, bundleC)
-                    ),
-                    List.of(
-                            getConnectorData(connD, connD, null)
-                    )
+                    List.of(getConnectorData(connB, connB, bundleB), getConnectorData(connC, connC, bundleC)),
+                    List.of(getConnectorData(connD, connD, null))
             )
     );
 
     private static final Map<String, TestBundleData> testDataSet2 = Map.of( // linear with jump connector from B to D
-            bundleA.getUri(), new TestBundleData(
+                                                                            bundleA.getUri(), new TestBundleData(
                     bundleA,
                     bundleA,
                     objectMapper.valueToTree("bundleA_result"),
                     List.of(),
-                    List.of(
-                            getConnectorData(connA, connA, null),
-                            getConnectorData(connA1, connA, bundleB)
-                    )
-            ),
-            bundleB.getUri(), new TestBundleData(
+                    List.of(getConnectorData(connA, connA, null), getConnectorData(connA1, connA, bundleB))
+            ), bundleB.getUri(), new TestBundleData(
                     bundleB,
                     bundleB,
                     objectMapper.valueToTree("bundleB_result"),
-                    List.of(
-                            getConnectorData(connA, connA, bundleA)
-                    ),
+                    List.of(getConnectorData(connA, connA, bundleA)),
                     List.of(
                             getConnectorData(connB, connB, null),
                             getConnectorData(connB1, connB, bundleC),
                             getConnectorData(connC, connC, null),
                             getConnectorData(connC1, connC, bundleD)
                     )
-            ),
-            bundleC.getUri(), new TestBundleData(
+            ), bundleC.getUri(), new TestBundleData(
                     bundleC,
                     bundleC,
                     objectMapper.valueToTree("bundleC_result"),
-                    List.of(
-                            getConnectorData(connB, connB, bundleB)
-                    ),
-                    List.of(
-                            getConnectorData(connC, connC, null),
-                            getConnectorData(connC1, connC, bundleD)
-                    )
-            ),
-            bundleD.getUri(), new TestBundleData(
+                    List.of(getConnectorData(connB, connB, bundleB)),
+                    List.of(getConnectorData(connC, connC, null), getConnectorData(connC1, connC, bundleD))
+            ), bundleD.getUri(), new TestBundleData(
                     bundleD,
                     bundleD,
                     objectMapper.valueToTree("bundleD_result"),
-                    List.of(
-                            getConnectorData(connC, connC, bundleC)
-                    ),
-                    List.of(
-                            getConnectorData(connD, connD, null)
-                    )
+                    List.of(getConnectorData(connC, connC, bundleC)),
+                    List.of(getConnectorData(connD, connD, null))
             )
     );
 
@@ -161,13 +119,17 @@ public class TraverserTest {
         return new org.openprovenance.prov.vanilla.QualifiedName(EXAMPLE_NAMESPACE_URI, localName, EXAMPLE_PREFIX);
     }
 
-    private static ConnectorDTO getConnectorData(QualifiedName connId, QualifiedName referencedConnId,
-                                                 QualifiedName referencedBundleId) {
+    private static ConnectorDTO getConnectorData(
+            QualifiedName connId,
+            QualifiedName referencedConnId,
+            QualifiedName referencedBundleId
+    ) {
         return new ConnectorDTO(
                 new QualifiedNameDTO().from(connId),
                 new QualifiedNameDTO().from(referencedConnId),
                 new QualifiedNameDTO().from(referencedBundleId),
-                referencedBundleId == null ? null :
+                referencedBundleId == null ?
+                        null :
                         new QualifiedNameDTO().from(getExampleQN("meta_" + referencedBundleId.getLocalPart())),
                 "hashA",
                 "SHA-256",
@@ -181,31 +143,39 @@ public class TraverserTest {
 
     private static IProvServiceAPI getMockedProvServiceAPI(Map<String, TestBundleData> testData) {
         return new IProvServiceAPI() {
-            @Override
-            public BundleQueryResultDTO fetchBundleQueryResult(final String serviceUri, final QualifiedName bundleId,
-                                                               final QualifiedName connectorId,
-                                                               String authorizationHeader,
-                                                               final JsonNode querySpecification) {
+            @Override public BundleQueryResultDTO fetchBundleQueryResult(
+                    final String serviceUri,
+                    final QualifiedName bundleId,
+                    final QualifiedName connectorId,
+                    String authorizationHeader,
+                    final JsonNode querySpecification
+            ) {
                 return new BundleQueryResultDTO(new Token(null, "x"), testData.get(bundleId.getUri()).queryResult);
             }
 
-            @Override
-            public QualifiedName fetchPreferredBundleVersion(final String serviceUri, final QualifiedName bundleId,
-                                                             final QualifiedName connectorId,
-                                                             String authorizationHeader,
-                                                             final String versionPreference) {
+            @Override public QualifiedName fetchPreferredBundleVersion(
+                    final String serviceUri,
+                    final QualifiedName bundleId,
+                    final QualifiedName connectorId,
+                    String authorizationHeader,
+                    final String versionPreference
+            ) {
                 if (versionPreference.equals("LATEST")) {
                     return testData.get(bundleId.getUri()).latestVersionId;
                 }
                 return bundleId;
             }
 
-            @Override
-            public BundleQueryResultDTO fetchBundleConnectors(final String serviceUri, final QualifiedName bundleId,
-                                                              final QualifiedName connectorId,
-                                                              String authorizationHeader, final boolean backward) {
-                List<ConnectorDTO> connectors = backward ? testData.get(
-                        bundleId.getUri()).backwardConnectors : testData.get(bundleId.getUri()).forwardConnectors;
+            @Override public BundleQueryResultDTO fetchBundleConnectors(
+                    final String serviceUri,
+                    final QualifiedName bundleId,
+                    final QualifiedName connectorId,
+                    String authorizationHeader,
+                    final boolean backward
+            ) {
+                List<ConnectorDTO> connectors = backward ?
+                        testData.get(bundleId.getUri()).backwardConnectors :
+                        testData.get(bundleId.getUri()).forwardConnectors;
 
                 return new BundleQueryResultDTO(new Token(null, "x"), objectMapper.valueToTree(connectors));
             }
@@ -216,36 +186,30 @@ public class TraverserTest {
         return (bundleId, _) -> failForBundles.stream().noneMatch(b -> b.getUri().equals(bundleId.getUri()));
     }
 
-    private static Map<EValidityCheck, IValidityVerifier> getMockedValidityVerifiers(
-            Map<QualifiedName, EValidityCheck> failForBundles) {
+    private static Map<EValidityCheck, IValidityVerifier> getMockedValidityVerifiers(Map<QualifiedName, EValidityCheck> failForBundles) {
         BiPredicate<QualifiedName, EValidityCheck> validate =
-                (QualifiedName bundleId, EValidityCheck validityCheck) -> failForBundles.entrySet()
-                        .stream().noneMatch(
-                                e -> e.getKey().getUri().equals(bundleId.getUri()) &&
-                                        e.getValue() == validityCheck
-                        );
+                (QualifiedName bundleId, EValidityCheck validityCheck) -> failForBundles.entrySet().stream()
+                        .noneMatch(e -> e.getKey().getUri().equals(bundleId.getUri()) && e.getValue() == validityCheck);
 
         return Map.of(
-                EValidityCheck.DEMO_SIMPLE_CONSTRAINTS, (itemToTraverse, _) ->
-                        validate.test(itemToTraverse.bundleId, EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),
-                EValidityCheck.DEMO_IS_SAMPLING_BUNDLE, (itemToTraverse, _) ->
-                        validate.test(itemToTraverse.bundleId, EValidityCheck.DEMO_IS_SAMPLING_BUNDLE),
-                EValidityCheck.DEMO_IS_PROCESSING_BUNDLE, (itemToTraverse, _) ->
-                        validate.test(itemToTraverse.bundleId, EValidityCheck.DEMO_IS_PROCESSING_BUNDLE)
+                EValidityCheck.DEMO_SIMPLE_CONSTRAINTS,
+                (itemToTraverse, _) -> validate.test(itemToTraverse.bundleId, EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),
+                EValidityCheck.DEMO_IS_SAMPLING_BUNDLE,
+                (itemToTraverse, _) -> validate.test(itemToTraverse.bundleId, EValidityCheck.DEMO_IS_SAMPLING_BUNDLE),
+                EValidityCheck.DEMO_IS_PROCESSING_BUNDLE,
+                (itemToTraverse, _) -> validate.test(itemToTraverse.bundleId, EValidityCheck.DEMO_IS_PROCESSING_BUNDLE)
         );
     }
 
     private static Map<ETraversalPriority, Comparator<ItemToTraverse>> getMockedPriorityComparators() {
-        return Map.of(
-                ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
-                new IntegrityThenOrderedValidity()
-        );
+        return Map.of(ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS, new IntegrityThenOrderedValidity());
     }
 
     static Stream<Object[]> bothDirectionsPrams() {
         return Stream.of(
                 new Object[]{true, bundleD, connD, "LATEST", 4},
-                new Object[]{false, bundleA, connA1, "LATEST", 5}, // D is searched from 2 different connectors
+                new Object[]{false, bundleA, connA1, "LATEST", 5},
+                // D is searched from 2 different connectors
 
                 new Object[]{true, bundleD, connD, "SPECIFIED", 4},
                 new Object[]{false, bundleA, connA1, "SPECIFIED", 1},
@@ -255,10 +219,14 @@ public class TraverserTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("bothDirectionsPrams")
-    public void test_traverseCount(boolean backward, QualifiedName startBundle, QualifiedName startConnector,
-                                   String versionPreference, int expectedCount) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("bothDirectionsPrams")
+    public void test_traverseCount(
+            boolean backward,
+            QualifiedName startBundle,
+            QualifiedName startConnector,
+            String versionPreference,
+            int expectedCount
+    ) {
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
                 getMockedProvServiceAPI(testDataSet1),
@@ -271,9 +239,7 @@ public class TraverserTest {
         );
 
         TraversalResults results = traverser.traverseChain(
-                startBundle,
-                startConnector,
-                new TraversalParams(
+                startBundle, startConnector, new TraversalParams(
                         backward,
                         null,
                         versionPreference,
@@ -291,8 +257,7 @@ public class TraverserTest {
         assert results.errors.isEmpty();
     }
 
-    @Test
-    public void test_failedIntegrity() {
+    @Test public void test_failedIntegrity() {
 
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
@@ -306,9 +271,7 @@ public class TraverserTest {
         );
 
         TraversalResults results = traverser.traverseChain(
-                bundleA,
-                connA1,
-                new TraversalParams(
+                bundleA, connA1, new TraversalParams(
                         false,
                         null,
                         "LATEST",
@@ -326,8 +289,7 @@ public class TraverserTest {
         assert results.errors.isEmpty();
     }
 
-    @Test
-    public void test_failedPathIntegrity() {
+    @Test public void test_failedPathIntegrity() {
 
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
@@ -341,9 +303,7 @@ public class TraverserTest {
         );
 
         TraversalResults results = traverser.traverseChain(
-                bundleA,
-                connA1,
-                new TraversalParams(
+                bundleA, connA1, new TraversalParams(
                         false,
                         null,
                         "LATEST",
@@ -361,8 +321,7 @@ public class TraverserTest {
         assert results.errors.isEmpty();
     }
 
-    @Test
-    public void test_failedValidity() {
+    @Test public void test_failedValidity() {
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
                 getMockedProvServiceAPI(testDataSet1),
@@ -370,16 +329,12 @@ public class TraverserTest {
                 10,
                 true,
                 true,
-                getMockedValidityVerifiers(Map.of(
-                        bundleB, EValidityCheck.DEMO_SIMPLE_CONSTRAINTS
-                )),
+                getMockedValidityVerifiers(Map.of(bundleB, EValidityCheck.DEMO_SIMPLE_CONSTRAINTS)),
                 getMockedPriorityComparators()
         );
 
         TraversalResults results = traverser.traverseChain(
-                bundleD,
-                connD,
-                new TraversalParams(
+                bundleD, connD, new TraversalParams(
                         true,
                         null,
                         "LATEST",
@@ -391,15 +346,14 @@ public class TraverserTest {
 
         assert results.results.size() == 4;
         assert results.results.stream().allMatch(r -> r.integrity);
-        assert results.results.stream().filter(r -> r.validityChecks.stream().allMatch(Map.Entry::getValue))
-                .count() == 3;
+        assert results.results.stream().filter(r -> r.validityChecks.stream().allMatch(Map.Entry::getValue)).count() ==
+                3;
         assert results.results.stream().allMatch(r -> r.pathIntegrity);
         assert results.results.stream().allMatch(r -> r.pathValidityChecks.stream().allMatch(Map.Entry::getValue));
         assert results.errors.isEmpty();
     }
 
-    @Test
-    public void test_failedPathValidity() {
+    @Test public void test_failedPathValidity() {
         Traverser traverser = new Traverser(
                 getMockedProvServiceTable(),
                 getMockedProvServiceAPI(testDataSet1),
@@ -408,16 +362,16 @@ public class TraverserTest {
                 true,
                 true,
                 getMockedValidityVerifiers(Map.of(
-                        bundleB, EValidityCheck.DEMO_SIMPLE_CONSTRAINTS,
-                        bundleC, EValidityCheck.DEMO_SIMPLE_CONSTRAINTS
+                        bundleB,
+                        EValidityCheck.DEMO_SIMPLE_CONSTRAINTS,
+                        bundleC,
+                        EValidityCheck.DEMO_SIMPLE_CONSTRAINTS
                 )),
                 getMockedPriorityComparators()
         );
 
         TraversalResults results = traverser.traverseChain(
-                bundleD,
-                connD,
-                new TraversalParams(
+                bundleD, connD, new TraversalParams(
                         true,
                         null,
                         "LATEST",
@@ -429,8 +383,8 @@ public class TraverserTest {
 
         assert results.results.size() == 4;
         assert results.results.stream().allMatch(r -> r.integrity);
-        assert results.results.stream().filter(r -> r.validityChecks.stream().allMatch(Map.Entry::getValue))
-                .count() == 2;
+        assert results.results.stream().filter(r -> r.validityChecks.stream().allMatch(Map.Entry::getValue)).count() ==
+                2;
         assert results.results.stream().allMatch(r -> r.pathIntegrity);
         assert results.results.stream().filter(r -> r.pathValidityChecks.stream().allMatch(Map.Entry::getValue))
                 .count() == 3;

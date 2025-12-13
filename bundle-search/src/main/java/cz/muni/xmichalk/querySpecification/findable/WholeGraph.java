@@ -7,8 +7,7 @@ import java.util.List;
 
 public class WholeGraph implements IFindableSubgraph {
 
-    @Override
-    public List<SubgraphWrapper> find(final SubgraphWrapper graph, final INode startNode) {
+    @Override public List<SubgraphWrapper> find(final SubgraphWrapper graph, final INode startNode) {
         return List.of(graph);
     }
 }

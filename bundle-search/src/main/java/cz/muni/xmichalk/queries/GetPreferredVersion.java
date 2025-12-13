@@ -32,8 +32,7 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData> {
     }
 
 
-    @Override
-    public QueryResult<QualifiedNameData> evaluate(QueryContext context) throws AccessDeniedException {
+    @Override public QueryResult<QualifiedNameData> evaluate(QueryContext context) throws AccessDeniedException {
         if (versionPreference == null) {
             throw new IllegalStateException(
                     "Value of versionPreference cannot be null in " + this.getClass().getName());
@@ -70,9 +69,11 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData> {
     }
 
     private QualifiedName getMetaBundleId(QueryContext context) throws AccessDeniedException {
-        StorageCpmDocument retrievedDocument =
-                context.documentLoader.loadCpmDocument(context.documentId.getUri(), EBundlePart.TraversalInformation,
-                        context.authorizationHeader);
+        StorageCpmDocument retrievedDocument = context.documentLoader.loadCpmDocument(
+                context.documentId.getUri(),
+                EBundlePart.TraversalInformation,
+                context.authorizationHeader
+        );
         CpmDocument document = retrievedDocument.document;
         return CpmUtils.getMetaBundleId(document);
     }

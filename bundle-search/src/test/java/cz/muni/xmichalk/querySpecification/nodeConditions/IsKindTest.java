@@ -11,10 +11,10 @@ import java.util.stream.Stream;
 
 public class IsKindTest {
     private static final Activity activity = new org.openprovenance.prov.vanilla.Activity(
-            new QualifiedNameData("http://example.org/", "activity1").toQN(),
-            null,
-            null,
-            new ArrayList<>()
+            new QualifiedNameData(
+                    "http://example.org/",
+                                  "activity1"
+            ).toQN(), null, null, new ArrayList<>()
     );
 
     private static final Entity entity = new org.openprovenance.prov.vanilla.Entity(
@@ -39,8 +39,7 @@ public class IsKindTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testIsKind(Element element, StatementOrBundle.Kind kind, boolean expectedResult) {
         INode node = new MergedNode(element);
 

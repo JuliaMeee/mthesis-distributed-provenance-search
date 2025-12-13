@@ -10,8 +10,7 @@ public class IntegrityThenOrderedValidity implements Comparator<ItemToTraverse> 
     public IntegrityThenOrderedValidity() {
     }
 
-    @Override
-    public int compare(ItemToTraverse first, ItemToTraverse second) {
+    @Override public int compare(ItemToTraverse first, ItemToTraverse second) {
         if (first == null && second != null) return 1;
         if (second == null && first != null) return -1;
         if (first == null) return 0;

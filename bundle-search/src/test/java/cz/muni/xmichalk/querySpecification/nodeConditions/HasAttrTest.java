@@ -23,19 +23,15 @@ public class HasAttrTest {
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
 
-    @Test
-    public void testHasAttr_true() {
+    @Test public void testHasAttr_true() {
         QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "entity1", "blank");
         Entity entity = new org.openprovenance.prov.vanilla.Entity(
-                entityId,
-                List.of(
-                        new Other(
-                                new QualifiedNameData("attr/", "Name").toQN(),
-                                new QualifiedNameData(PROV_URI, "QUALIFIED_NAME").toQN(),
-                                new QualifiedNameData("attr/", "Value").toQN()
+                entityId, List.of(new Other(
+                new QualifiedNameData("attr/", "Name").toQN(),
+                new QualifiedNameData(PROV_URI, "QUALIFIED_NAME").toQN(),
+                new QualifiedNameData("attr/", "Value").toQN()
 
-                        )
-                )
+        ))
         );
         INode node = new MergedNode(entity);
 
@@ -44,19 +40,15 @@ public class HasAttrTest {
         assert hasAttrCondition.test(node);
     }
 
-    @Test
-    public void testHasAttr_false() {
+    @Test public void testHasAttr_false() {
         QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "entity1", "blank");
         Entity entity = new org.openprovenance.prov.vanilla.Entity(
-                entityId,
-                List.of(
-                        new Other(
-                                new QualifiedNameData("attr/", "Name").toQN(),
-                                new QualifiedNameData(PROV_URI, "QUALIFIED_NAME").toQN(),
-                                new QualifiedNameData("attr/", "Value").toQN()
+                entityId, List.of(new Other(
+                new QualifiedNameData("attr/", "Name").toQN(),
+                new QualifiedNameData(PROV_URI, "QUALIFIED_NAME").toQN(),
+                new QualifiedNameData("attr/", "Value").toQN()
 
-                        )
-                )
+        ))
         );
         INode node = new MergedNode(entity);
 

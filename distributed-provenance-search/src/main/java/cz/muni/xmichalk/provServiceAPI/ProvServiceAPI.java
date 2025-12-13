@@ -19,8 +19,12 @@ public class ProvServiceAPI implements IProvServiceAPI {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public BundleQueryResultDTO fetchBundleQueryResult(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
-            JsonNode querySpecification) {
+            String serviceUri,
+            QualifiedName bundleId,
+            QualifiedName connectorId,
+            String authorizationHeader,
+            JsonNode querySpecification
+    ) {
         BundleQueryDTO queryParams = new BundleQueryDTO(bundleId, connectorId, querySpecification);
 
         if (serviceUri == null) {
@@ -36,8 +40,8 @@ public class ProvServiceAPI implements IProvServiceAPI {
 
         HttpEntity<BundleQueryDTO> request = new HttpEntity<>(queryParams, headers);
 
-        ResponseEntity<BundleQueryResultDTO> response = restTemplate.postForEntity(
-                url, request, BundleQueryResultDTO.class);
+        ResponseEntity<BundleQueryResultDTO> response =
+                restTemplate.postForEntity(url, request, BundleQueryResultDTO.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Bundle query API call failed with status: " + response.getStatusCode());
@@ -47,54 +51,61 @@ public class ProvServiceAPI implements IProvServiceAPI {
     }
 
     public QualifiedName fetchPreferredBundleVersion(
-            String serviceUri, QualifiedName bundleId, QualifiedName metaId, String authorizationHeader,
-            String versionPreference) {
+            String serviceUri,
+            QualifiedName bundleId,
+            QualifiedName metaId,
+            String authorizationHeader,
+            String versionPreference
+    ) {
         String metaUri = (metaId != null) ? "\"" + metaId.getUri() + "\"" : null;
         JsonNode query = null;
         try {
             query = objectMapper.readTree("""
-                        {
-                          "type": "GetPreferredVersion",
-                          "versionPreference": "%s",
-                          "metaUri": %s
-                        }
-                    """.formatted(versionPreference, metaUri)
-            );
+                                                      {
+                                                        "type": "GetPreferredVersion",
+                                                        "versionPreference": "%s",
+                                                        "metaUri": %s
+                                                      }
+                                                  """.formatted(versionPreference, metaUri));
         } catch (IOException e) {
             throw new RuntimeException("Failed to create GetPreferredVersion query JSON.", e);
         }
 
 
-        BundleQueryResultDTO queryResult = fetchBundleQueryResult(
-                serviceUri, bundleId, null, authorizationHeader, query
-        );
+        BundleQueryResultDTO queryResult =
+                fetchBundleQueryResult(serviceUri, bundleId, null, authorizationHeader, query);
 
         if (queryResult == null || queryResult.result == null) {
             return null;
         }
 
-        QualifiedNameDTO pickedBundleIdDto =
-                objectMapper.convertValue(queryResult.result, new TypeReference<QualifiedNameDTO>() {
-                });
+        QualifiedNameDTO pickedBundleIdDto = objectMapper.convertValue(
+                queryResult.result, new TypeReference<QualifiedNameDTO>() {
+                }
+        );
 
         return pickedBundleIdDto == null ? null : pickedBundleIdDto.toQN();
     }
 
     public BundleQueryResultDTO fetchBundleConnectors(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
-            boolean backward) {
+            String serviceUri,
+            QualifiedName bundleId,
+            QualifiedName connectorId,
+            String authorizationHeader,
+            boolean backward
+    ) {
         JsonNode query = null;
         try {
             query = objectMapper.readTree("""
-                        {
-                          "type": "GetConnectors",
-                          "backward": %s,
-                          "fromSubgraphs" : {
-                            "type" : "DerivationPathFromStartNode",
-                            "backward" : %s
-                          }
-                        }
-                    """.formatted(backward, backward));
+                                                      {
+                                                        "type": "GetConnectors",
+                                                        "backward": %s,
+                                                        "fromSubgraphs" : {
+                                                          "type" : "DerivationPathFromStartNode",
+                                                          "backward" : %s
+                                                        }
+                                                      }
+                                                  """.formatted(backward, backward));
         } catch (IOException e) {
             throw new RuntimeException("Failed to create GetConnectors query JSON.", e);
         }

@@ -28,22 +28,15 @@ import java.util.Comparator;
 import java.util.Map;
 
 @Configuration
-@SecurityScheme(
-        name = "auth",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT"
-)
+@SecurityScheme(name = "auth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 @OpenAPIDefinition(
         info = @Info(
-                title = "Provenance traversal API",
-                version = "1.0.0",
+                title = "Provenance traversal API", version = "1.0.0",
                 description = "REST API for traversing through the provenance chain."
-        ),
-        externalDocs = @ExternalDocumentation(
-                description = "Query structure documentation",
-                url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search#query-structure"
-        )
+        ), externalDocs = @ExternalDocumentation(
+        description = "Query structure documentation",
+        url = "https://github.com/JuliaMeee/mthesis-distributed-provenance-search#query-structure"
+)
 )
 public class TraverserConfig {
     @Value("${traverser.concurrencyDegree:10}")
@@ -58,8 +51,7 @@ public class TraverserConfig {
     @Value("${demoValidityVerifier.authHeader}")
     private String authHeader;
 
-    @Bean
-    public IProvServiceTable provServiceTable() {
+    @Bean public IProvServiceTable provServiceTable() {
         ProvServiceTable table = new ProvServiceTable();
         try {
             ClassPathResource resource = new ClassPathResource("provServiceTable.json");
@@ -70,18 +62,16 @@ public class TraverserConfig {
         return table;
     }
 
-    @Bean
-    public IProvServiceAPI provServiceAPI() {
+    @Bean public IProvServiceAPI provServiceAPI() {
         return new ProvServiceAPI();
     }
 
-    @Bean
-    public IIntegrityVerifier integrityVerifier() {
+    @Bean public IIntegrityVerifier integrityVerifier() {
         return new StorageDocumentIntegrityVerifier();
     }
 
-    @Bean
-    public Map<EValidityCheck, IValidityVerifier> validityVerifiers(IProvServiceAPI provServiceAPI) throws IOException {
+    @Bean public Map<EValidityCheck, IValidityVerifier> validityVerifiers(IProvServiceAPI provServiceAPI)
+            throws IOException {
         ClassPathResource simpleSemanticResource =
                 new ClassPathResource("validitySpecifications" + File.separator + "simpleSemanticConstraints.json");
         ClassPathResource isSamplingBundleResource =
@@ -99,20 +89,17 @@ public class TraverserConfig {
         );
     }
 
-    @Bean
-    public Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators() {
-        return Map.of(
-                ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS, new IntegrityThenOrderedValidity()
-        );
+    @Bean public Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators() {
+        return Map.of(ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS, new IntegrityThenOrderedValidity());
     }
 
-    @Bean
-    public Traverser traverser(
+    @Bean public Traverser traverser(
             IProvServiceTable provServiceTable,
             IProvServiceAPI provServiceAPI,
             IIntegrityVerifier integrityVerifier,
             Map<EValidityCheck, IValidityVerifier> validityVerifiers,
-            Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators) {
+            Map<ETraversalPriority, Comparator<ItemToTraverse>> traversalPriorityComparators
+    ) {
         return new Traverser(
                 provServiceTable,
                 provServiceAPI,
@@ -121,6 +108,7 @@ public class TraverserConfig {
                 preferProvServiceFromConnectors,
                 omitEmptyResults,
                 validityVerifiers,
-                traversalPriorityComparators);
+                traversalPriorityComparators
+        );
     }
 }

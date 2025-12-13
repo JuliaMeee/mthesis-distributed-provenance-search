@@ -16,23 +16,23 @@ import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
 public class GraphTraverserTest {
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
-    void testTraverseFrom_unfiltered(CpmDocument document, QualifiedName startNodeId) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams") void testTraverseFrom_unfiltered(CpmDocument document,
+                                                                                                                      QualifiedName startNodeId
+    ) {
         INode startNode = document.getNode(startNodeId);
         Predicate<EdgeToNode> filter = null;
         Set<INode> traversed = new HashSet<>();
-        int countOfNodesWithEdges = (int) document.getNodes().stream()
-                .filter(node -> !node.getAllEdges().isEmpty()).count();
+        int countOfNodesWithEdges =
+                (int) document.getNodes().stream().filter(node -> !node.getAllEdges().isEmpty()).count();
 
         GraphTraverser.traverseFrom(startNode, edgeToNode -> traversed.add(edgeToNode.node), filter);
 
         assert (traversed.size() == countOfNodesWithEdges);
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
-    void testTraverseFrom_filtered(CpmDocument document, QualifiedName startNodeId) {
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams") void testTraverseFrom_filtered(CpmDocument document,
+                                                                                                                    QualifiedName startNodeId
+    ) {
         INode startNode = document.getNode(startNodeId);
         Predicate<INode> nodeCondition = node -> node == startNode;
         Predicate<EdgeToNode> filter = (edgeToNode) -> nodeCondition.test(edgeToNode.node);
@@ -44,8 +44,7 @@ public class GraphTraverserTest {
         assert traversed.stream().findFirst().get() == startNode;
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     void testTraverseFrom_filteredToNothing(CpmDocument document, QualifiedName startNodeId) {
         INode startNode = document.getNode(startNodeId);
         Predicate<EdgeToNode> filter = (_) -> false;
@@ -56,20 +55,18 @@ public class GraphTraverserTest {
         assert (traversed.isEmpty());
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     void testTraverseAndFindNodes_unfiltered(CpmDocument document, QualifiedName startNodeId) {
         INode startNode = document.getNode(startNodeId);
-        int countOfNodesWithEdges = (int) document.getNodes().stream()
-                .filter(node -> !node.getAllEdges().isEmpty()).count();
+        int countOfNodesWithEdges =
+                (int) document.getNodes().stream().filter(node -> !node.getAllEdges().isEmpty()).count();
 
         Set<INode> filteredNodes = GraphTraverser.traverseAndFindNodes(startNode, (_) -> true);
 
         assert (filteredNodes.size() == countOfNodesWithEdges);
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     void testTraverseAndFindNodes_filtered(CpmDocument document, QualifiedName startNodeId) {
         INode startNode = document.getNode(startNodeId);
         Predicate<INode> nodeCondition = node -> node == startNode;
@@ -80,8 +77,7 @@ public class GraphTraverserTest {
         assert filteredNodes.stream().findFirst().get() == startNode;
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     void testTraverseAndFindNodes_filteredToNothing(CpmDocument document, QualifiedName startNodeId) {
         INode startNode = document.getNode(startNodeId);
         Predicate<INode> filter = (_) -> false;
@@ -94,15 +90,23 @@ public class GraphTraverserTest {
 
     static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
-                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null)},
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
-                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r2_3um_Spec",
-                                null)},
-                new Object[]{TestDocumentProvider.processingBundle_V1,
-                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", null)},
-                new Object[]{TestDocumentProvider.processingBundle_V1,
-                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null)}
+                new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null)
+                }, new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(
+                                BLANK_URI,
+                                "StoredSampleCon_r2_3um_Spec",
+                                null
+                        )
+                }, new Object[]{
+                        TestDocumentProvider.processingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", null)
+                }, new Object[]{
+                        TestDocumentProvider.processingBundle_V1,
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1", null)
+                }
         );
     }
 }

@@ -27,8 +27,7 @@ public class FilteredSubgraphs implements IFindableSubgraph {
         this.startsIn = startsIn;
     }
 
-    @Override
-    public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
+    @Override public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
         if (filter == null) {
             throw new IllegalStateException("Value of filter cannot be null in " + this.getClass().getSimpleName());
         }
@@ -36,27 +35,25 @@ public class FilteredSubgraphs implements IFindableSubgraph {
             throw new IllegalStateException("Value of startsIn cannot be null in " + this.getClass().getSimpleName());
         }
 
-        Set<INode> startingNodes = startsIn.find(graph, startNode).stream()
-                .flatMap(subgraph -> subgraph.getNodes().stream())
-                .collect(Collectors.toSet());
+        Set<INode> startingNodes =
+                startsIn.find(graph, startNode).stream().flatMap(subgraph -> subgraph.getNodes().stream())
+                        .collect(Collectors.toSet());
 
-        return startingNodes.stream()
-                .map(startingNode -> {
-                    SubgraphWrapper foundSubgraph = new SubgraphWrapper();
+        return startingNodes.stream().map(startingNode -> {
+            SubgraphWrapper foundSubgraph = new SubgraphWrapper();
 
-                    GraphTraverser.traverseFrom(
-                            startingNode,
-                            edgeToNode -> {
-                                if (edgeToNode.node != null && !foundSubgraph.getNodes().contains(edgeToNode.node)) {
-                                    foundSubgraph.getNodes().add(edgeToNode.node);
-                                }
-                                if (edgeToNode.edge != null && !foundSubgraph.getEdges().contains(edgeToNode.edge)) {
-                                    foundSubgraph.getEdges().add(edgeToNode.edge);
-                                }
-                            },
-                            filter);
+            GraphTraverser.traverseFrom(
+                    startingNode, edgeToNode -> {
+                        if (edgeToNode.node != null && !foundSubgraph.getNodes().contains(edgeToNode.node)) {
+                            foundSubgraph.getNodes().add(edgeToNode.node);
+                        }
+                        if (edgeToNode.edge != null && !foundSubgraph.getEdges().contains(edgeToNode.edge)) {
+                            foundSubgraph.getEdges().add(edgeToNode.edge);
+                        }
+                    }, filter
+            );
 
-                    return foundSubgraph;
-                }).toList();
+            return foundSubgraph;
+        }).toList();
     }
 }

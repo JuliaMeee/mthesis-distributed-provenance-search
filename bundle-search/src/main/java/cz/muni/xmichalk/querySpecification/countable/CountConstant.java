@@ -10,8 +10,7 @@ public class CountConstant<T> implements ICountable<T> {
         this.count = count;
     }
 
-    @Override
-    public int count(T source) {
+    @Override public int count(T source) {
         if (count == null) {
             throw new IllegalStateException("Value of count cannot be null in " + this.getClass().getSimpleName());
         }

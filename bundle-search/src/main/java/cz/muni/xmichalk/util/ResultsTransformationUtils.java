@@ -75,9 +75,7 @@ public class ResultsTransformationUtils {
     }
 
     public static void registerAllPrefixes(Namespace namespace, Object provObject) {
-        doForEachQualifiedName(
-                provObject,
-                qn -> namespace.register(qn.getPrefix(), qn.getNamespaceURI()));
+        doForEachQualifiedName(provObject, qn -> namespace.register(qn.getPrefix(), qn.getNamespaceURI()));
     }
 
     public static void doForEachQualifiedName(Object provObject, Consumer<QualifiedName> action) {

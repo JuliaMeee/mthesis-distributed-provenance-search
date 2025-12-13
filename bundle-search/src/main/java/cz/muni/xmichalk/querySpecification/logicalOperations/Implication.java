@@ -14,8 +14,7 @@ public class Implication<T> implements ICondition<T> {
         this.consequence = consequence;
     }
 
-    @Override
-    public boolean test(T target) {
+    @Override public boolean test(T target) {
         if (premise == null) {
             throw new IllegalStateException("Value of premise cannot be null in " + this.getClass().getSimpleName());
         }

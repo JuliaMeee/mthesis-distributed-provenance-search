@@ -15,8 +15,7 @@ public class NegationTest {
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public <T> void testNegation(T target, ICondition<T> condition, boolean expectedResult) {
 
         Negation<T> negation = new Negation<T>(condition);

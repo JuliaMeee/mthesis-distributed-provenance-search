@@ -16,27 +16,25 @@ import java.util.stream.Stream;
 import static cz.muni.xmichalk.util.NameSpaceConstants.BLANK_URI;
 
 public class DerivationPathConditionTest {
-    private static final INode node1 = new MergedNode(
-            new org.openprovenance.prov.vanilla.Entity(
-                    new QualifiedNameData(BLANK_URI, "entity1").toQN(),
-                    new ArrayList<>()
-            )
-    );
+    private static final INode node1 = new MergedNode(new org.openprovenance.prov.vanilla.Entity(
+            new QualifiedNameData(
+                    BLANK_URI,
+                                  "entity1"
+            ).toQN(), new ArrayList<>()
+    ));
 
-    private static final INode node2 = new MergedNode(
-            new org.openprovenance.prov.vanilla.Entity(
-                    new QualifiedNameData(BLANK_URI, "entity2").toQN(),
-                    new ArrayList<>()
-            )
-    );
+    private static final INode node2 = new MergedNode(new org.openprovenance.prov.vanilla.Entity(
+            new QualifiedNameData(
+                    BLANK_URI,
+                                  "entity2"
+            ).toQN(), new ArrayList<>()
+    ));
 
     static Stream<Object[]> testParams() {
-        return Arrays.stream(StatementOrBundle.Kind.values())
-                .map(value -> new Object[]{value});
+        return Arrays.stream(StatementOrBundle.Kind.values()).map(value -> new Object[]{value});
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testDerivationPathCondition_pathKind(StatementOrBundle.Kind edgeKind) {
         EdgeToNode edgeToNode = new EdgeToNode(new MergedEdge(() -> edgeKind, node1, node2), node2);
 
@@ -48,8 +46,7 @@ public class DerivationPathConditionTest {
                 edgeKind == StatementOrBundle.Kind.PROV_DERIVATION);
     }
 
-    @Test
-    public void testDerivationPathCondition_skipNullEdge() {
+    @Test public void testDerivationPathCondition_skipNullEdge() {
         EdgeToNode edgeToNode = new EdgeToNode(null, null);
 
         DerivationPathCondition derivationPathCondition = new DerivationPathCondition(null);
@@ -57,8 +54,7 @@ public class DerivationPathConditionTest {
         assert derivationPathCondition.test(edgeToNode);
     }
 
-    @Test
-    public void testDerivationPathCondition_isEffectTrue() {
+    @Test public void testDerivationPathCondition_isEffectTrue() {
         EdgeToNode edgeToNode =
                 new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node2);
 
@@ -67,8 +63,7 @@ public class DerivationPathConditionTest {
         assert derivationPathCondition.test(edgeToNode);
     }
 
-    @Test
-    public void testDerivationPathCondition_isEffectFalse() {
+    @Test public void testDerivationPathCondition_isEffectFalse() {
         EdgeToNode edgeToNode =
                 new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node1);
 
@@ -77,8 +72,7 @@ public class DerivationPathConditionTest {
         assert !derivationPathCondition.test(edgeToNode);
     }
 
-    @Test
-    public void testDerivationPathCondition_isNotEffectTrue() {
+    @Test public void testDerivationPathCondition_isNotEffectTrue() {
         EdgeToNode edgeToNode =
                 new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node1);
 
@@ -87,8 +81,7 @@ public class DerivationPathConditionTest {
         assert derivationPathCondition.test(edgeToNode);
     }
 
-    @Test
-    public void testDerivationPathCondition_isNotEffectFalse() {
+    @Test public void testDerivationPathCondition_isNotEffectFalse() {
         EdgeToNode edgeToNode =
                 new EdgeToNode(new MergedEdge(() -> StatementOrBundle.Kind.PROV_DERIVATION, node2, node1), node2);
 

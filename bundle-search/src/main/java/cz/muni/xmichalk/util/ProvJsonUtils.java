@@ -106,9 +106,9 @@ public class ProvJsonUtils {
                 String bundleId = it.next();
                 ObjectNode bundleObj = (ObjectNode) bundleNode.path(bundleId);
 
-                ObjectNode bundlePrefix = bundleObj.has("prefix") && bundleObj.get("prefix").isObject()
-                        ? (ObjectNode) bundleObj.get("prefix")
-                        : mapper.createObjectNode();
+                ObjectNode bundlePrefix = bundleObj.has("prefix") && bundleObj.get("prefix").isObject() ?
+                        (ObjectNode) bundleObj.get("prefix") :
+                        mapper.createObjectNode();
 
                 outerPrefix.fields().forEachRemaining(entry -> {
                     bundlePrefix.set(entry.getKey(), entry.getValue());
@@ -137,9 +137,7 @@ public class ProvJsonUtils {
 
             // Otherwise recurse through fields
             ObjectNode newObj = mapper.createObjectNode();
-            obj.fields().forEachRemaining(e ->
-                    newObj.set(e.getKey(), putTypedObjectsInArrays(e.getValue(), mapper))
-            );
+            obj.fields().forEachRemaining(e -> newObj.set(e.getKey(), putTypedObjectsInArrays(e.getValue(), mapper)));
             return newObj;
         }
 

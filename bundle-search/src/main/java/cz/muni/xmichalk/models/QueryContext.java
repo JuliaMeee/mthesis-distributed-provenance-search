@@ -9,8 +9,12 @@ public class QueryContext {
     public final String authorizationHeader;
     public final IStorage documentLoader;
 
-    public QueryContext(QualifiedName documentId, QualifiedName startNodeId,
-                        String authorizationHeader, IStorage documentLoader) {
+    public QueryContext(
+            QualifiedName documentId,
+            QualifiedName startNodeId,
+            String authorizationHeader,
+            IStorage documentLoader
+    ) {
         this.documentId = documentId;
         this.startNodeId = startNodeId;
         this.authorizationHeader = authorizationHeader;

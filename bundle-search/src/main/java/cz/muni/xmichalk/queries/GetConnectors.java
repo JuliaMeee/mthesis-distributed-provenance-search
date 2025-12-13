@@ -34,24 +34,18 @@ public class GetConnectors extends FindSubgraphsQuery<List<ConnectorData>> {
         this.fromSubgraphs = fromSubgraphs;
     }
 
-    @Override
-    public QueryResult<List<ConnectorData>> evaluate(QueryContext context) throws AccessDeniedException {
-        String typeValueRegex = backward == null ? CPM_URI + "(backward|forward)Connector"
-                : CPM_URI + (backward ? "backwardConnector" : "forwardConnector");
+    @Override public QueryResult<List<ConnectorData>> evaluate(QueryContext context) throws AccessDeniedException {
+        String typeValueRegex = backward == null ?
+                CPM_URI + "(backward|forward)Connector" :
+                CPM_URI + (backward ? "backwardConnector" : "forwardConnector");
 
-        IFindableSubgraph finder = new FittingNodes(
-                new HasAttrQualifiedNameValue(
-                        ATTR_PROV_TYPE.getUri(),
-                        typeValueRegex
-                ),
-                fromSubgraphs
-        );
+        IFindableSubgraph finder =
+                new FittingNodes(new HasAttrQualifiedNameValue(ATTR_PROV_TYPE.getUri(), typeValueRegex), fromSubgraphs);
 
         return super.evaluate(context, finder);
     }
 
-    @Override
-    public EBundlePart decideRequiredBundlePart() {
+    @Override public EBundlePart decideRequiredBundlePart() {
         return EBundlePart.TraversalInformation;
     }
 
@@ -60,15 +54,13 @@ public class GetConnectors extends FindSubgraphsQuery<List<ConnectorData>> {
             return List.of();
         }
 
-        Set<INode> connectors = subgraphs.stream()
-                .flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
+        Set<INode> connectors =
+                subgraphs.stream().flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
 
         if (connectors.isEmpty()) {
             return List.of();
         }
-        return connectors.stream()
-                .map(this::transformToConnectorData)
-                .toList();
+        return connectors.stream().map(this::transformToConnectorData).toList();
     }
 
     private ConnectorData transformToConnectorData(INode node) {
@@ -83,11 +75,13 @@ public class GetConnectors extends FindSubgraphsQuery<List<ConnectorData>> {
         connectorData.referencedConnectorId = new QualifiedNameData().from(referencedConnectorIdValue);
 
         Object referencedBundleIdValue = AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_BUNDLE_ID);
-        connectorData.referencedBundleId = referencedBundleIdValue == null ? null :
+        connectorData.referencedBundleId = referencedBundleIdValue == null ?
+                null :
                 new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedBundleIdValue);
 
         Object referencedMetaBundleIdValue = AttributeUtils.getAttributeValue(node, ATTR_REFERENCED_META_BUNDLE_ID);
-        connectorData.referencedMetaBundleId = referencedMetaBundleIdValue == null ? null :
+        connectorData.referencedMetaBundleId = referencedMetaBundleIdValue == null ?
+                null :
                 new QualifiedNameData().from((org.openprovenance.prov.model.QualifiedName) referencedMetaBundleIdValue);
 
         Object provServiceUriValue = AttributeUtils.getAttributeValue(node, ATTR_PROVENANCE_SERVICE_URI);

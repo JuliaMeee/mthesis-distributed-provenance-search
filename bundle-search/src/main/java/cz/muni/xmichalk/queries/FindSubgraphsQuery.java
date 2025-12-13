@@ -16,12 +16,14 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = GetConnectors.class, name = "GetConnectors"),
-        @JsonSubTypes.Type(value = GetNodeIds.class, name = "GetNodeIds"),
-        @JsonSubTypes.Type(value = GetNodes.class, name = "GetNodes"),
-        @JsonSubTypes.Type(value = GetSubgraphs.class, name = "GetSubgraphs"),
-})
+@JsonSubTypes(
+        {
+                @JsonSubTypes.Type(value = GetConnectors.class, name = "GetConnectors"),
+                @JsonSubTypes.Type(value = GetNodeIds.class, name = "GetNodeIds"),
+                @JsonSubTypes.Type(value = GetNodes.class, name = "GetNodes"),
+                @JsonSubTypes.Type(value = GetSubgraphs.class, name = "GetSubgraphs"),
+        }
+)
 public abstract class FindSubgraphsQuery<T> implements IQuery<T> {
     public IFindableSubgraph fromSubgraphs = new WholeGraph();
 
@@ -31,9 +33,11 @@ public abstract class FindSubgraphsQuery<T> implements IQuery<T> {
         }
 
         EBundlePart requiredBundlePart = decideRequiredBundlePart();
-        StorageCpmDocument retrievedDocument =
-                context.documentLoader.loadCpmDocument(context.documentId.getUri(), requiredBundlePart,
-                        context.authorizationHeader);
+        StorageCpmDocument retrievedDocument = context.documentLoader.loadCpmDocument(
+                context.documentId.getUri(),
+                requiredBundlePart,
+                context.authorizationHeader
+        );
         CpmDocument document = retrievedDocument.document;
         INode startNode = document.getNode(context.startNodeId);
 
@@ -42,8 +46,7 @@ public abstract class FindSubgraphsQuery<T> implements IQuery<T> {
         return new QueryResult<T>(transformResult(subgraphs), retrievedDocument.token);
     }
 
-    @Override
-    public QueryResult<T> evaluate(QueryContext context) throws AccessDeniedException {
+    @Override public QueryResult<T> evaluate(QueryContext context) throws AccessDeniedException {
         return evaluate(context, fromSubgraphs);
     }
 

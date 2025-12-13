@@ -25,8 +25,7 @@ public class FittingNodes implements IFindableSubgraph {
         this.startsIn = startsIn;
     }
 
-    @Override
-    public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
+    @Override public List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode) {
         if (nodeCondition == null) {
             throw new IllegalStateException(
                     "Value of nodeCondition cannot be null in " + this.getClass().getSimpleName());
@@ -35,16 +34,11 @@ public class FittingNodes implements IFindableSubgraph {
             throw new IllegalStateException("Value of startsIn cannot be null in " + this.getClass().getSimpleName());
         }
 
-        Set<INode> startingNodes = startsIn.find(graph, startNode).stream()
-                .flatMap(subgraph -> subgraph.getNodes().stream())
-                .collect(Collectors.toSet());
+        Set<INode> startingNodes =
+                startsIn.find(graph, startNode).stream().flatMap(subgraph -> subgraph.getNodes().stream())
+                        .collect(Collectors.toSet());
 
-        return startingNodes.stream()
-                .filter(node -> nodeCondition.test(node))
-                .map(node -> new SubgraphWrapper(
-                        List.of(node),
-                        new ArrayList<>()
-                ))
-                .toList();
+        return startingNodes.stream().filter(node -> nodeCondition.test(node))
+                .map(node -> new SubgraphWrapper(List.of(node), new ArrayList<>())).toList();
     }
 }

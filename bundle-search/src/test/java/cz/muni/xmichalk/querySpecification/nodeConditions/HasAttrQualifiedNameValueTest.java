@@ -13,19 +13,14 @@ import java.util.stream.Stream;
 import static cz.muni.xmichalk.util.NameSpaceConstants.PROV_URI;
 
 public class HasAttrQualifiedNameValueTest {
-    private static final INode node = new MergedNode(
-            new org.openprovenance.prov.vanilla.Entity(
-                    new QualifiedNameData("http://example.org/", "entity1").toQN(),
-                    List.of(
-                            new Other(
-                                    new QualifiedNameData("attr/", "Name").toQN(),
-                                    new QualifiedNameData(PROV_URI, "QUALIFIED_NAME").toQN(),
-                                    new QualifiedNameData("attr/", "Value").toQN()
+    private static final INode node = new MergedNode(new org.openprovenance.prov.vanilla.Entity(
+            new QualifiedNameData("http://example.org/", "entity1").toQN(), List.of(new Other(
+            new QualifiedNameData("attr/", "Name").toQN(),
+            new QualifiedNameData(PROV_URI, "QUALIFIED_NAME").toQN(),
+            new QualifiedNameData("attr/", "Value").toQN()
 
-                            )
-                    )
-            )
-    );
+    ))
+    ));
 
     private static Stream<Object[]> testParams() {
         return Stream.of(
@@ -36,13 +31,9 @@ public class HasAttrQualifiedNameValueTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("testParams")
+    @ParameterizedTest @MethodSource("testParams")
     public void testHasAttrQualifiedNameValue(INode node, String attrName, String attrValue, boolean expectedResult) {
-        HasAttrQualifiedNameValue condition = new HasAttrQualifiedNameValue(
-                attrName,
-                attrValue
-        );
+        HasAttrQualifiedNameValue condition = new HasAttrQualifiedNameValue(attrName, attrValue);
         assert condition.test(node) == expectedResult;
     }
 }

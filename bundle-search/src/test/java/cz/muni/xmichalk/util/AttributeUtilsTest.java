@@ -22,12 +22,13 @@ public class AttributeUtilsTest {
     static ICpmFactory cF = new CpmMergedFactory(pF);
     static ICpmProvFactory cPF = new CpmProvFactory(pF);
 
-    @Test
-    public void testGetAttributeValue_location() {
+    @Test public void testGetAttributeValue_location() {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
         INode node = cpmDoc.getNode(new org.openprovenance.prov.vanilla.QualifiedName(
-                "gen/", "190fd43b1968737f3501420a6bfd9b74873e32416c6e14fef26238fbe3b197a2", "gen")
-        );
+                "gen/",
+                                                                                      "190fd43b1968737f3501420a6bfd9b74873e32416c6e14fef26238fbe3b197a2",
+                                                                                      "gen"
+        ));
 
         Object value = AttributeUtils.getAttributeValue(node, AttributeNames.ATTR_LOCATION);
 
@@ -44,14 +45,14 @@ public class AttributeUtilsTest {
 
     }
 
-    @Test
-    public void testGetAttributeValue_provType() {
-        QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "entity1", "blank");
+    @Test public void testGetAttributeValue_provType() {
+        QualifiedName entityId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "entity1", "blank");
         Entity entity = cPF.getProvFactory().newEntity(entityId);
         QualifiedName typeValue = pF.newQualifiedName(BLANK_URI, "MyType", "blank");
-        Type typeAttr = pF.newType(typeValue,
-                new org.openprovenance.prov.vanilla.QualifiedName(PROV_URI, "QUALIFIED_NAME", "prov"));
+        Type typeAttr = pF.newType(
+                typeValue,
+                new org.openprovenance.prov.vanilla.QualifiedName(PROV_URI, "QUALIFIED_NAME", "prov")
+        );
         entity.getType().add(typeAttr);
 
 
@@ -63,10 +64,8 @@ public class AttributeUtilsTest {
         assert qnType.getUri().equals(typeValue.getUri());
     }
 
-    @Test
-    public void testGetAttributeValue_startTime() {
-        QualifiedName activityId = new org.openprovenance.prov.vanilla.QualifiedName(
-                BLANK_URI, "activity1", "blank");
+    @Test public void testGetAttributeValue_startTime() {
+        QualifiedName activityId = new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "activity1", "blank");
         Activity activity = cPF.getProvFactory().newActivity(activityId);
         var startTime = pF.newISOTime("2025-08-16T10:00:00Z");
         activity.setStartTime(startTime);
@@ -80,74 +79,61 @@ public class AttributeUtilsTest {
 
     }
 
-    @Test
-    public void testHasAttributeTargetValue_provType_true() {
+    @Test public void testHasAttributeTargetValue_provType_true() {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        INode node = cpmDoc.getNode(
-                new org.openprovenance.prov.vanilla.QualifiedName(
-                        BLANK_URI, "Sampling", "blank")
-        );
-        QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
-                NameSpaceConstants.PROV_URI, "type", "prov");
+        INode node = cpmDoc.getNode(new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "Sampling", "blank"));
+        QualifiedName attributeName =
+                new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.PROV_URI, "type", "prov");
 
         boolean hasTargetValue = AttributeUtils.hasAttributeTargetValue(
                 node,
                 attributeName,
                 QualifiedName.class,
-                qn -> qn.getUri().equals(NameSpaceConstants.CPM_URI + "mainActivity")
+                qn -> qn.getUri()
+                        .equals(NameSpaceConstants.CPM_URI +
+                                        "mainActivity")
         );
 
         assert hasTargetValue;
     }
 
-    @Test
-    public void testHasAttributeTargetValue_provType_false() {
+    @Test public void testHasAttributeTargetValue_provType_false() {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
-        INode node = cpmDoc.getNode(
-                new org.openprovenance.prov.vanilla.QualifiedName(
-                        BLANK_URI, "Sampling", "blank")
-        );
-        QualifiedName attributeName = new org.openprovenance.prov.vanilla.QualifiedName(
-                NameSpaceConstants.PROV_URI, "type", "prov");
+        INode node = cpmDoc.getNode(new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "Sampling", "blank"));
+        QualifiedName attributeName =
+                new org.openprovenance.prov.vanilla.QualifiedName(NameSpaceConstants.PROV_URI, "type", "prov");
 
         boolean hasTargetValue = AttributeUtils.hasAttributeTargetValue(
                 node,
                 attributeName,
                 QualifiedName.class,
-                qn -> qn.getUri().equals(NameSpaceConstants.CPM_URI + "backwardConnector")
+                qn -> qn.getUri()
+                        .equals(NameSpaceConstants.CPM_URI +
+                                        "backwardConnector")
         );
 
         assert !hasTargetValue;
     }
 
-    @Test
-    public void testIsTargetValue_provType_true() {
+    @Test public void testIsTargetValue_provType_true() {
         QualifiedName value = pF.newQualifiedName(BLANK_URI, "value", "blank");
 
-        boolean isTargetValue = AttributeUtils.isTargetValue(
-                value,
-                QualifiedName.class,
-                qn -> qn.getUri().equals(value.getUri())
-        );
+        boolean isTargetValue =
+                AttributeUtils.isTargetValue(value, QualifiedName.class, qn -> qn.getUri().equals(value.getUri()));
 
         assert isTargetValue;
     }
 
-    @Test
-    public void testIsTargetValue_provType_false() {
+    @Test public void testIsTargetValue_provType_false() {
         QualifiedName value = pF.newQualifiedName(BLANK_URI, "value", "blank");
 
-        boolean isTargetValue = AttributeUtils.isTargetValue(
-                value,
-                QualifiedName.class,
-                qn -> qn.getUri().equals("otherUri")
-        );
+        boolean isTargetValue =
+                AttributeUtils.isTargetValue(value, QualifiedName.class, qn -> qn.getUri().equals("otherUri"));
 
         assert !isTargetValue;
     }
 
-    @Test
-    public void testIsTargetValue_provTypeList_true() {
+    @Test public void testIsTargetValue_provTypeList_true() {
         QualifiedName value = pF.newQualifiedName(BLANK_URI, "value", "blank");
 
         boolean isTargetValue = AttributeUtils.isTargetValue(
@@ -159,15 +145,11 @@ public class AttributeUtilsTest {
         assert isTargetValue;
     }
 
-    @Test
-    public void testIsTargetValue_provTypeList_false() {
+    @Test public void testIsTargetValue_provTypeList_false() {
         QualifiedName value = pF.newQualifiedName(BLANK_URI, "value", "blank");
 
-        boolean isTargetValue = AttributeUtils.isTargetValue(
-                List.of(value),
-                QualifiedName.class,
-                qn -> qn.getUri().equals("otherUri")
-        );
+        boolean isTargetValue =
+                AttributeUtils.isTargetValue(List.of(value), QualifiedName.class, qn -> qn.getUri().equals("otherUri"));
 
         assert !isTargetValue;
     }

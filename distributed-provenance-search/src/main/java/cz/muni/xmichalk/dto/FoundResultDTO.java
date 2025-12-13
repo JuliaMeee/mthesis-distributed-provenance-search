@@ -22,9 +22,15 @@ public class FoundResultDTO {
 
     }
 
-    public FoundResultDTO(QualifiedNameDTO bundleId, QualifiedNameDTO fromConnectorId, boolean integrity,
-                          List<Map.Entry<EValidityCheck, Boolean>> validityChecks, boolean pathIntegrity,
-                          List<Map.Entry<EValidityCheck, Boolean>> pathValidityChecks, JsonNode result) {
+    public FoundResultDTO(
+            QualifiedNameDTO bundleId,
+            QualifiedNameDTO fromConnectorId,
+            boolean integrity,
+            List<Map.Entry<EValidityCheck, Boolean>> validityChecks,
+            boolean pathIntegrity,
+            List<Map.Entry<EValidityCheck, Boolean>> pathValidityChecks,
+            JsonNode result
+    ) {
         this.bundleId = bundleId;
         this.fromConnectorId = fromConnectorId;
         this.integrity = integrity;

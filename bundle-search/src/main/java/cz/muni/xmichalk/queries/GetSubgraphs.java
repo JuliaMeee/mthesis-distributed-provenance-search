@@ -28,9 +28,7 @@ public class GetSubgraphs extends FindSubgraphsQuery<List<JsonNode>> {
             List.of();
         }
 
-        return subgraphs.stream()
-                .map(this::transformSubgraphToDocJson)
-                .collect(Collectors.toList());
+        return subgraphs.stream().map(this::transformSubgraphToDocJson).collect(Collectors.toList());
     }
 
     private JsonNode transformSubgraphToDocJson(SubgraphWrapper subgraph) {
@@ -38,10 +36,8 @@ public class GetSubgraphs extends FindSubgraphsQuery<List<JsonNode>> {
             List.of();
         }
 
-        Document encapsulatigDocument = ResultsTransformationUtils.encapsulateInDocument(
-                subgraph.getNodes(),
-                subgraph.getEdges()
-        );
+        Document encapsulatigDocument =
+                ResultsTransformationUtils.encapsulateInDocument(subgraph.getNodes(), subgraph.getEdges());
 
         return ResultsTransformationUtils.transformToJsonNode(encapsulatigDocument);
     }

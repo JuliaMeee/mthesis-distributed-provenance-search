@@ -16,29 +16,41 @@ public class DerivationPathFromStartNodeTest {
 
     static Stream<Object[]> testParams() {
         return Stream.of(
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null),
-                        false, 5},
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        false,
+                        5
+                }, new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null),
-                        true, 3},
-                new Object[]{TestDocumentProvider.samplingBundle_V1,
+                        true,
+                        3
+                }, new Object[]{
+                        TestDocumentProvider.samplingBundle_V1,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", null),
-                        null, 5},
-                new Object[]{TestDocumentProvider.speciesIdentificationBundle_V0,
+                        null,
+                        5
+                }, new Object[]{
+                        TestDocumentProvider.speciesIdentificationBundle_V0,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", null),
-                        false, 2},
-                new Object[]{TestDocumentProvider.speciesIdentificationBundle_V0,
+                        false,
+                        2
+                }, new Object[]{
+                        TestDocumentProvider.speciesIdentificationBundle_V0,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", null),
-                        true, 5},
-                new Object[]{TestDocumentProvider.speciesIdentificationBundle_V0,
+                        true,
+                        5
+                }, new Object[]{
+                        TestDocumentProvider.speciesIdentificationBundle_V0,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesCon", null),
-                        null, 5}
+                        null,
+                        5
+                }
         );
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testParams")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testFind(CpmDocument cpmDocument, QualifiedName startNodeId, Boolean backward, int expectedNodesCount) {
         SubgraphWrapper graph = new SubgraphWrapper(cpmDocument.getNodes(), cpmDocument.getEdges());
         INode startNode = cpmDocument.getNode(startNodeId);

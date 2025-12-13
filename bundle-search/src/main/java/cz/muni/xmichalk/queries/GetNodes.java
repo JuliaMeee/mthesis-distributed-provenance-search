@@ -29,8 +29,8 @@ public class GetNodes extends FindSubgraphsQuery<JsonNode> {
             return null;
         }
 
-        Set<INode> nodes = subgraphs.stream()
-                .flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
+        Set<INode> nodes =
+                subgraphs.stream().flatMap(subgraph -> subgraph.getNodes().stream()).collect(Collectors.toSet());
 
         if (nodes.isEmpty()) {
             return null;

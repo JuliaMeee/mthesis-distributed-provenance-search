@@ -21,8 +21,7 @@ public class ResultsTransformationUtilsTest {
     ICpmProvFactory cPF = new CpmProvFactory(pF);
 
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testDocuments")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testDocuments")
     public void testTransformToJsonNode(CpmDocument cpmDocument) throws IOException {
         JsonNode jsonNode = ResultsTransformationUtils.transformToJsonNode(cpmDocument.toDocument());
 
@@ -35,8 +34,7 @@ public class ResultsTransformationUtilsTest {
         assert (cpmDocument.getNodes().stream().allMatch(node -> newCpmDocument.getNode(node.getId()) != null));
     }
 
-    @ParameterizedTest
-    @org.junit.jupiter.params.provider.MethodSource("testDocuments")
+    @ParameterizedTest @org.junit.jupiter.params.provider.MethodSource("testDocuments")
     public void testEncapsulateInDocument(CpmDocument cpmDocument) {
 
         Document newDocument =

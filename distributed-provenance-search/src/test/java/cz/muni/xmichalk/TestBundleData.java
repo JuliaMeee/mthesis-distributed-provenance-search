@@ -13,11 +13,12 @@ public class TestBundleData {
     public List<ConnectorDTO> forwardConnectors;
     public List<ConnectorDTO> backwardConnectors;
 
-    public TestBundleData(QualifiedName id,
-                          QualifiedName latestVersionId,
-                          JsonNode queryResult,
-                          List<ConnectorDTO> backwardConnectors,
-                          List<ConnectorDTO> forwardConnectors
+    public TestBundleData(
+            QualifiedName id,
+            QualifiedName latestVersionId,
+            JsonNode queryResult,
+            List<ConnectorDTO> backwardConnectors,
+            List<ConnectorDTO> forwardConnectors
     ) {
         this.id = id;
         this.latestVersionId = latestVersionId;
