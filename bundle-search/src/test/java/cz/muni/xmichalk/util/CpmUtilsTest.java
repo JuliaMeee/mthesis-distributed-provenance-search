@@ -60,8 +60,8 @@ public class CpmUtilsTest {
                         BLANK_URI + "StoredSampleCon_r2_3um"
                 }, new Object[]{
                         TestDocumentProvider.samplingBundle_V1,
-                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "IdentifiedSpeciesConSpec", null),
-                        BLANK_URI + "IdentifiedSpeciesCon"
+                        new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", null),
+                        BLANK_URI + "ProcessedSampleCon"
                 }, new Object[]{
                         TestDocumentProvider.processingBundle_V1,
                         new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", null),
