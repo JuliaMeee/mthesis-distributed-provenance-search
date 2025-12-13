@@ -4,22 +4,15 @@ import cz.muni.xmichalk.bundleVersionPicker.EVersionPreference;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.LatestVersionPicker;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.SpecifiedVersionPicker;
-import cz.muni.xmichalk.documentLoader.EBundlePart;
-import cz.muni.xmichalk.documentLoader.IDocumentLoader;
-import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.models.QueryContext;
+import cz.muni.xmichalk.storage.EBundlePart;
 import org.openprovenance.prov.model.QualifiedName;
 
-public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequiresDocumentLoader {
-    private IDocumentLoader documentLoader;
+public class GetPreferredVersion implements IQuery<QualifiedNameData> {
     public EVersionPreference versionPreference;
 
     public GetPreferredVersion() {
-    }
-
-    public GetPreferredVersion(EVersionPreference versionPreference, IDocumentLoader documentLoader) {
-        this.versionPreference = versionPreference;
-        this.documentLoader = documentLoader;
     }
 
     public GetPreferredVersion(EVersionPreference versionPreference) {
@@ -28,7 +21,7 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
 
 
     @Override
-    public QualifiedNameData evaluate(BundleStart input) {
+    public QualifiedNameData evaluate(QueryContext context) {
         if (versionPreference == null) {
             throw new IllegalStateException(
                     "Value of versionPreference cannot be null in " + this.getClass().getName());
@@ -38,7 +31,7 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
 
         switch (this.versionPreference) {
             case LATEST:
-                versionPicker = new LatestVersionPicker(documentLoader);
+                versionPicker = new LatestVersionPicker(context.documentLoader, context.authorizationHeader);
                 break;
             case SPECIFIED:
                 versionPicker = new SpecifiedVersionPicker();
@@ -47,7 +40,7 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
                 throw new IllegalArgumentException("Unknown version preference: " + this.versionPreference);
         }
 
-        QualifiedName pickedVersion = versionPicker.apply(input.bundle);
+        QualifiedName pickedVersion = versionPicker.apply(context.document);
 
         if (pickedVersion != null) {
             return new QualifiedNameData().from(pickedVersion);
@@ -59,10 +52,5 @@ public class GetPreferredVersion implements IQuery<QualifiedNameData>, IRequires
     @Override
     public EBundlePart decideRequiredBundlePart() {
         return EBundlePart.TraversalInformation;
-    }
-
-    @Override
-    public void injectDocumentLoader(final IDocumentLoader documentLoader) {
-        this.documentLoader = documentLoader;
     }
 }

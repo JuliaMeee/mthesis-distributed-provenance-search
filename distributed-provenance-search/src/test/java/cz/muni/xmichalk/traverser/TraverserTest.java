@@ -184,6 +184,7 @@ public class TraverserTest {
             @Override
             public BundleQueryResultDTO fetchBundleQueryResult(final String serviceUri, final QualifiedName bundleId,
                                                                final QualifiedName connectorId,
+                                                               String authorizationHeader,
                                                                final JsonNode querySpecification) {
                 return new BundleQueryResultDTO(new Token(null, "x"), testData.get(bundleId.getUri()).queryResult);
             }
@@ -191,6 +192,7 @@ public class TraverserTest {
             @Override
             public QualifiedName fetchPreferredBundleVersion(final String serviceUri, final QualifiedName bundleId,
                                                              final QualifiedName connectorId,
+                                                             String authorizationHeader,
                                                              final String versionPreference) {
                 if (versionPreference.equals("LATEST")) {
                     return testData.get(bundleId.getUri()).latestVersionId;
@@ -200,7 +202,8 @@ public class TraverserTest {
 
             @Override
             public BundleQueryResultDTO fetchBundleConnectors(final String serviceUri, final QualifiedName bundleId,
-                                                              final QualifiedName connectorId, final boolean backward) {
+                                                              final QualifiedName connectorId,
+                                                              String authorizationHeader, final boolean backward) {
                 List<ConnectorDTO> connectors = backward ? testData.get(
                         bundleId.getUri()).backwardConnectors : testData.get(bundleId.getUri()).forwardConnectors;
 
@@ -272,6 +275,7 @@ public class TraverserTest {
                 startConnector,
                 new TraversalParams(
                         backward,
+                        null,
                         versionPreference,
                         ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                         List.of(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),
@@ -306,6 +310,7 @@ public class TraverserTest {
                 connA1,
                 new TraversalParams(
                         false,
+                        null,
                         "LATEST",
                         ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                         List.of(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),
@@ -340,6 +345,7 @@ public class TraverserTest {
                 connA1,
                 new TraversalParams(
                         false,
+                        null,
                         "LATEST",
                         ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                         List.of(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),
@@ -375,6 +381,7 @@ public class TraverserTest {
                 connD,
                 new TraversalParams(
                         true,
+                        null,
                         "LATEST",
                         ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                         List.of(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),
@@ -412,6 +419,7 @@ public class TraverserTest {
                 connD,
                 new TraversalParams(
                         true,
+                        null,
                         "LATEST",
                         ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,
                         List.of(EValidityCheck.DEMO_SIMPLE_CONSTRAINTS),

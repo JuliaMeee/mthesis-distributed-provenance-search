@@ -3,7 +3,7 @@ package cz.muni.xmichalk.queries;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.TestDocumentProvider;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,8 +31,9 @@ public class GetNodeIdsTest {
         GetNodeIds getNodeIdsQuery = new GetNodeIds(
                 (g, n) -> List.of(g)
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getNodeIdsQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getNodeIdsQuery.evaluate(context);
 
         assert result.size() == cpmDocument.getNodes().size();
         assert cpmDocument.getNodes().stream().allMatch(
@@ -54,8 +55,9 @@ public class GetNodeIdsTest {
         GetNodeIds getNodeIdsQuery = new GetNodeIds(
                 fromSubgraph
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getNodeIdsQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getNodeIdsQuery.evaluate(context);
 
         assert result.size() == 1;
         assert result.getFirst().toQN().getUri().equals(mainActivityNode.getId().getUri());
@@ -67,8 +69,9 @@ public class GetNodeIdsTest {
         GetNodeIds getNodeIdsQuery = new GetNodeIds(
                 (g, n) -> List.of()
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getNodeIdsQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getNodeIdsQuery.evaluate(context);
 
         assert result.isEmpty();
     }

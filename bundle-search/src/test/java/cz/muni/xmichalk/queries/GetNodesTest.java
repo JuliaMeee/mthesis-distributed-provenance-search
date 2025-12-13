@@ -7,7 +7,7 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.TestDocumentProvider;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
@@ -44,8 +44,9 @@ public class GetNodesTest {
         GetNodes getNodesQuery = new GetNodes(
                 (g, n) -> List.of(g)
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getNodesQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getNodesQuery.evaluate(context);
 
         assert result != null;
         Document resultDocument = ProvDocumentUtils.deserialize(result.toString(), Formats.ProvFormat.JSON);
@@ -72,8 +73,9 @@ public class GetNodesTest {
         GetNodes getNodesQuery = new GetNodes(
                 fromSubgraph
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getNodesQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getNodesQuery.evaluate(context);
 
         assert result != null;
         Document resultDocument = ProvDocumentUtils.deserialize(result.toString(), Formats.ProvFormat.JSON);
@@ -88,8 +90,9 @@ public class GetNodesTest {
         GetNodes getNodesQuery = new GetNodes(
                 (g, n) -> List.of()
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getNodesQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getNodesQuery.evaluate(context);
 
         assert result == null;
     }

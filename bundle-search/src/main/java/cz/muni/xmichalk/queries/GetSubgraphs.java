@@ -1,7 +1,7 @@
 package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
 import cz.muni.xmichalk.util.ResultsTransformationUtils;
@@ -22,12 +22,12 @@ public class GetSubgraphs implements IQuery<List<JsonNode>> {
     }
 
     @Override
-    public List<JsonNode> evaluate(BundleStart input) {
+    public List<JsonNode> evaluate(QueryContext context) {
         if (subgraph == null) {
             throw new IllegalStateException("Value of subgraph cannot be null  in " + this.getClass().getName());
         }
 
-        List<SubgraphWrapper> foundSubgraphs = subgraph.find(input);
+        List<SubgraphWrapper> foundSubgraphs = subgraph.find(context.document, context.startNode);
 
         return transformToDocJsonList(foundSubgraphs);
     }

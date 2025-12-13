@@ -19,7 +19,8 @@ public class ProvServiceAPI implements IProvServiceAPI {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public BundleQueryResultDTO fetchBundleQueryResult(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, JsonNode querySpecification) {
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
+            JsonNode querySpecification) {
         BundleQueryDTO queryParams = new BundleQueryDTO(bundleId, connectorId, querySpecification);
 
         if (serviceUri == null) {
@@ -31,6 +32,7 @@ public class ProvServiceAPI implements IProvServiceAPI {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", authorizationHeader);
 
         HttpEntity<BundleQueryDTO> request = new HttpEntity<>(queryParams, headers);
 
@@ -45,7 +47,8 @@ public class ProvServiceAPI implements IProvServiceAPI {
     }
 
     public QualifiedName fetchPreferredBundleVersion(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String versionPreference) {
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
+            String versionPreference) {
         JsonNode query = null;
         try {
             query = objectMapper.readTree("""
@@ -61,7 +64,7 @@ public class ProvServiceAPI implements IProvServiceAPI {
 
 
         BundleQueryResultDTO queryResult = fetchBundleQueryResult(
-                serviceUri, bundleId, connectorId, query
+                serviceUri, bundleId, connectorId, authorizationHeader, query
         );
 
         if (queryResult == null || queryResult.result == null) {
@@ -76,7 +79,8 @@ public class ProvServiceAPI implements IProvServiceAPI {
     }
 
     public BundleQueryResultDTO fetchBundleConnectors(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, boolean backward) {
+            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
+            boolean backward) {
         JsonNode query = null;
         try {
             query = objectMapper.readTree("""
@@ -93,6 +97,6 @@ public class ProvServiceAPI implements IProvServiceAPI {
             throw new RuntimeException("Failed to create GetConnectors query JSON.", e);
         }
 
-        return fetchBundleQueryResult(serviceUri, bundleId, connectorId, query);
+        return fetchBundleQueryResult(serviceUri, bundleId, connectorId, authorizationHeader, query);
     }
 }

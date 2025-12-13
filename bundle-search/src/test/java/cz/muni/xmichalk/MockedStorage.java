@@ -5,9 +5,9 @@ import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.documentLoader.EBundlePart;
-import cz.muni.xmichalk.documentLoader.IDocumentLoader;
-import cz.muni.xmichalk.documentLoader.StorageCpmDocument;
+import cz.muni.xmichalk.storage.EBundlePart;
+import cz.muni.xmichalk.storage.IStorage;
+import cz.muni.xmichalk.storage.StorageCpmDocument;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import org.openprovenance.prov.model.Document;
 import org.openprovenance.prov.model.interop.Formats;
@@ -15,20 +15,24 @@ import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.nio.file.Path;
 
-public class MockedDocumentLoader implements IDocumentLoader {
+public class MockedStorage implements IStorage {
     ProvFactory pF = new ProvFactory();
     ICpmFactory cF = new CpmMergedFactory(pF);
     ICpmProvFactory cPF = new CpmProvFactory(pF);
     String dataFolder = System.getProperty("user.dir") + "/src/test/resources/data/";
 
+    public static String authTokenFullAccess = "full_access_token";
+    public static String authTokenNoAccess = "no_access_token";
+    public static String authTokenExcludeBundleIdPrefix = "Exclude ";
+
     @Override
-    public StorageCpmDocument loadCpmDocument(final String uri, EBundlePart part) {
+    public StorageCpmDocument loadCpmDocument(final String uri, EBundlePart part, String authorizationHeader) {
         Document document = getFromFile(uri);
         return new StorageCpmDocument(new CpmDocument(document, pF, cPF, cF), null);
     }
 
     @Override
-    public StorageCpmDocument loadMetaCpmDocument(final String uri) {
+    public StorageCpmDocument loadMetaCpmDocument(final String uri, String authorizationHeader) {
         Document document = getFromFile(uri);
         return new StorageCpmDocument(new CpmDocument(document, pF, cPF, cF), null);
     }

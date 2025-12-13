@@ -1,15 +1,15 @@
 package cz.muni.xmichalk.queries;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.documentLoader.EBundlePart;
-import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.querySpecification.findable.FittingNodes;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
 import cz.muni.xmichalk.querySpecification.findable.WholeGraph;
 import cz.muni.xmichalk.querySpecification.nodeConditions.HasAttrQualifiedNameValue;
+import cz.muni.xmichalk.storage.EBundlePart;
 import cz.muni.xmichalk.util.AttributeUtils;
 import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
@@ -39,7 +39,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
     }
 
     @Override
-    public List<ConnectorData> evaluate(BundleStart input) {
+    public List<ConnectorData> evaluate(QueryContext context) {
         String typeValueRegex = backward == null ? CPM_URI + "(backward|forward)Connector"
                 : CPM_URI + (backward ? "backwardConnector" : "forwardConnector");
 
@@ -51,7 +51,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
                 fromSubgraphs
         );
 
-        List<SubgraphWrapper> subgraphs = finder.find(input);
+        List<SubgraphWrapper> subgraphs = finder.find(context.document, context.startNode);
 
         if (subgraphs == null || subgraphs.isEmpty()) {
             return List.of();

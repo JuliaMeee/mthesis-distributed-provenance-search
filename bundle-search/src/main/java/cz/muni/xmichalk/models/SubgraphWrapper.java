@@ -1,5 +1,6 @@
 package cz.muni.xmichalk.models;
 
+import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.IEdge;
 import cz.muni.fi.cpm.model.INode;
 
@@ -24,6 +25,11 @@ public class SubgraphWrapper {
     public SubgraphWrapper(SubgraphWrapper other) {
         this.nodes = new ArrayList<>(other.getNodes());
         this.edges = new ArrayList<>(other.getEdges());
+    }
+
+    public SubgraphWrapper(CpmDocument cpmDocument) {
+        this.nodes = new ArrayList<>(cpmDocument.getNodes());
+        this.edges = new ArrayList<>(cpmDocument.getEdges());
     }
 
     public List<INode> getNodes() {

@@ -2,7 +2,7 @@ package cz.muni.xmichalk.bundleVersionPicker;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.MockedDocumentLoader;
+import cz.muni.xmichalk.MockedStorage;
 import cz.muni.xmichalk.TestDocumentProvider;
 import cz.muni.xmichalk.bundleVersionPicker.implementations.LatestVersionPicker;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ public class LatestVersionPickerTest {
 
     @Test
     public void testApply() {
-        LatestVersionPicker picker = new LatestVersionPicker(new MockedDocumentLoader());
+        LatestVersionPicker picker = new LatestVersionPicker(new MockedStorage(), null);
 
         QualifiedName latestBundleVersion = picker.apply(TestDocumentProvider.samplingBundle_V0);
 

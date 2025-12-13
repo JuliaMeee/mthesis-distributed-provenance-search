@@ -3,7 +3,7 @@ package cz.muni.xmichalk.querySpecification.bundleConditions;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.TestDocumentProvider;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.DocumentStart;
 import org.junit.jupiter.api.Test;
 
 public class AllNodesTest {
@@ -11,7 +11,7 @@ public class AllNodesTest {
     public void testAllNodes_allTrue() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         INode startNode = cpmDocument.getMainActivity();
-        BundleStart target = new BundleStart(cpmDocument, startNode);
+        DocumentStart target = new DocumentStart(cpmDocument, startNode);
 
         AllNodes allNodesCondition = new AllNodes(
                 node -> true
@@ -24,7 +24,7 @@ public class AllNodesTest {
     public void testAllNodes_allFalse() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         INode startNode = cpmDocument.getMainActivity();
-        BundleStart target = new BundleStart(cpmDocument, startNode);
+        DocumentStart target = new DocumentStart(cpmDocument, startNode);
 
         AllNodes allNodesCondition = new AllNodes(
                 node -> false
@@ -37,7 +37,7 @@ public class AllNodesTest {
     public void testAllNodes_oneTrue() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         INode startNode = cpmDocument.getMainActivity();
-        BundleStart target = new BundleStart(cpmDocument, startNode);
+        DocumentStart target = new DocumentStart(cpmDocument, startNode);
 
         AllNodes allNodesCondition = new AllNodes(
                 node -> node == startNode
@@ -50,7 +50,7 @@ public class AllNodesTest {
     public void testAllNodes_oneFalse() {
         CpmDocument cpmDocument = TestDocumentProvider.samplingBundle_V1;
         INode startNode = cpmDocument.getMainActivity();
-        BundleStart target = new BundleStart(cpmDocument, startNode);
+        DocumentStart target = new DocumentStart(cpmDocument, startNode);
 
         AllNodes allNodesCondition = new AllNodes(
                 node -> node != startNode

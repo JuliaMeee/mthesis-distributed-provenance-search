@@ -1,0 +1,25 @@
+{
+  "authorizedByDefault": true,
+  "authEntries": [
+    {
+      "authHeader": "Bearer token_denied_ProcessingBundle_V0",
+      "uri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/ProcessingBundle_V0",
+      "authorized": false
+    },
+    {
+      "authHeader": "Bearer token_denied_ProcessingBundle_V1",
+      "uri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/ProcessingBundle_V1",
+      "authorized": false
+    },
+    {
+      "authHeader": "Bearer token_denied_ProcessingBundle",
+      "uri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/ProcessingBundle_V0",
+      "authorized": false
+    },
+    {
+      "authHeader": "Bearer token_denied_ProcessingBundle",
+      "uri": "http://prov-storage-2:8000/api/v1/organizations/ORG2/documents/ProcessingBundle_V1",
+      "authorized": false
+    }
+  ]
+}

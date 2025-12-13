@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import org.openprovenance.prov.model.QualifiedName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,7 @@ public class TraverserController {
 
     @Operation(summary = "Traverses given bundle and its predecessors to find results for the query.")
     @PostMapping(value = "/api/traversePredecessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @SecurityRequirement(name = "auth")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Traversal Params",
             required = true,
@@ -164,12 +167,15 @@ public class TraverserController {
             )
     )
     public ResponseEntity<?> traversePredecessors(
-            @RequestBody TraversalParamsDTO traverseParams) {
-        return traverseChain(traverseParams, true);
+            @RequestBody TraversalParamsDTO traverseParams,
+            HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        return traverseChain(traverseParams, true, authorizationHeader);
     }
 
     @Operation(summary = "Traverses given bundle and its successors to find results for the query.")
     @PostMapping(value = "/api/traverseSuccessors", produces = MediaType.APPLICATION_JSON_VALUE)
+    @SecurityRequirement(name = "auth")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Traversal Params",
             required = true,
@@ -261,11 +267,14 @@ public class TraverserController {
             )
     )
     public ResponseEntity<?> traverseSuccessors(
-            @RequestBody TraversalParamsDTO traversalParams) {
-        return traverseChain(traversalParams, false);
+            @RequestBody TraversalParamsDTO traversalParams,
+            HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        return traverseChain(traversalParams, false, authorizationHeader);
     }
 
-    private ResponseEntity<?> traverseChain(TraversalParamsDTO traversalParams, boolean traverseBackwards) {
+    private ResponseEntity<?> traverseChain(TraversalParamsDTO traversalParams, boolean traverseBackwards,
+                                            String authorizationHeader) {
         List<String> missingParams = getMissingParams(traversalParams);
         if (!missingParams.isEmpty()) {
             return ResponseEntity
@@ -283,6 +292,7 @@ public class TraverserController {
                     connectorId,
                     new TraversalParams(
                             traverseBackwards,
+                            authorizationHeader,
                             traversalParams.versionPreference,
                             traversalParams.traversalPriority != null ? traversalParams.traversalPriority :
                                     ETraversalPriority.INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS,

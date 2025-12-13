@@ -7,7 +7,7 @@ import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
 import cz.muni.xmichalk.TestDocumentProvider;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,8 +39,10 @@ public class GetSubgraphsTest {
         GetSubgraphs getSubgraphsQuery = new GetSubgraphs(
                 (g, n) -> List.of(g)
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getSubgraphsQuery.evaluate(new BundleStart(cpmDocument, startNode));
+
+        var result = getSubgraphsQuery.evaluate(context);
 
         assert result != null;
         assert result.size() == 1;
@@ -71,8 +73,9 @@ public class GetSubgraphsTest {
                         )
                 )
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getSubgraphsQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getSubgraphsQuery.evaluate(context);
 
         assert result.size() == 2;
     }
@@ -83,8 +86,9 @@ public class GetSubgraphsTest {
         GetSubgraphs getSubgraphsQuery = new GetSubgraphs(
                 (g, n) -> List.of()
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        var result = getSubgraphsQuery.evaluate(new BundleStart(cpmDocument, startNode));
+        var result = getSubgraphsQuery.evaluate(context);
 
         assert result.isEmpty();
     }

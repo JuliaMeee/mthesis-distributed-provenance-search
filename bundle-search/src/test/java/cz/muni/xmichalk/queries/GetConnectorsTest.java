@@ -3,8 +3,8 @@ package cz.muni.xmichalk.queries;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.TestDocumentProvider;
-import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
+import cz.muni.xmichalk.models.QueryContext;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.util.List;
@@ -33,10 +33,9 @@ public class GetConnectorsTest {
                 true,
                 (g, n) -> List.of(g)
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(
-                new BundleStart(cpmDocument, startNode)
-        );
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
 
         assert result.size() == backwardConnectors;
         assert cpmDocument.getBackwardConnectors().stream().allMatch(
@@ -54,10 +53,9 @@ public class GetConnectorsTest {
                 false,
                 (g, n) -> List.of(g)
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(
-                new BundleStart(cpmDocument, startNode)
-        );
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
 
         assert result.size() == forwardConnectors;
         assert cpmDocument.getForwardConnectors().stream().allMatch(
@@ -75,10 +73,9 @@ public class GetConnectorsTest {
                 null,
                 (g, n) -> List.of(g)
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(
-                new BundleStart(cpmDocument, startNode)
-        );
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
 
         assert result.size() == backwardConnectors + forwardConnectors;
     }
@@ -91,10 +88,9 @@ public class GetConnectorsTest {
                 null,
                 (g, n) -> List.of()
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(
-                new BundleStart(cpmDocument, startNode)
-        );
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
 
         assert result.isEmpty();
     }

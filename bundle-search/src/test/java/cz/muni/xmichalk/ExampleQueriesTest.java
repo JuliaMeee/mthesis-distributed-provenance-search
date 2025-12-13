@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.merged.CpmMergedFactory;
 import cz.muni.fi.cpm.model.*;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
-import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.ConnectorData;
+import cz.muni.xmichalk.models.DocumentStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.queries.*;
 import cz.muni.xmichalk.querySpecification.ICondition;
 import cz.muni.xmichalk.querySpecification.bundleConditions.AllNodes;
@@ -55,8 +56,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -94,8 +96,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -132,8 +135,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -189,8 +193,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         JsonNode foundNodesDoc = (JsonNode) result;
@@ -237,8 +242,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
 
         assert result != null;
@@ -286,8 +292,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof JsonNode;
@@ -327,8 +334,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -379,8 +387,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List<?>;
@@ -419,13 +428,13 @@ public class ExampleQueriesTest {
                 new HasAttr(ATTR_HASH_ALG.getUri())
         ));
         IQuery<?> query = new TestBundleFits(
-                new AllTrue<BundleStart>(
+                new AllTrue<DocumentStart>(
                         List.of(
                                 // Has exactly one main activity
-                                new CountComparisonCondition<BundleStart>(
+                                new CountComparisonCondition<DocumentStart>(
                                         new FittingNodes(isMainActivity),
                                         EComparisonResult.EQUALS,
-                                        new CountConstant<BundleStart>(1)
+                                        new CountConstant<DocumentStart>(1)
                                 ),
                                 // Main activity has ref to meta bundle
                                 new AllNodes(
@@ -447,8 +456,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
         assert result != null;
         assert result instanceof Boolean;
         Boolean fits = (Boolean) result;
@@ -482,8 +492,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof Boolean;
@@ -501,8 +512,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List;
@@ -524,8 +536,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
+        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
 
-        Object result = deserializedQuery.evaluate(new BundleStart(cpmDoc, cpmDoc.getNode(startNodeId)));
+        Object result = deserializedQuery.evaluate(context);
 
         assert result != null;
         assert result instanceof List;

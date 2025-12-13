@@ -12,12 +12,15 @@ import java.io.InputStream;
 public class DemoValidityVerifier implements IValidityVerifier {
     private final IProvServiceAPI provServiceAPI;
     private final JsonNode validitySpecification;
+    private final String authorizationHeader;
 
-    public DemoValidityVerifier(IProvServiceAPI provServiceAPI, InputStream input) {
+    public DemoValidityVerifier(IProvServiceAPI provServiceAPI, InputStream validitySpecificationJson,
+                                String authorizationHeader) {
         this.provServiceAPI = provServiceAPI;
+        this.authorizationHeader = authorizationHeader;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            validitySpecification = objectMapper.readTree(input);
+            validitySpecification = objectMapper.readTree(validitySpecificationJson);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -30,7 +33,8 @@ public class DemoValidityVerifier implements IValidityVerifier {
         String provServiceUri = itemToTraverse.provServiceUri;
 
         BundleQueryResultDTO result = provServiceAPI.fetchBundleQueryResult(
-                provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, validitySpecification);
+                provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId, authorizationHeader,
+                validitySpecification);
 
         if (result == null) {
             throw new RuntimeException(

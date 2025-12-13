@@ -1,6 +1,6 @@
-package cz.muni.xmichalk.documentLoader;
+package cz.muni.xmichalk.storage;
 
-import cz.muni.xmichalk.documentLoader.storageDTO.Token;
+import cz.muni.xmichalk.storage.storageDTO.Token;
 import org.openprovenance.prov.model.Document;
 
 public class StorageDocument {

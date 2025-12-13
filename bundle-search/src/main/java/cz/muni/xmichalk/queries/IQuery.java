@@ -2,8 +2,8 @@ package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import cz.muni.xmichalk.documentLoader.EBundlePart;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QueryContext;
+import cz.muni.xmichalk.storage.EBundlePart;
 
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -16,7 +16,7 @@ import cz.muni.xmichalk.models.BundleStart;
         @JsonSubTypes.Type(value = GetPreferredVersion.class, name = "GetPreferredVersion"),
 })
 public interface IQuery<T> {
-    T evaluate(BundleStart input);
+    T evaluate(QueryContext context);
 
     default EBundlePart decideRequiredBundlePart() {
         return EBundlePart.Whole;

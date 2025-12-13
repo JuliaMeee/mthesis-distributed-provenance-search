@@ -2,11 +2,11 @@ package cz.muni.xmichalk.queries;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.MockedDocumentLoader;
+import cz.muni.xmichalk.MockedStorage;
 import cz.muni.xmichalk.TestDocumentProvider;
 import cz.muni.xmichalk.bundleVersionPicker.EVersionPreference;
-import cz.muni.xmichalk.models.BundleStart;
 import cz.muni.xmichalk.models.QualifiedNameData;
+import cz.muni.xmichalk.models.QueryContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.openprovenance.prov.model.QualifiedName;
 
@@ -42,12 +42,12 @@ public class GetPreferredVersionTest {
     @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetPreferredVersion(CpmDocument document, INode startNode, EVersionPreference preference,
                                         QualifiedName expectedBundleId) {
-        GetPreferredVersion query = new GetPreferredVersion(
-                preference,
-                new MockedDocumentLoader()
-        );
+        GetPreferredVersion query = new GetPreferredVersion(preference);
+        QueryContext context = new QueryContext(document, startNode, MockedStorage.authTokenFullAccess,
+                new MockedStorage());
 
-        QualifiedNameData resultBundleId = query.evaluate(new BundleStart(document, startNode));
+
+        QualifiedNameData resultBundleId = query.evaluate(context);
 
         assert resultBundleId.toQN().getUri().equals(expectedBundleId.getUri());
 

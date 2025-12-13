@@ -14,7 +14,9 @@ import cz.muni.xmichalk.validity.EValidityCheck;
 import cz.muni.xmichalk.validity.IValidityVerifier;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,12 @@ import java.util.Comparator;
 import java.util.Map;
 
 @Configuration
+@SecurityScheme(
+        name = "auth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 @OpenAPIDefinition(
         info = @Info(
                 title = "Provenance traversal API",
@@ -46,6 +54,9 @@ public class TraverserConfig {
 
     @Value("${traverser.omitEmptyResults:false}")
     private boolean omitEmptyResults;
+
+    @Value("${demoValidityVerifier.authHeader}")
+    private String authHeader;
 
     @Bean
     public IProvServiceTable provServiceTable() {
@@ -80,11 +91,11 @@ public class TraverserConfig {
 
         return Map.of(
                 EValidityCheck.DEMO_SIMPLE_CONSTRAINTS,
-                new DemoValidityVerifier(provServiceAPI, simpleSemanticResource.getInputStream()),
+                new DemoValidityVerifier(provServiceAPI, simpleSemanticResource.getInputStream(), authHeader),
                 EValidityCheck.DEMO_IS_SAMPLING_BUNDLE,
-                new DemoValidityVerifier(provServiceAPI, isSamplingBundleResource.getInputStream()),
+                new DemoValidityVerifier(provServiceAPI, isSamplingBundleResource.getInputStream(), authHeader),
                 EValidityCheck.DEMO_IS_PROCESSING_BUNDLE,
-                new DemoValidityVerifier(provServiceAPI, isProcessingBundleResource.getInputStream())
+                new DemoValidityVerifier(provServiceAPI, isProcessingBundleResource.getInputStream(), authHeader)
         );
     }
 

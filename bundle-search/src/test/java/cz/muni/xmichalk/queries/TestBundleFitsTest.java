@@ -3,7 +3,7 @@ package cz.muni.xmichalk.queries;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.TestDocumentProvider;
-import cz.muni.xmichalk.models.BundleStart;
+import cz.muni.xmichalk.models.QueryContext;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.util.stream.Stream;
@@ -24,10 +24,9 @@ public class TestBundleFitsTest {
         TestBundleFits testBundleFits = new TestBundleFits(
                 (bundleStart) -> bundleStart.startNode == startNode
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        assert testBundleFits.evaluate(
-                new BundleStart(cpmDocument, startNode)
-        );
+        assert testBundleFits.evaluate(context);
     }
 
     @ParameterizedTest
@@ -36,9 +35,8 @@ public class TestBundleFitsTest {
         TestBundleFits testBundleFits = new TestBundleFits(
                 (bundleStart) -> false
         );
+        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
 
-        assert !testBundleFits.evaluate(
-                new BundleStart(cpmDocument, startNode)
-        );
+        assert !testBundleFits.evaluate(context);
     }
 }

@@ -133,8 +133,7 @@ public class Traverser {
             runningTasks.incrementAndGet();
             completionService.submit(() -> {
                 QualifiedName referencedBundleId = finalNext.bundleId;
-                QualifiedName preferredBundleId = getPreferredVersion(finalNext, traversalParams.versionPreference,
-                        traversalState);
+                QualifiedName preferredBundleId = getPreferredVersion(finalNext, traversalParams, traversalState);
                 finalNext.bundleId = preferredBundleId;
                 if (tryMarkAsProcessing(finalNext, traversalState, true)) {
                     traverseItem(finalNext, traversalState, traversalParams);
@@ -157,11 +156,11 @@ public class Traverser {
         try {
             BundleQueryResultDTO queryResult = provServiceAPI.fetchBundleQueryResult(
                     itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
-                    traversalParams.querySpecification);
+                    traversalParams.authorizationHeader, traversalParams.querySpecification);
 
             BundleQueryResultDTO findConnectorsResult = provServiceAPI.fetchBundleConnectors(
                     itemToTraverse.provServiceUri, itemToTraverse.bundleId, itemToTraverse.connectorId,
-                    traversalParams.traverseBackwards);
+                    traversalParams.authorizationHeader, traversalParams.traverseBackwards);
 
             boolean hasIntegrity = hasIntegrity(itemToTraverse.bundleId, queryResult, findConnectorsResult);
 
@@ -212,14 +211,15 @@ public class Traverser {
         return itemToTraverse;
     }
 
-    private QualifiedName getPreferredVersion(ItemToTraverse itemToTraverse, String versionPreference,
+    private QualifiedName getPreferredVersion(ItemToTraverse itemToTraverse, TraversalParams traversalParams,
                                               TraversalState traversalState) {
         try {
             log.info("Fetching preferred version for bundle: {} with preference: {}", itemToTraverse.bundleId.getUri(),
-                    versionPreference);
+                    traversalParams.versionPreference);
             QualifiedName preferredVersion =
                     provServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId,
-                            itemToTraverse.connectorId, versionPreference);
+                            itemToTraverse.connectorId, traversalParams.authorizationHeader,
+                            traversalParams.versionPreference);
             if (preferredVersion != null) {
                 log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(),
                         preferredVersion.getUri());

@@ -1,11 +1,11 @@
-package cz.muni.xmichalk.documentLoader;
+package cz.muni.xmichalk.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
-import cz.muni.xmichalk.documentLoader.storageDTO.GetDocumentResponse;
-import cz.muni.xmichalk.documentLoader.storageDTO.GetMetaResponse;
+import cz.muni.xmichalk.storage.storageDTO.GetDocumentResponse;
+import cz.muni.xmichalk.storage.storageDTO.GetMetaResponse;
 import cz.muni.xmichalk.util.ProvDocumentUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class StorageDocumentLoader implements IDocumentLoader {
+public class Storage implements IStorage {
     private static final Formats.ProvFormat FORMAT = Formats.ProvFormat.JSON;
     private static final String FORMAT_QUERY_PARAM = "format=json";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
@@ -29,17 +29,17 @@ public class StorageDocumentLoader implements IDocumentLoader {
     private final ICpmFactory cpmFactory;
     private final ICpmProvFactory cpmProvFactory;
 
-    public StorageDocumentLoader(ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory) {
+    public Storage(ProvFactory provFactory, ICpmFactory cpmFactory, ICpmProvFactory cpmProvFactory) {
         this.provFactory = provFactory;
         this.cpmFactory = cpmFactory;
         this.cpmProvFactory = cpmProvFactory;
     }
 
 
-    public StorageDocument loadDocument(String uri) {
+    public StorageDocument loadDocument(String uri, String authorizationHeader) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
-            String responseBody = getRequest(uri);
+            String responseBody = getRequest(uri, authorizationHeader);
             ObjectMapper mapper = new ObjectMapper();
             GetDocumentResponse storageResponse = mapper.readValue(responseBody, GetDocumentResponse.class);
             String decodedDocument = decodeData(storageResponse.document);
@@ -51,16 +51,16 @@ public class StorageDocumentLoader implements IDocumentLoader {
     }
 
     @Override
-    public StorageCpmDocument loadCpmDocument(String uri, EBundlePart part) {
+    public StorageCpmDocument loadCpmDocument(String uri, EBundlePart part, String authorizationHeader) {
         if (part == EBundlePart.DomainSpecific) uri += "/domain-specific";
         else if (part == EBundlePart.TraversalInformation) uri += "/backbone";
-        return toCpmDocument(loadDocument(uri));
+        return toCpmDocument(loadDocument(uri, authorizationHeader));
     }
-    
-    public StorageDocument loadMetaDocument(String uri) {
+
+    public StorageDocument loadMetaDocument(String uri, String authorizationHeader) {
         try {
             uri += (uri.contains("?") ? "&" : "?") + FORMAT_QUERY_PARAM;
-            String responseBody = getRequest(uri);
+            String responseBody = getRequest(uri, authorizationHeader);
             ObjectMapper mapper = new ObjectMapper();
             GetMetaResponse storageResponse = mapper.readValue(responseBody, GetMetaResponse.class);
             String decodedDocument = decodeData(storageResponse.graph);
@@ -72,8 +72,8 @@ public class StorageDocumentLoader implements IDocumentLoader {
     }
 
     @Override
-    public StorageCpmDocument loadMetaCpmDocument(String uri) {
-        return toCpmDocument(loadMetaDocument(uri));
+    public StorageCpmDocument loadMetaCpmDocument(String uri, String authorizationHeader) {
+        return toCpmDocument(loadMetaDocument(uri, authorizationHeader));
 
     }
 
@@ -91,9 +91,10 @@ public class StorageDocumentLoader implements IDocumentLoader {
         );
     }
 
-    private static String getRequest(String url) throws IOException {
+    private static String getRequest(String url, String authorizationHeader) throws IOException {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Authorization", authorizationHeader);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode != 200) {

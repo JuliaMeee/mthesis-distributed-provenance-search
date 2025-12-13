@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.documentLoader.storageDTO;
+package cz.muni.xmichalk.storage.storageDTO;
 
 public class GetDocumentResponse {
     public String document;

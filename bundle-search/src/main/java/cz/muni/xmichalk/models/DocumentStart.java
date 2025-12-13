@@ -3,15 +3,15 @@ package cz.muni.xmichalk.models;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 
-public class BundleStart {
-    public CpmDocument bundle;
+public class DocumentStart {
+    public CpmDocument document;
     public INode startNode;
 
-    public BundleStart() {
+    public DocumentStart() {
     }
 
-    public BundleStart(CpmDocument bundle, INode startNode) {
-        this.bundle = bundle;
+    public DocumentStart(CpmDocument document, INode startNode) {
+        this.document = document;
         this.startNode = startNode;
     }
 }

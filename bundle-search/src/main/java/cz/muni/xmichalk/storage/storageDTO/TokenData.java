@@ -1,4 +1,4 @@
-package cz.muni.xmichalk.documentLoader.storageDTO;
+package cz.muni.xmichalk.storage.storageDTO;
 
 public record TokenData(
         String originatorId,
