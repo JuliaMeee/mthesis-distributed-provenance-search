@@ -9,7 +9,6 @@ import org.openprovenance.prov.model.StatementOrBundle;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static cz.muni.xmichalk.util.AttributeNames.ATTR_PROV_TYPE;
@@ -18,21 +17,7 @@ import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
 
 public class CpmUtils {
     public static QualifiedName getMetaBundleId(CpmDocument bundle) {
-        INode startNode = chooseStartNode(bundle);
-        if (startNode == null) {
-            return null;
-        }
-        Set<INode> mainActivities = GraphTraverser.traverseAndFindNodes(
-                startNode,
-                node -> AttributeUtils.hasAttributeTargetValue(node, ATTR_PROV_TYPE, QualifiedName.class,
-                        qName -> qName.getUri().equals(CPM_URI + "mainActivity"))
-        );
-
-        if (mainActivities == null || mainActivities.size() != 1) {
-            return null;
-        }
-
-        return (QualifiedName) AttributeUtils.getAttributeValue(mainActivities.stream().findFirst().get(),
+        return (QualifiedName) AttributeUtils.getAttributeValue(bundle.getMainActivity(),
                 ATTR_REFERENCED_META_BUNDLE_ID);
     }
 

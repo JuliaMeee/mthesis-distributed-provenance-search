@@ -225,7 +225,7 @@ public class TraverserController {
                                               "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                                               "querySpecification": {
                                                 "type" : "GetSubgraphs",
-                                                "subgraph" : {
+                                                "fromSubgraphs" : {
                                                   "type" : "FittingLinearSubgraphs",
                                                   "graphParts" : [ {
                                                     "type" : "EdgeToNodeCondition",

@@ -1,13 +1,9 @@
 package cz.muni.xmichalk.queries;
 
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.models.ConnectorData;
-import cz.muni.xmichalk.models.QualifiedNameData;
-import cz.muni.xmichalk.models.QueryContext;
-import cz.muni.xmichalk.models.SubgraphWrapper;
+import cz.muni.xmichalk.models.*;
 import cz.muni.xmichalk.querySpecification.findable.FittingNodes;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
-import cz.muni.xmichalk.querySpecification.findable.WholeGraph;
 import cz.muni.xmichalk.querySpecification.nodeConditions.HasAttrQualifiedNameValue;
 import cz.muni.xmichalk.storage.EBundlePart;
 import cz.muni.xmichalk.util.AttributeUtils;
@@ -15,6 +11,7 @@ import cz.muni.xmichalk.util.CpmUtils;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,9 +19,8 @@ import java.util.stream.Collectors;
 import static cz.muni.xmichalk.util.AttributeNames.*;
 import static cz.muni.xmichalk.util.NameSpaceConstants.CPM_URI;
 
-public class GetConnectors implements IQuery<List<ConnectorData>> {
+public class GetConnectors extends FindSubgraphsQuery<List<ConnectorData>> {
     public Boolean backward = null;
-    public IFindableSubgraph fromSubgraphs = new WholeGraph();
 
     public GetConnectors() {
     }
@@ -39,7 +35,7 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
     }
 
     @Override
-    public List<ConnectorData> evaluate(QueryContext context) {
+    public QueryResult<List<ConnectorData>> evaluate(QueryContext context) throws AccessDeniedException {
         String typeValueRegex = backward == null ? CPM_URI + "(backward|forward)Connector"
                 : CPM_URI + (backward ? "backwardConnector" : "forwardConnector");
 
@@ -51,8 +47,15 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
                 fromSubgraphs
         );
 
-        List<SubgraphWrapper> subgraphs = finder.find(context.document, context.startNode);
+        return super.evaluate(context, finder);
+    }
 
+    @Override
+    public EBundlePart decideRequiredBundlePart() {
+        return EBundlePart.TraversalInformation;
+    }
+
+    @Override protected List<ConnectorData> transformResult(List<SubgraphWrapper> subgraphs) {
         if (subgraphs == null || subgraphs.isEmpty()) {
             return List.of();
         }
@@ -63,15 +66,9 @@ public class GetConnectors implements IQuery<List<ConnectorData>> {
         if (connectors.isEmpty()) {
             return List.of();
         }
-
         return connectors.stream()
                 .map(this::transformToConnectorData)
                 .toList();
-    }
-
-    @Override
-    public EBundlePart decideRequiredBundlePart() {
-        return EBundlePart.TraversalInformation;
     }
 
     private ConnectorData transformToConnectorData(INode node) {

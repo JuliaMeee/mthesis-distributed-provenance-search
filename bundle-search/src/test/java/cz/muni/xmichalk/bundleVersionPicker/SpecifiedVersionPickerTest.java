@@ -15,7 +15,7 @@ public class SpecifiedVersionPickerTest {
     @org.junit.jupiter.params.provider.MethodSource("params")
     public void testApply(CpmDocument cpmDoc) {
 
-        QualifiedName bundleId = new SpecifiedVersionPicker().apply(cpmDoc);
+        QualifiedName bundleId = new SpecifiedVersionPicker().apply(cpmDoc.getBundleId(), null);
 
         assert bundleId.getUri().equals(cpmDoc.getBundleId().getUri());
     }

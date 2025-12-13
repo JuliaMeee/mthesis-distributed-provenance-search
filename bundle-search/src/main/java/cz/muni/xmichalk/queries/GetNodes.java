@@ -2,9 +2,9 @@ package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import cz.muni.fi.cpm.model.INode;
-import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
+import cz.muni.xmichalk.storage.EBundlePart;
 import cz.muni.xmichalk.util.ResultsTransformationUtils;
 import org.openprovenance.prov.model.Document;
 
@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class GetNodes implements IQuery<JsonNode> {
-    public IFindableSubgraph fromSubgraphs;
-
+public class GetNodes extends FindSubgraphsQuery<JsonNode> {
     public GetNodes() {
     }
 
@@ -22,17 +20,11 @@ public class GetNodes implements IQuery<JsonNode> {
         this.fromSubgraphs = fromSubgraphs;
     }
 
-    @Override
-    public JsonNode evaluate(QueryContext context) {
-        if (fromSubgraphs == null) {
-            throw new IllegalStateException("Value of fromSubgraphs cannot be null in " + this.getClass().getName());
-        }
-        List<SubgraphWrapper> nodeSubgraphs = fromSubgraphs.find(context.document, context.startNode);
-
-        return transformToNodesDocJson(nodeSubgraphs);
+    @Override protected EBundlePart decideRequiredBundlePart() {
+        return EBundlePart.Whole;
     }
 
-    private JsonNode transformToNodesDocJson(List<SubgraphWrapper> subgraphs) {
+    @Override protected JsonNode transformResult(final List<SubgraphWrapper> subgraphs) {
         if (subgraphs == null || subgraphs.isEmpty()) {
             return null;
         }

@@ -1,38 +1,29 @@
 package cz.muni.xmichalk.queries;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
 import cz.muni.xmichalk.querySpecification.findable.IFindableSubgraph;
+import cz.muni.xmichalk.storage.EBundlePart;
 import cz.muni.xmichalk.util.ResultsTransformationUtils;
 import org.openprovenance.prov.model.Document;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GetSubgraphs implements IQuery<List<JsonNode>> {
-    public IFindableSubgraph subgraph;
-
+public class GetSubgraphs extends FindSubgraphsQuery<List<JsonNode>> {
     public GetSubgraphs() {
     }
 
     public GetSubgraphs(IFindableSubgraph subgraph) {
 
-        this.subgraph = subgraph;
+        this.fromSubgraphs = subgraph;
     }
 
-    @Override
-    public List<JsonNode> evaluate(QueryContext context) {
-        if (subgraph == null) {
-            throw new IllegalStateException("Value of subgraph cannot be null  in " + this.getClass().getName());
-        }
-
-        List<SubgraphWrapper> foundSubgraphs = subgraph.find(context.document, context.startNode);
-
-        return transformToDocJsonList(foundSubgraphs);
+    @Override protected EBundlePart decideRequiredBundlePart() {
+        return EBundlePart.Whole;
     }
 
-    private List<JsonNode> transformToDocJsonList(List<SubgraphWrapper> subgraphs) {
+    @Override protected List<JsonNode> transformResult(final List<SubgraphWrapper> subgraphs) {
         if (subgraphs == null || subgraphs.isEmpty()) {
             List.of();
         }

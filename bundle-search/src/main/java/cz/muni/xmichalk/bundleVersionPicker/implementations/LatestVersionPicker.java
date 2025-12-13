@@ -3,10 +3,7 @@ package cz.muni.xmichalk.bundleVersionPicker.implementations;
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.bundleVersionPicker.IVersionPicker;
-import cz.muni.xmichalk.storage.IStorage;
-import cz.muni.xmichalk.storage.StorageCpmDocument;
 import cz.muni.xmichalk.util.AttributeUtils;
-import cz.muni.xmichalk.util.CpmUtils;
 import cz.muni.xmichalk.util.GraphTraverser;
 import org.openprovenance.prov.model.LangString;
 import org.openprovenance.prov.model.QualifiedName;
@@ -18,43 +15,16 @@ import static cz.muni.xmichalk.util.AttributeNames.ATTR_VERSION;
 import static cz.muni.xmichalk.util.NameSpaceConstants.PROV_URI;
 
 public class LatestVersionPicker implements IVersionPicker {
-    private final IStorage documentLoader;
-    private final String authorizationHeader;
-
-    public LatestVersionPicker(IStorage documentLoader, String authorizationHeader) {
-        this.documentLoader = documentLoader;
-        this.authorizationHeader = authorizationHeader;
+    public LatestVersionPicker() {
     }
 
     @Override
-    public QualifiedName apply(CpmDocument bundle) {
-        if (bundle == null) {
-            throw new RuntimeException("Bundle document is null");
-        }
-        if (documentLoader == null) {
-            throw new RuntimeException("Document loader is null");
+    public QualifiedName apply(QualifiedName bundleId, CpmDocument metaDocument) {
+        if (metaDocument == null) {
+            throw new RuntimeException("Meta document is null");
         }
 
-        QualifiedName metaBundleId = CpmUtils.getMetaBundleId(bundle);
-
-        if (metaBundleId == null) {
-            throw new RuntimeException(
-                    "Failed to find meta bundle reference in bundle: " + bundle.getBundleId().getUri());
-        }
-
-        StorageCpmDocument metaDocument = null;
-        try {
-            metaDocument = documentLoader.loadMetaCpmDocument(metaBundleId.getUri(), authorizationHeader);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load meta bundle: " + metaBundleId.getUri(), e);
-        }
-
-
-        if (metaDocument == null || metaDocument.document == null) {
-            throw new RuntimeException("Failed to load meta bundle: " + metaBundleId.getUri());
-        }
-
-        INode versionNode = pickLatestVersionNode(metaDocument.document);
+        INode versionNode = pickLatestVersionNode(metaDocument);
 
         return versionNode != null ? versionNode.getId() : null;
     }

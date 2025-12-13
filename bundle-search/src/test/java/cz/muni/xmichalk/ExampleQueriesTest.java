@@ -32,6 +32,7 @@ import org.openprovenance.prov.model.interop.Formats;
 import org.openprovenance.prov.vanilla.ProvFactory;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import static cz.muni.xmichalk.util.AttributeNames.*;
@@ -56,9 +57,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List<?>;
@@ -80,7 +81,7 @@ public class ExampleQueriesTest {
     }
 
     @Test
-    public void findMainActivityId() {
+    public void findMainActivityId() throws AccessDeniedException {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
         QualifiedName startNodeId =
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
@@ -96,9 +97,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List<?>;
@@ -109,7 +110,7 @@ public class ExampleQueriesTest {
     }
 
     @Test
-    public void findIdsOfDsConnectorSpecialization() {
+    public void findIdsOfDsConnectorSpecialization() throws AccessDeniedException {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
         QualifiedName startNodeId =
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
@@ -135,9 +136,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List<?>;
@@ -193,9 +194,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         JsonNode foundNodesDoc = (JsonNode) result;
@@ -242,9 +243,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
 
         assert result != null;
@@ -292,9 +293,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof JsonNode;
@@ -334,9 +335,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List<?>;
@@ -387,9 +388,9 @@ public class ExampleQueriesTest {
         JsonNode serializedQuery = objectMapper.valueToTree(query);
         IQuery<?> deserializedQuery = objectMapper.convertValue(serializedQuery, new TypeReference<IQuery<?>>() {
         });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List<?>;
@@ -406,7 +407,7 @@ public class ExampleQueriesTest {
     }
 
     @Test
-    public void testFitsSimpleValidityCheck() {
+    public void testFitsSimpleValidityCheck() throws AccessDeniedException {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
         QualifiedName startNodeId =
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "StoredSampleCon_r1_Spec", "blank");
@@ -456,9 +457,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
         assert result != null;
         assert result instanceof Boolean;
         Boolean fits = (Boolean) result;
@@ -466,7 +467,7 @@ public class ExampleQueriesTest {
     }
 
     @Test
-    public void testFitsIsSamplingBundle() {
+    public void testFitsIsSamplingBundle() throws AccessDeniedException {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
         QualifiedName startNodeId =
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
@@ -492,9 +493,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof Boolean;
@@ -503,7 +504,7 @@ public class ExampleQueriesTest {
     }
 
     @Test
-    public void findDerivationpathBackwardConnectors() {
+    public void findDerivationpathBackwardConnectors() throws AccessDeniedException {
         CpmDocument cpmDoc = TestDocumentProvider.processingBundle_V1;
         QualifiedName startNodeId =
                 new org.openprovenance.prov.vanilla.QualifiedName(BLANK_URI, "ProcessedSampleConSpec", "blank");
@@ -512,9 +513,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List;
@@ -526,7 +527,7 @@ public class ExampleQueriesTest {
     }
 
     @Test
-    public void findDerivationPathForwardConnectors() {
+    public void findDerivationPathForwardConnectors() throws AccessDeniedException {
         CpmDocument cpmDoc = TestDocumentProvider.samplingBundle_V1;
 
         QualifiedName startNodeId =
@@ -536,9 +537,9 @@ public class ExampleQueriesTest {
         IQuery<?> deserializedQuery =
                 objectMapper.convertValue(serializedSpecification, new TypeReference<IQuery<?>>() {
                 });
-        QueryContext context = new QueryContext(cpmDoc, cpmDoc.getNode(startNodeId), null, null);
+        QueryContext context = new QueryContext(cpmDoc.getBundleId(), startNodeId, null, new MockedStorage());
 
-        Object result = deserializedQuery.evaluate(context);
+        Object result = deserializedQuery.evaluate(context).result;
 
         assert result != null;
         assert result instanceof List;

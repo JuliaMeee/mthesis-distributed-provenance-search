@@ -1,19 +1,18 @@
 package cz.muni.xmichalk.models;
 
-import cz.muni.fi.cpm.model.CpmDocument;
-import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.storage.IStorage;
+import org.openprovenance.prov.model.QualifiedName;
 
 public class QueryContext {
-    public final CpmDocument document;
-    public final INode startNode;
+    public final QualifiedName documentId;
+    public final QualifiedName startNodeId;
     public final String authorizationHeader;
     public final IStorage documentLoader;
 
-    public QueryContext(CpmDocument document, INode startNode,
+    public QueryContext(QualifiedName documentId, QualifiedName startNodeId,
                         String authorizationHeader, IStorage documentLoader) {
-        this.document = document;
-        this.startNode = startNode;
+        this.documentId = documentId;
+        this.startNodeId = startNodeId;
         this.authorizationHeader = authorizationHeader;
         this.documentLoader = documentLoader;
     }

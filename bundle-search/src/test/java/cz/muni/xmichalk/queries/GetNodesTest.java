@@ -6,6 +6,7 @@ import cz.muni.fi.cpm.model.ICpmFactory;
 import cz.muni.fi.cpm.model.ICpmProvFactory;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.fi.cpm.vanilla.CpmProvFactory;
+import cz.muni.xmichalk.MockedStorage;
 import cz.muni.xmichalk.TestDocumentProvider;
 import cz.muni.xmichalk.models.QueryContext;
 import cz.muni.xmichalk.models.SubgraphWrapper;
@@ -44,9 +45,10 @@ public class GetNodesTest {
         GetNodes getNodesQuery = new GetNodes(
                 (g, n) -> List.of(g)
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        var result = getNodesQuery.evaluate(context);
+        var result = getNodesQuery.evaluate(context).result;
 
         assert result != null;
         Document resultDocument = ProvDocumentUtils.deserialize(result.toString(), Formats.ProvFormat.JSON);
@@ -73,9 +75,10 @@ public class GetNodesTest {
         GetNodes getNodesQuery = new GetNodes(
                 fromSubgraph
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        var result = getNodesQuery.evaluate(context);
+        var result = getNodesQuery.evaluate(context).result;
 
         assert result != null;
         Document resultDocument = ProvDocumentUtils.deserialize(result.toString(), Formats.ProvFormat.JSON);
@@ -90,9 +93,10 @@ public class GetNodesTest {
         GetNodes getNodesQuery = new GetNodes(
                 (g, n) -> List.of()
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        var result = getNodesQuery.evaluate(context);
+        var result = getNodesQuery.evaluate(context).result;
 
         assert result == null;
     }

@@ -2,11 +2,13 @@ package cz.muni.xmichalk.queries;
 
 import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
+import cz.muni.xmichalk.MockedStorage;
 import cz.muni.xmichalk.TestDocumentProvider;
 import cz.muni.xmichalk.models.ConnectorData;
 import cz.muni.xmichalk.models.QueryContext;
 import org.junit.jupiter.params.ParameterizedTest;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -28,14 +30,15 @@ public class GetConnectorsTest {
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetConnectors_backward_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors,
-                                                      int forwardConnectors) {
+                                                      int forwardConnectors) throws AccessDeniedException {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 true,
                 (g, n) -> List.of(g)
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context).result;
 
         assert result.size() == backwardConnectors;
         assert cpmDocument.getBackwardConnectors().stream().allMatch(
@@ -48,14 +51,15 @@ public class GetConnectorsTest {
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetConnectors_forward_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors,
-                                                     int forwardConnectors) {
+                                                     int forwardConnectors) throws AccessDeniedException {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 false,
                 (g, n) -> List.of(g)
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context).result;
 
         assert result.size() == forwardConnectors;
         assert cpmDocument.getForwardConnectors().stream().allMatch(
@@ -68,14 +72,15 @@ public class GetConnectorsTest {
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetConnectors_all_unfiltered(CpmDocument cpmDocument, INode startNode, int backwardConnectors,
-                                                 int forwardConnectors) {
+                                                 int forwardConnectors) throws AccessDeniedException {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 null,
                 (g, n) -> List.of(g)
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context).result;
 
         assert result.size() == backwardConnectors + forwardConnectors;
     }
@@ -83,14 +88,16 @@ public class GetConnectorsTest {
     @ParameterizedTest
     @org.junit.jupiter.params.provider.MethodSource("testParams")
     public void testGetConnectors_all_filteredToNothing(CpmDocument cpmDocument, INode startNode,
-                                                        int backwardConnectors, int forwardConnectors) {
+                                                        int backwardConnectors, int forwardConnectors)
+            throws AccessDeniedException {
         GetConnectors getAllConnectorsQuery = new GetConnectors(
                 null,
                 (g, n) -> List.of()
         );
-        QueryContext context = new QueryContext(cpmDocument, startNode, null, null);
+        QueryContext context =
+                new QueryContext(cpmDocument.getBundleId(), startNode.getId(), null, new MockedStorage());
 
-        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context);
+        List<ConnectorData> result = getAllConnectorsQuery.evaluate(context).result;
 
         assert result.isEmpty();
     }

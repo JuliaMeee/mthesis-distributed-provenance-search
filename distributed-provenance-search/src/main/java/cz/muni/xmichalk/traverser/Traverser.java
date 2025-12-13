@@ -87,6 +87,7 @@ public class Traverser {
                 new ItemToTraverse(
                         startBundleId,
                         startNodeId,
+                        null,
                         provServiceTable.getServiceUri(startBundleId.getUri()),
                         true,
                         new ArrayList<>(traversalParams.validityChecks.stream().map((EValidityCheck check) ->
@@ -218,7 +219,7 @@ public class Traverser {
                     traversalParams.versionPreference);
             QualifiedName preferredVersion =
                     provServiceAPI.fetchPreferredBundleVersion(itemToTraverse.provServiceUri, itemToTraverse.bundleId,
-                            itemToTraverse.connectorId, traversalParams.authorizationHeader,
+                            itemToTraverse.metaBundleId, traversalParams.authorizationHeader,
                             traversalParams.versionPreference);
             if (preferredVersion != null) {
                 log.info("Fetch preferred version for bundle: {} returned {}", itemToTraverse.bundleId.getUri(),
@@ -350,6 +351,7 @@ public class Traverser {
                     new ItemToTraverse(
                             connector.referencedBundleId.toQN(),
                             connector.referencedConnectorId.toQN(),
+                            connector.referencedMetaBundleId != null ? connector.referencedMetaBundleId.toQN() : null,
                             getProvServiceUri(connector, provServiceTable, preferProvServiceFromConnectors),
                             itemTraversed.pathIntegrity && integrity,
                             combineValidityChecks(itemTraversed.pathValidityChecks, validityChecks)

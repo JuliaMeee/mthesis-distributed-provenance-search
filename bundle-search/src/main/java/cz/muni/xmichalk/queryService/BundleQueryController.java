@@ -57,7 +57,7 @@ public class BundleQueryController {
                                               },
                                               "querySpecification": {
                                                  "type" : "GetSubgraphs",
-                                                 "subgraph" : {
+                                                 "fromSubgraphs" : {
                                                    "type" : "DerivationPathFromStartNode",
                                                    "backward" : true
                                                 }
@@ -79,7 +79,7 @@ public class BundleQueryController {
                                               },
                                               "querySpecification": {
                                                 "type" : "GetSubgraphs",
-                                                "subgraph" : {
+                                                "fromSubgraphs" : {
                                                   "type" : "FilteredSubgraphs",
                                                   "filter" : {
                                                     "type" : "AnyTrue",
@@ -304,8 +304,8 @@ public class BundleQueryController {
         }
 
         try {
-            QualifiedName bundleId = queryParams.bundleId.toQN();
-            QualifiedName connectorId = queryParams.startNodeId.toQN();
+            QualifiedName bundleId = queryParams.bundleId == null ? null : queryParams.bundleId.toQN();
+            QualifiedName connectorId = queryParams.startNodeId == null ? null : queryParams.startNodeId.toQN();
 
             String authorizationHeader = request.getHeader("Authorization");
 

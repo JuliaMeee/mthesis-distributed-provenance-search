@@ -47,16 +47,18 @@ public class ProvServiceAPI implements IProvServiceAPI {
     }
 
     public QualifiedName fetchPreferredBundleVersion(
-            String serviceUri, QualifiedName bundleId, QualifiedName connectorId, String authorizationHeader,
+            String serviceUri, QualifiedName bundleId, QualifiedName metaId, String authorizationHeader,
             String versionPreference) {
+        String metaUri = (metaId != null) ? "\"" + metaId.getUri() + "\"" : null;
         JsonNode query = null;
         try {
             query = objectMapper.readTree("""
                         {
                           "type": "GetPreferredVersion",
-                          "versionPreference": "%s"
+                          "versionPreference": "%s",
+                          "metaUri": %s
                         }
-                    """.formatted(versionPreference)
+                    """.formatted(versionPreference, metaUri)
             );
         } catch (IOException e) {
             throw new RuntimeException("Failed to create GetPreferredVersion query JSON.", e);
@@ -64,7 +66,7 @@ public class ProvServiceAPI implements IProvServiceAPI {
 
 
         BundleQueryResultDTO queryResult = fetchBundleQueryResult(
-                serviceUri, bundleId, connectorId, authorizationHeader, query
+                serviceUri, bundleId, null, authorizationHeader, query
         );
 
         if (queryResult == null || queryResult.result == null) {
@@ -75,7 +77,7 @@ public class ProvServiceAPI implements IProvServiceAPI {
                 objectMapper.convertValue(queryResult.result, new TypeReference<QualifiedNameDTO>() {
                 });
 
-        return pickedBundleIdDto.toQN();
+        return pickedBundleIdDto == null ? null : pickedBundleIdDto.toQN();
     }
 
     public BundleQueryResultDTO fetchBundleConnectors(
