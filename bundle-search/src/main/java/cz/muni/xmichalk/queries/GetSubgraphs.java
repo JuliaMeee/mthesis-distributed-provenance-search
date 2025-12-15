@@ -25,15 +25,14 @@ public class GetSubgraphs extends FindSubgraphsQuery<List<JsonNode>> {
 
     @Override protected List<JsonNode> transformResult(final List<SubgraphWrapper> subgraphs) {
         if (subgraphs == null || subgraphs.isEmpty()) {
-            List.of();
+            return List.of();
         }
-
         return subgraphs.stream().map(this::transformSubgraphToDocJson).collect(Collectors.toList());
     }
 
     private JsonNode transformSubgraphToDocJson(SubgraphWrapper subgraph) {
         if (subgraph == null || subgraph.getNodes() == null) {
-            List.of();
+            return null;
         }
 
         Document encapsulatigDocument =

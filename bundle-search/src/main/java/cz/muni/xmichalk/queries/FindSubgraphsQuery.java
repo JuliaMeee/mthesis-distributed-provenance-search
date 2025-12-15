@@ -27,7 +27,8 @@ import java.util.List;
 public abstract class FindSubgraphsQuery<T> implements IQuery<T> {
     public IFindableSubgraph fromSubgraphs = new WholeGraph();
 
-    public QueryResult<T> evaluate(QueryContext context, IFindableSubgraph fromSubgraphs) throws AccessDeniedException {
+    protected QueryResult<T> evaluate(QueryContext context, IFindableSubgraph fromSubgraphs)
+            throws AccessDeniedException {
         if (fromSubgraphs == null) {
             throw new IllegalStateException("Value of fromSubgraphs cannot be null in " + this.getClass().getName());
         }
@@ -41,7 +42,7 @@ public abstract class FindSubgraphsQuery<T> implements IQuery<T> {
         CpmDocument document = retrievedDocument.document;
         INode startNode = document.getNode(context.startNodeId);
 
-        List<SubgraphWrapper> subgraphs = fromSubgraphs.find(document, startNode);
+        List<SubgraphWrapper> subgraphs = fromSubgraphs.find(new SubgraphWrapper(document), startNode);
 
         return new QueryResult<T>(transformResult(subgraphs), retrievedDocument.token);
     }

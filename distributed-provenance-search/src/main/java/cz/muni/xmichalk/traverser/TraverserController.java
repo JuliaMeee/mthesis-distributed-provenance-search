@@ -77,63 +77,56 @@ public class TraverserController {
                               "traversalPriority": "INTEGRITY_THEN_ORDERED_VALIDITY_CHECKS",
                               "validityChecks": ["DEMO_SIMPLE_CONSTRAINTS"],
                               "querySpecification": {
-                                "type" : "GetNodes",
-                                "fromSubgraphs" : {
-                                  "type" : "FittingNodes",
-                                  "nodeCondition" : {
-                                    "type" : "AllTrue",
-                                    "conditions" : [ {
-                                      "type" : "IsKind",
-                                      "kind" : "PROV_ACTIVITY"
-                                    }, {
-                                      "type" : "HasAttrLangStringValue",
-                                      "attributeNameUri" : "http://purl.org/dc/terms/type",
-                                      "valueRegex" : "(?i).*storing.*"
-                                    } ]
-                                  },
-                                  "startsIn" : {
-                                    "type" : "FilteredSubgraphs",
-                                    "filter" : {
-                                      "type" : "AnyTrue",
-                                      "conditions" : [ {
-                                        "type" : "EdgeToNodeCondition",
-                                        "edgeCondition" : {
-                                          "type" : "AnyTrue",
-                                          "conditions" : [ {
-                                            "type" : "IsRelation",
-                                            "relation" : "PROV_USAGE"
-                                          }, {
-                                            "type" : "IsRelation",
-                                            "relation" : "PROV_GENERATION"
-                                          } ]
-                                        },
-                                        "nodeIsEffect" : false
-                                      }, {
-                                        "type" : "EdgeToNodeCondition",
-                                        "edgeCondition" : {
-                                          "type" : "IsRelation",
-                                          "relation" : "PROV_SPECIALIZATION"
-                                        }
-                                      } ]
-                                    },
-                                    "startsIn" : {
-                                      "type" : "FilteredSubgraphs",
-                                      "filter" : {
-                                        "type" : "EdgeToNodeCondition",
-                                        "edgeCondition" : {
-                                          "type" : "IsRelation",
-                                          "relation" : "PROV_DERIVATION"
-                                        },
-                                        "nodeCondition" : {
-                                          "type" : "HasAttrQualifiedNameValue",
-                                          "attributeNameUri" : "http://www.w3.org/ns/prov#type",
-                                          "valueUriRegex" : "https://www.commonprovenancemodel.org/cpm-namespace-v1-0/forwardConnector"
-                                        },
-                                        "nodeIsEffect" : false
+                                "type": "GetNodes",
+                                "fromSubgraphs": {
+                                  "type": "FittingNodes",
+                                  "nodeCondition": {
+                                    "type": "AllTrue",
+                                    "conditions": [
+                                      {
+                                        "type": "IsKind",
+                                        "kind": "PROV_ACTIVITY"
                                       },
-                                      "startsIn" : {
-                                        "type" : "StartNode"
+                                      {
+                                        "type": "HasAttrLangStringValue",
+                                        "attributeNameUri": "http://purl.org/dc/terms/type",
+                                        "valueRegex": "(?i).*storing.*"
                                       }
+                                    ]
+                                  },
+                                  "startsIn": {
+                                    "type": "FilteredSubgraphs",
+                                    "filter": {
+                                      "type": "AnyTrue",
+                                      "conditions": [
+                                        {
+                                          "type": "EdgeToNodeCondition",
+                                          "edgeCondition": {
+                                            "type": "AnyTrue",
+                                            "conditions": [
+                                              {
+                                                "type": "IsRelation",
+                                                "relation": "PROV_USAGE"
+                                              },
+                                              {
+                                                "type": "IsRelation",
+                                                "relation": "PROV_GENERATION"
+                                              }
+                                            ]
+                                          },
+                                          "nodeIsEffect": false
+                                        },
+                                        {
+                                          "type": "EdgeToNodeCondition",
+                                          "edgeCondition": {
+                                            "type": "IsRelation",
+                                            "relation": "PROV_SPECIALIZATION"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "startsIn": {
+                                      "type": "StartNode"
                                     }
                                   }
                                 }
@@ -277,6 +270,11 @@ public class TraverserController {
         List<String> missingParams = getMissingParams(traversalParams);
         if (!missingParams.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getMissingParamsMessage(missingParams));
+        }
+
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Missing Authorization header");
         }
 
         try {

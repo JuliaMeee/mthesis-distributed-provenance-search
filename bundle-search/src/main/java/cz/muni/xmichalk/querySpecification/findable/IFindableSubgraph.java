@@ -2,7 +2,6 @@ package cz.muni.xmichalk.querySpecification.findable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import cz.muni.fi.cpm.model.CpmDocument;
 import cz.muni.fi.cpm.model.INode;
 import cz.muni.xmichalk.models.DocumentStart;
 import cz.muni.xmichalk.models.SubgraphWrapper;
@@ -24,12 +23,7 @@ import java.util.List;
 public interface IFindableSubgraph extends ICountable<DocumentStart> {
     List<SubgraphWrapper> find(SubgraphWrapper graph, INode startNode);
 
-
-    default List<SubgraphWrapper> find(CpmDocument document, INode startNode) {
-        return find(new SubgraphWrapper(document), startNode);
-    }
-
     @Override default int count(DocumentStart documentStart) {
-        return find(documentStart.document, documentStart.startNode).size();
+        return find(new SubgraphWrapper(documentStart.document), documentStart.startNode).size();
     }
 }

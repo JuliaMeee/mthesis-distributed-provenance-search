@@ -208,22 +208,6 @@ public class BundleQueryController {
             }
             """
     ), @ExampleObject(
-            name = "Get all connectors", value = """
-            {
-              "bundleId": {
-                "nameSpaceUri": "http://prov-storage-3:8000/api/v1/organizations/ORG3/documents/",
-                "localPart": "SpeciesIdentificationBundle_V0"
-              },
-              "startNodeId": {
-                "nameSpaceUri": "https://openprovenance.org/blank/",
-                "localPart": "StoredSampleCon_r1"
-              },
-              "querySpecification": {
-                "type" : "GetConnectors"
-              }
-            }
-            """
-    ), @ExampleObject(
             name = "Test whether bundle has exactly one main activity", value = """
             {
               "bundleId": {
@@ -282,11 +266,16 @@ public class BundleQueryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getMissingParamsMessage(missingParams));
         }
 
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Missing Authorization header");
+        }
+
         try {
             QualifiedName bundleId = queryParams.bundleId == null ? null : queryParams.bundleId.toQN();
             QualifiedName connectorId = queryParams.startNodeId == null ? null : queryParams.startNodeId.toQN();
-
-            String authorizationHeader = request.getHeader("Authorization");
 
             log.info(
                     "Received bundle query request for bundleId: {}, startNodeId: {}, query type: {}",
